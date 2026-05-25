@@ -1,6 +1,6 @@
 package mixin;
-import createvvvf.VVVFSoundEngine;
-import createvvvf.VVVFSoundGen;
+import createvvvfsim.VVVFSoundEngine;
+import createvvvfsim.VVVFSoundGen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.level.Level;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-@Mixin(value={CarriageSounds.class},remap=false,priority=900)
+@Mixin(value={CarriageSounds.class},remap=false,priority=1027)
 public class VVVFCarriageSounds{
     private final VVVFSoundGen gen=new VVVFSoundGen();
     private boolean is_move=false,is_last_move=false;

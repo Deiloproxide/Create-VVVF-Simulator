@@ -1,4 +1,4 @@
-package createvvvf;
+package createvvvfsim;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.config.CTrains;
 import net.minecraft.world.phys.Vec3;
@@ -69,16 +69,17 @@ public class VVVFSoundGen{
             double base_f=Math.max(current_f,0f);
             Struct.PulseControl.Pulse.PulseTypeName pulse_type;
             int pulse_count;
-            /*
-            //策略1：南车西门子
+
+
+            //策略1：南车西门子Siemens
             Struct.PulseControl.Pulse.PulseAlternative pulse_alt;
-            if(base_f<15f){
+            if(base_f<18f){
                 pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;
                 pulse_count=1;
                 pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
                 carrier_main_f.value=14.0*base_f+240.0;
             }//异步240Hz-450Hz
-            else if(15f<=base_f && base_f<38.4f){
+            else if(18f<=base_f && base_f<38.4f){
                 pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;
                 pulse_count=1;
                 pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
@@ -122,8 +123,8 @@ public class VVVFSoundGen{
             elect_state.baseWaveFrequency=base_f;
             elect_state.baseWaveAmplitude=base_f/65.0;
             pulse_control.pulseMode.alternative=pulse_alt;
-            */
-            //策略2：阿尔斯通
+            /*
+            //策略2：阿尔斯通Alstom
             if(base_f<13.5f){
                 pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;
                 pulse_count=1;
@@ -152,8 +153,7 @@ public class VVVFSoundGen{
             }//同步方波
             elect_state.baseWaveFrequency=base_f;
             elect_state.baseWaveAmplitude=0.013178*base_f-0.011358;
-
-
+            */
             elect_state.isZeroOutput=base_f<=0.0;
             pulse_control.pulseMode.pulseType=pulse_type;
             pulse_control.pulseMode.pulseCount=pulse_count;

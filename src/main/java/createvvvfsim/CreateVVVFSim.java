@@ -1,4 +1,4 @@
-package createvvvf;
+package createvvvfsim;
 import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.api.distmarker.Dist;
@@ -7,11 +7,11 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import vvvf.modulation.CustomPwm;
-@Mod(CreateVVVF.mod_id)
-public class CreateVVVF{
-    public static final String mod_id="create_vvvf";
+@Mod(CreateVVVFSim.mod_id)
+public class CreateVVVFSim{
+    public static final String mod_id="create_vvvf_simulator";
     public static final Minecraft mc=Minecraft.getInstance();
-    public CreateVVVF(){
+    public CreateVVVFSim(){
         CustomPwm.CustomPwmPresets.preload();
         VVVFSoundEngine.offPause(mc.options.getSoundSourceVolume(SoundSource.MASTER));
     }

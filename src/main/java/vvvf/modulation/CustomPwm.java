@@ -76,7 +76,7 @@ public class CustomPwm{
     public static final class CustomPwmPresets{
         private static final Map<Key,CustomPwm> PRESETS=new HashMap<>();
         private static final AtomicBoolean LOADED=new AtomicBoolean(false);
-        private static final String BASE_PATH="/assets/createvvvf/SwitchAngle/";
+        private static final String BASE_PATH="/assets/createvvvfsim/SwitchAngle/";
         public static void register(int level,Struct.PulseControl.Pulse.PulseTypeName pulseType,int pulseCount,Struct.PulseControl.Pulse.PulseAlternative alternative,CustomPwm pwm){
             PRESETS.put(new Key(level,pulseType,pulseCount,alternative),pwm);
         }
