@@ -1,3 +1,4 @@
+//please open this file in utf-8 encoding to avoid garbled characters
 package createvvvfsim;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.config.CTrains;
@@ -13,14 +14,13 @@ public class VVVFSoundGen{
     private static final int buffer_size=VVVFSoundEngine.buffer_size;
     private static final double sample_dt=1.0/sample_rate;
     private static final float max_amp=0.1f;
-    private static final float max_distance=64f;
     //train config
     private static final CTrains trains_config=AllConfigs.server().trains;
     private static final float max_speed=trains_config.trainTopSpeed.getF();
-    private static final float max_acc=trains_config.trainAcceleration.getF()/400f;
-    private static final float max_control_f=115f;
+    private static final float max_acc=trains_config.trainAcceleration.getF()/20f;
+    private static final float max_control_f=85f;
     //speed filter config
-    private static final int speeds_length=8;
+    private static final int speeds_length=5;
 
     private int speeds_index=0;
     private final float[] speed_samples=new float[speeds_length];
@@ -43,21 +43,19 @@ public class VVVFSoundGen{
     }
     public void updateF(Vec3 move){
         //避免客户端与服务器连接不稳定造成的速度波动
-        float raw_speed=(float)move.length()/0.05f;
+        float raw_speed=(float)move.length()*20f;
         raw_speed=Math.min(raw_speed,max_speed);
         speed_samples[speeds_index]=raw_speed;
         speeds_index=(speeds_index+1)%speeds_length;
         float[] speeds=Arrays.copyOf(speed_samples,speeds_length);
         Arrays.sort(speeds);
         float med_speed=speeds[speeds_length/2];
-        float max_speed_delta=max_acc*20f;
-        float delta=Math.clamp(med_speed-last_speed,-max_speed_delta,max_speed_delta);
+        float delta=Math.clamp(med_speed-last_speed,-max_acc,max_acc);
         last_speed+=delta;
         target_f=Math.clamp(last_speed/max_speed,0f,1f)*max_control_f;
     }
-    public void updateAmp(Vec3 train_pos,Vec3 player_pos){
-        float distance=(float)train_pos.distanceTo(player_pos);
-        target_amp=max_amp*(distance<max_distance?1f-distance/max_distance:0f);
+    public void updateAmp(float distance_amp){
+        target_amp=max_amp*distance_amp;
     }
     public void mixTo(float[] mix_buffer){
         float f_step=(target_f-current_f)/buffer_size;
@@ -70,14 +68,13 @@ public class VVVFSoundGen{
             Struct.PulseControl.Pulse.PulseTypeName pulse_type;
             int pulse_count;
 
-
             //策略1：南车西门子Siemens
             Struct.PulseControl.Pulse.PulseAlternative pulse_alt;
             if(base_f<18f){
                 pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;
                 pulse_count=1;
                 pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
-                carrier_main_f.value=14.0*base_f+240.0;
+                carrier_main_f.value=70.0/6.0*base_f+240.0;
             }//异步240Hz-450Hz
             else if(18f<=base_f && base_f<38.4f){
                 pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;

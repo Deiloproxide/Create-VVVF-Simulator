@@ -65,6 +65,60 @@ public final class L2 {
                     : (((int) (rawX / MyMath.M_PI_2)) % 4 > 1 ? 0 : 2);
         }
 
+        if (domain.electricalState.pulsePattern.pulseMode.pulseCount == 11
+                && domain.electricalState.pulsePattern.pulseMode.alternative == PulseAlternative.Alt1) {
+            double amplitude = domain.electricalState.baseWaveAmplitude;
+            double sqrt5 = Math.sqrt(5.0);
+            double sqrt3 = Math.sqrt(3.0);
+
+            CustomPwm.SwitchEntry[] alpha = new CustomPwm.SwitchEntry[]{
+                    new CustomPwm.SwitchEntry(
+                            MyMath.M_PI / 15.0
+                                    - (1.0 + sqrt5) / (10.0 * sqrt3) * amplitude
+                                    - 2.0 * MyMath.Functions.sine(MyMath.M_PI / 30.0) / (5.0 * sqrt3) * amplitude,
+                            (byte) 2
+                    ),
+                    new CustomPwm.SwitchEntry(
+                            MyMath.M_PI / 15.0
+                                    + (sqrt5 - 1.0) / (10.0 * sqrt3) * amplitude
+                                    + 2.0 * MyMath.Functions.sine(MyMath.M_PI * 7.0 / 30.0) / (5.0 * sqrt3) * amplitude,
+                            (byte) 0
+                    ),
+                    new CustomPwm.SwitchEntry(
+                            MyMath.M_PI / 6.0 - 1.0 / (5.0 * sqrt3) * amplitude,
+                            (byte) 2
+                    ),
+                    new CustomPwm.SwitchEntry(
+                            MyMath.M_PI * 2.0 / 5.0
+                                    - 2.0 * MyMath.Functions.sine(MyMath.M_PI / 30.0) / (5.0 * sqrt3) * amplitude,
+                            (byte) 0
+                    ),
+                    new CustomPwm.SwitchEntry(
+                            MyMath.M_PI * 2.0 / 5.0
+                                    + (sqrt5 - 1.0) / (10.0 * sqrt3) * amplitude,
+                            (byte) 2
+                    ),
+            };
+
+            if (amplitude >= 0.9927) {
+                alpha[0] = new CustomPwm.SwitchEntry(0.0, (byte) 2);
+            }
+            if (amplitude >= 0.9203069589) {
+                alpha[1] = new CustomPwm.SwitchEntry(0.417331, (byte) 0);
+                alpha[2] = new CustomPwm.SwitchEntry(0.417331, (byte) 2);
+                alpha[3] = new CustomPwm.SwitchEntry(
+                        1.23442104526 + 0.278769982056 * (amplitude - 0.9203069589),
+                        (byte) 0
+                );
+                alpha[4] = new CustomPwm.SwitchEntry(
+                        1.32231416347 - 0.824126360283 * (amplitude - 0.9203069589),
+                        (byte) 2
+                );
+            }
+
+            return CustomPwm.getPwm(alpha, x, (byte) 0);
+        }
+
         if ((domain.electricalState.pulsePattern.pulseMode.pulseCount == 6 || domain.electricalState.pulsePattern.pulseMode.pulseCount == 8)
                 && domain.electricalState.pulsePattern.pulseMode.alternative == PulseAlternative.Alt1) {
             int c = domain.electricalState.pulsePattern.pulseMode.pulseCount == 6 ? 6 : 9;
