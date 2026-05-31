@@ -1,20 +1,16 @@
 package createvvvfsim;
 import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-public class VVVFSoundEngine{
-    public static final int sample_rate=44100;
-    public static final int buffer_size=1<<12;
-    private static final AudioFormat format=new AudioFormat(sample_rate,16,1,true,false);
-    private static final Object mix_lock=new Object();
-    private static final List<SoundGen> generators=new ArrayList<>();
+public class SoundEngine{
+    private static final int sample_rate=Configs.sample_rate;
+    private static final int buffer_size=Configs.buffer_size;
+    private static final AudioFormat format=Configs.format;
     private static final double[] mix_buffer=new double[buffer_size];
     private static final byte[] out_buffer=new byte[buffer_size*2];
-    private static final Thread thread=new Thread(VVVFSoundEngine::mixLoop);
+    private static final Thread thread=new Thread(SoundEngine::mixLoop);
     private static volatile double target_main_amp=0.0;
     private static double current_main_amp=0.0;
     private static SourceDataLine dataline;
@@ -28,27 +24,17 @@ public class VVVFSoundEngine{
         thread.setDaemon(true);
         thread.start();
     }
-    public static void onPause(){
-        synchronized(mix_lock){
-            target_main_amp=0.0;
-        }
-    }
-    public static void offPause(double volume){
-        synchronized(mix_lock){
-            target_main_amp=volume;
-        }
-    }
-    public static void onQuit(){
-        synchronized(mix_lock){
-            target_main_amp=0.0;
-            generators.clear();
-        }
+    public static void setMainAmp(double volume){
+        target_main_amp=volume;
     }
     private static void mixLoop(){
         while(true){
-            synchronized(mix_lock){
-                Arrays.fill(mix_buffer,0.0);
-                for(SoundGen gen:generators) gen.mixTo(mix_buffer);
+            Arrays.fill(mix_buffer,0.0);
+            synchronized(TrainStatus.train_lock){
+                for(TrainStatus status:TrainStatus.all_trains){
+                    status.gen.mixTo(mix_buffer);
+                    status.vvvf_gen.mixTo(mix_buffer);
+                }
             }
             double amp_step=(target_main_amp-current_main_amp)/buffer_size;
             for(int i=0;i<buffer_size;i++){
@@ -59,16 +45,6 @@ public class VVVFSoundEngine{
                 out_buffer[i*2+1]=(byte)((sample>>8)&0xFF);
             }
             dataline.write(out_buffer,0,buffer_size*2);
-        }
-    }
-    public static void addPlayer(SoundGen gen){
-        synchronized(mix_lock){
-            if(!generators.contains(gen)) generators.add(gen);
-        }
-    }
-    public static void removePlayer(SoundGen gen){
-        synchronized(mix_lock){
-            generators.removeIf(generator->generator==gen);
         }
     }
 }

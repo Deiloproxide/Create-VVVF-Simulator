@@ -5,32 +5,32 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientPauseChangeEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import soundphysics.remastered.SoundPhysicsBridgeManager;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
 @Mod(CreateVVVFSim.mod_id)
 public class CreateVVVFSim{
     public static final String mod_id="create_vvvf_simulator";
-    public static final Minecraft mc=Minecraft.getInstance();
-    public CreateVVVFSim(){
+    static{
         SoundPhysicsBridgeManager.init();
         CustomPwm.CustomPwmPresets.preload();
-        VVVFSoundEngine.offPause(mc.options.getSoundSourceVolume(SoundSource.MASTER));
     }
     @EventBusSubscriber(modid=mod_id,value=Dist.CLIENT)
     public static class ClientEvents{
-        private static boolean is_inworld=false,is_last_inworld=false;
-        private static boolean is_paused=false,is_last_paused=false;
+        private static final Minecraft mc=Minecraft.getInstance();
         @SubscribeEvent
-        public static void onClientTick(ClientTickEvent.Post event){
-            is_inworld=mc.level!=null && mc.player!=null;
-            is_paused=mc.isPaused();
-            if(!is_inworld && is_last_inworld) VVVFSoundEngine.onQuit();
-            else if(is_paused && !is_last_paused) VVVFSoundEngine.onPause();
-            else if(!is_paused && is_last_paused)
-                VVVFSoundEngine.offPause(mc.options.getSoundSourceVolume(SoundSource.MASTER));
-            is_last_inworld=is_inworld;
-            is_last_paused=is_paused;
+        public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event){
+            SoundEngine.setMainAmp(mc.options.getSoundSourceVolume(SoundSource.MASTER));
+        }
+        @SubscribeEvent
+        public static void onPauseChange(ClientPauseChangeEvent.Post event){
+            SoundEngine.setMainAmp(event.isPaused()?0.0:mc.options.getSoundSourceVolume(SoundSource.MASTER));
+        }
+        @SubscribeEvent
+        public static void tick(ClientTickEvent.Post event){
+            TrainStatus.tick(mc.level,mc.player);
         }
     }
 }

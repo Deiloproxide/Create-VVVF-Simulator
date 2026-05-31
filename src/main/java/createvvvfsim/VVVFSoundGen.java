@@ -1,8 +1,4 @@
 package createvvvfsim;
-import com.simibubi.create.infrastructure.config.AllConfigs;
-import com.simibubi.create.infrastructure.config.CTrains;
-import net.minecraft.world.phys.Vec3;
-import java.util.Arrays;
 import vvvfsimulator.generation.audio.trainsound.Audio;
 import vvvfsimulator.generation.audio.trainsound.AudioFilter.CppConvolutionFilter;
 import vvvfsimulator.generation.audio.trainsound.AudioResourceManager;
@@ -11,22 +7,10 @@ import vvvfsimulator.vvvf.calculation.Common;
 import vvvfsimulator.vvvf.model.Struct;
 import vvvfsimulator.vvvf.model.Struct.ElectricalParameter.CarrierParameter;
 public class VVVFSoundGen extends SoundGen{
-    //train config
-    private static final CTrains trains_config=AllConfigs.server().trains;
-    private static final double max_speed=trains_config.trainTopSpeed.getF();
-    private static final double max_acc=trains_config.trainAcceleration.getF()*1.01/20.0;
-    private static final double max_base_f=115.0;
-    private static final int conv_block_size=512;
-    //speed filter config
-    private static final int speeds_length=7;
-
-    private int speeds_index=0;
-    private final double[] speed_samples=new double[speeds_length];
-    private double last_speed=0.0;
-
+    private static final double max_base_f=Configs.max_base_f;
+    private static final int conv_block_size=Configs.conv_block_size;
     private volatile double target_f=0.0;
     private double current_f=0.0;
-
     private final Struct.PulseControl pulse_control=new Struct.PulseControl();
     private final CarrierParameter.RandomFrequency carrier_random_f=new CarrierParameter.RandomFrequency(0.0,1.0);
     private final CarrierParameter.ConstantFrequency carrier_main_f=new CarrierParameter.ConstantFrequency(0.0);
@@ -36,8 +20,6 @@ public class VVVFSoundGen extends SoundGen{
     private final CppConvolutionFilter conv_filter;
     private final Struct.Domain domain=new Struct.Domain(train_config.motorSpec);
     private final double[] dry_buffer=new double[buffer_size],wet_buffer=new double[buffer_size];
-
-    private static int cnt=0;
     public VVVFSoundGen(){
         int[] ir_sample_rate={-1};
         double[] ir=AudioResourceManager.readResourceAudioFileSample(AudioResourceManager.SAMPLE_IR_PATH,ir_sample_rate);
@@ -54,11 +36,6 @@ public class VVVFSoundGen extends SoundGen{
         double motorPwm = control.motor.parameter.diffTe * Math.pow(10, data.motorVolumeDb);
         double motor = Audio.calculateHarmonicSounds(control, data.harmonicSound);
         double gear = Audio.calculateHarmonicSounds(control, data.gearSound);
-        cnt++;
-        if(cnt==100000){
-            cnt=0;
-            System.out.printf("pwm: %8f,  motor: %10f,  gear: %10f,  base_f: %10f\n",motorPwm,motor,gear,base_f);
-        }
         return (motorPwm + motor + gear) * Math.pow(10, data.totalVolumeDb);
     }
     private static void addDefaultMotorHarmonics(vvvfsimulator.data.trainaudio.Struct config){
@@ -78,17 +55,8 @@ public class VVVFSoundGen extends SoundGen{
             config.harmonicSound.add(h);
         }
     }
-    public void updateF(Vec3 move){
-        double raw_speed=move.length()*20.0;
-        raw_speed=Math.min(raw_speed,max_speed);
-        speed_samples[speeds_index]=raw_speed;
-        speeds_index=(speeds_index+1)%speeds_length;
-        double[] speeds=Arrays.copyOf(speed_samples,speeds_length);
-        Arrays.sort(speeds);
-        double med_speed=speeds[speeds_length/2];
-        double delta=Math.clamp(med_speed-last_speed,-max_acc,max_acc);
-        last_speed+=delta;
-        target_f=Math.clamp(last_speed/max_speed,0.0,1.0)*max_base_f;
+    public void setF(double speed){
+        target_f=speed*max_base_f;
     }
     @Override
     public void mixTo(double[] mix_buffer){

@@ -3,10 +3,9 @@
   "minVersion":"0.8",
   "package":"mixin",
   "compatibilityLevel":"JAVA_21",
-  "mixins":[
-    "VVVFCarriageSounds"
-  ],
   "client":[
+    "NoCarriageSounds",
+    "TrainSound"
   ],
   "injectors":{
     "defaultRequire":1
