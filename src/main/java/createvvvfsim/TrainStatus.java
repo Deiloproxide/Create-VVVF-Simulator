@@ -1,110 +1,104 @@
 package createvvvfsim;
-import com.simibubi.create.Create;
 import com.simibubi.create.content.trains.entity.Carriage;
 import com.simibubi.create.content.trains.entity.Carriage.DimensionalCarriageEntity;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.content.trains.entity.Train;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 public class TrainStatus{
     private static final double max_distance=Configs.max_distance;
-    public static final List<TrainStatus> all_trains=new ArrayList<>();
-    public final Train train;
-    public final SoundGen gen=new SoundGen();
-    public final VVVFSoundGen vvvf_gen=new VVVFSoundGen();
-    private final FSmoother f_smoother=new FSmoother();
-    private boolean is_move=false,is_last_move=false;
-    public static final Object train_lock=new Object();
+    public static final Map<UUID,Double> cached_speeds=new HashMap<>();
+    public static final List<TrainData> all_trains=new ArrayList<>();
+    public static final Object speed_lock=new Object(),train_lock=new Object();
+
     private static final Logger LOGGER=LoggerFactory.getLogger("createvvvfsim");
-    private TrainStatus(Train train){
-        this.train=train;
-    }
+    private static int cnt=0;
+
     public static void addTrain(Train train){
-        TrainStatus status=new TrainStatus(train);
         synchronized(train_lock){
-            all_trains.add(status);
+            all_trains.add(new TrainData(train));
+        }
+    }
+    public static void getServerSpeed(TrainSyncModel model,IPayloadContext context){
+        synchronized(speed_lock){
+            cached_speeds.put(model.train_id(),model.speed());
+        }
+    }
+    public static void clearDataCache(){
+        synchronized(train_lock){
+            all_trains.clear();
+        }
+        synchronized(speed_lock){
+            cached_speeds.clear();
+        }
+    }
+    public static void forceReload(){
+        synchronized(train_lock){
+            for(TrainData train_data:all_trains){
+                Double speed;
+                synchronized(speed_lock){
+                    speed=cached_speeds.get(train_data.train.id);
+                }
+                if(speed!=null){
+                    train_data.f_smoother.reloadF(speed);
+                    train_data.is_reloaded=true;
+                }
+            }
         }
     }
     public static void tick(Level level,Player player){
         synchronized(train_lock){
-            all_trains.removeIf(status->status.isInvalid(level));
-            for(TrainStatus status:all_trains){
-                Vec3 player_pos=player.position();
-                List<Double> speeds=new ArrayList<>();
+            all_trains.removeIf(data->data.train.invalid);
+            if(player==null) return;
+            Vec3 player_pos=player.position();
+            for(TrainData train_data:all_trains){
                 double total_factor=0.0;
-                for(Carriage carriage:status.train.carriages){
-                    Tuple<Vec3,Vec3> now_last_pos=status.carriageNowLastPos(carriage);
-                    if(now_last_pos==null) continue;
-                    double move=now_last_pos.getA().distanceTo(now_last_pos.getB());
-                    speeds.add(move*20.0);
-                    if(!isCarriageInDimension(carriage,level)) continue;
-                    double distance=now_last_pos.getA().distanceTo(player_pos);
+                Double speed;
+                for(Carriage carriage:train_data.train.carriages){
+                    DimensionalCarriageEntity dce=carriage.getDimensionalIfPresent(level.dimension());
+                    if(dce==null) continue;
+                    Vec3 leading_anchor=dce.leadingAnchor(),trailing_anchor=dce.trailingAnchor();
+                    if(leading_anchor==null || trailing_anchor==null) continue;
+                    CarriageContraptionEntity entity=dce.entity.get();
+                    if(entity==null) continue;
+                    Vec3 train_pos=entity.position();
+                    double distance=train_pos.distanceTo(player_pos);
                     total_factor+=Math.max(0.0,1.0-distance/max_distance);
                 }
-                speeds.sort(Double::compare);
-                double carriage_speed=speeds.isEmpty()?0.0:speeds.get(speeds.size()/2);
-                status.is_move=carriage_speed>1e-2;
-                if(status.is_move && !status.is_last_move){
+                synchronized(speed_lock){
+                    speed=cached_speeds.get(train_data.train.id);
+                }
+                if(!train_data.is_reloaded){
+                    if(speed==null) speed=0.0;
+                    else{
+                        train_data.f_smoother.reloadF(speed);
+                        train_data.is_reloaded=true;
+                    }
+                }
+                train_data.is_move=speed>1e-2;
+                if(train_data.is_move && !train_data.is_last_move && total_factor>1e-2){
                     level.playLocalSound(player,SoundEvents.LAVA_EXTINGUISH,
                             SoundSource.NEUTRAL,0.75f*(float)total_factor,1f);
                     level.playLocalSound(player,SoundEvents.WOODEN_TRAPDOOR_CLOSE,
                             SoundSource.NEUTRAL,0.6f*(float)total_factor,1.5f);
                 }
-
-                double smoothed=status.f_smoother.smoothF(carriage_speed);
-                status.gen.setAmp(total_factor);
-                status.vvvf_gen.setAmp(total_factor);
-                status.vvvf_gen.setF(smoothed);
-                status.is_last_move=status.is_move;
-            }
-        }
-    }
-    private Tuple<Vec3,Vec3> carriageNowLastPos(Carriage carriage){
-        CarriageContraptionEntity entity=carriage.anyAvailableEntity();
-        if(entity==null) return null;
-        return new Tuple<>(entity.position(),entity.getPrevPositionVec());
-    }
-    private static boolean isCarriageInDimension(Carriage carriage,Level level){
-        DimensionalCarriageEntity dce=carriage.getDimensionalIfPresent(level.dimension());
-        return dce!=null;
-    }
-    private boolean isInvalid(Level level){
-        if(level==null) return true;
-        if(this.train.id==null) return true;
-        if(this.train.carriages==null || this.train.carriages.isEmpty()) return true;
-        var railways=Create.RAILWAYS.sided(level);
-        if(railways==null || railways.trains==null) return true;
-        return !railways.trains.containsKey(this.train.id);
-    }
-    public static void fromServer(TrainSyncModel model,IPayloadContext context){
-        UUID id=model.train_id();
-        double speed=model.speed();
-        List<Tuple<Vector3f,Integer>> carriage_data=model.carriage_data();
-        int tick=model.server_tick();
-        LOGGER.info("[server]: train_id: {}, speed: {}, tick: {}",id,speed,tick);
-        for(Tuple<Vector3f,Integer> carriage:carriage_data){
-            Vector3f pos=carriage.getA();
-            switch(carriage.getB()){
-                case 0:
-                    LOGGER.info("pos: ({},{},{}) at overworld",pos.x,pos.y,pos.z);
-                    break;
-                case 1:
-                    LOGGER.info("pos: ({},{},{}) at nether",pos.x,pos.y,pos.z);
-                    break;
-                case 2:
-                    LOGGER.info("pos: ({},{},{}) at end",pos.x,pos.y,pos.z);
-                    break;
+                cnt++;
+                double factor=total_factor;
+                if(cnt==3){
+                    cnt=0;
+                    LOGGER.info("factor:{}",String.format("%4.2f",factor));
+                }
+                train_data.gen.setAmp(total_factor);
+                train_data.vvvf_gen.setAmp(total_factor);
+                train_data.vvvf_gen.setF(train_data.f_smoother.smoothF(speed));
+                train_data.is_last_move=train_data.is_move;
             }
         }
     }

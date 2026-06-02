@@ -17,6 +17,6 @@ public class CreateVVVFSim{
     }
     public static void register(RegisterPayloadHandlersEvent event){
         PayloadRegistrar registrar=event.registrar("1.0.0");
-        registrar.playToClient(TrainSyncModel.model_type,TrainSyncModel.stream_codec,TrainStatus::fromServer);
+        registrar.playToClient(TrainSyncModel.model_type,TrainSyncModel.stream_codec,TrainStatus::getServerSpeed);
     }
 }

@@ -30,9 +30,9 @@ public class SoundEngine{
         while(true){
             Arrays.fill(mix_buffer,0.0);
             synchronized(TrainStatus.train_lock){
-                for(TrainStatus status:TrainStatus.all_trains){
-                    status.gen.mixTo(mix_buffer);
-                    status.vvvf_gen.mixTo(mix_buffer);
+                for(TrainData train_data:TrainStatus.all_trains){
+                    train_data.gen.mixTo(mix_buffer);
+                    train_data.vvvf_gen.mixTo(mix_buffer);
                 }
             }
             double amp_step=(target_main_amp-current_main_amp)/buffer_size;

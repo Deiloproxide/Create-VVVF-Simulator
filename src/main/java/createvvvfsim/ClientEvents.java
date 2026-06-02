@@ -15,6 +15,10 @@ public class ClientEvents{
         SoundEngine.setMainAmp(mc.options.getSoundSourceVolume(SoundSource.MASTER));
     }
     @SubscribeEvent
+    public static void onExit(ClientPlayerNetworkEvent.LoggingOut event){
+        TrainStatus.clearDataCache();
+    }
+    @SubscribeEvent
     public static void onPauseChange(ClientPauseChangeEvent.Post event){
         SoundEngine.setMainAmp(event.isPaused()?0.0:mc.options.getSoundSourceVolume(SoundSource.MASTER));
     }
