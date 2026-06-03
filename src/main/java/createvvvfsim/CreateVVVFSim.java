@@ -6,12 +6,10 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-import soundphysics.remastered.SoundPhysicsBridgeManager;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
 @Mod(Configs.mod_id)
 public class CreateVVVFSim{
     static{
-        SoundPhysicsBridgeManager.init();
         CustomPwm.CustomPwmPresets.preload();
     }
     public CreateVVVFSim(IEventBus modEventBus){

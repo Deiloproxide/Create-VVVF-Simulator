@@ -4,12 +4,14 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import soundphysics.Handler;
 public class SoundEngine{
     private static final int buffer_size=Configs.buffer_size;
     private static final AudioFormat format=Configs.format;
     private static final double[] mix_buffer=new double[buffer_size];
     private static final byte[] out_buffer=new byte[buffer_size*2];
     private static final Thread thread=new Thread(SoundEngine::mixLoop);
+    private static final Handler sound_handler=Configs.sound_handler;
     private static volatile double target_main_amp=0.0;
     private static double current_main_amp=0.0;
     private static SourceDataLine dataline;
@@ -35,6 +37,7 @@ public class SoundEngine{
                     train_data.vvvf_gen.mixTo(mix_buffer);
                 }
             }
+            sound_handler.handle(mix_buffer);
             double amp_step=(target_main_amp-current_main_amp)/buffer_size;
             for(int i=0;i<buffer_size;i++){
                 current_main_amp+=amp_step;

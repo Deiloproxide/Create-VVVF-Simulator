@@ -1,6 +1,8 @@
 package createvvvfsim;
 import javax.sound.sampled.AudioFormat;
 import net.minecraft.client.Minecraft;
+import soundphysics.Handler;
+import soundphysics.remastered.HandlerPhysics;
 public class Configs{
     //register
     public static final String mod_id="create_vvvf_simulator";
@@ -9,6 +11,11 @@ public class Configs{
     public static final int mixin_priority=1027;
     public static final int tick_period=3;
     public static final Minecraft mc=Minecraft.getInstance();
+    public static final Handler sound_handler;
+    static{
+        if(HandlerPhysics.register()) sound_handler=new HandlerPhysics();
+        else sound_handler=new Handler();
+    }
     //command
     public static final String command_vvvf="vvvf";
     public static final String command_reload="reload";

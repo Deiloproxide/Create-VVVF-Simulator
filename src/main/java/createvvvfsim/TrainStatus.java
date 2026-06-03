@@ -12,7 +12,6 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 public class TrainStatus{
     private static final double max_distance=Configs.max_distance;
-    private static final Map<CarriageContraptionEntity,Integer> ticks=new HashMap<>();
     public static final Map<UUID,Double> cached_speeds=new HashMap<>();
     public static final List<TrainData> all_trains=new ArrayList<>();
     public static final Object speed_lock=new Object(),train_lock=new Object();
@@ -61,8 +60,7 @@ public class TrainStatus{
                     if(dce==null) continue;
                     CarriageContraptionEntity entity=dce.entity.get();
                     if(entity==null) continue;
-                    Integer entity_tick=entity.tickCount;
-                    if(entity_tick.equals(ticks.put(entity,entity_tick))) continue;
+                    if(entity.isRemoved()) continue;
                     Vec3 train_pos=entity.position();
                     double distance=train_pos.distanceTo(player_pos);
                     total_factor+=Math.max(0.0,1.0-distance/max_distance);
