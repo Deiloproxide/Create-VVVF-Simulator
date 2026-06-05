@@ -1,4 +1,7 @@
-package createvvvfsim;
+package genengine;
+import createvvvfsim.Configs;
+import createvvvfsim.TrainData;
+import createvvvfsim.TrainStatus;
 import java.util.Arrays;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -33,8 +36,9 @@ public class SoundEngine{
             Arrays.fill(mix_buffer,0.0);
             synchronized(TrainStatus.train_lock){
                 for(TrainData train_data:TrainStatus.all_trains){
-                    train_data.gen.mixTo(mix_buffer);
+                    train_data.base_gen.mixTo(mix_buffer);
                     train_data.vvvf_gen.mixTo(mix_buffer);
+                    train_data.wind_gen.mixTo(mix_buffer);
                 }
             }
             sound_handler.handle(mix_buffer);

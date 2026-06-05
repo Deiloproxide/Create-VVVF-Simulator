@@ -82,7 +82,7 @@ public class Struct {
                 9.0 * baseRatio * 189.0 / 225,
                 9.0 * baseRatio,
                 9.0,
-                1.0,
+                //1.0,
                 9.5
         };
 

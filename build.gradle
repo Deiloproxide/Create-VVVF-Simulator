@@ -17,6 +17,13 @@ base{
     archivesName=mod_id
 }
 java.toolchain.languageVersion=JavaLanguageVersion.of(21)
+configurations{
+    libraries
+    implementation.extendsFrom libraries
+}
+configurations.matching{it.name=="additionalRuntimeClasspath"}.configureEach{
+    extendsFrom configurations.libraries
+}
 neoForge{
     version=project.neo_version
     runs{
@@ -59,6 +66,25 @@ dependencies{
     implementation("com.tterrag.registrate:Registrate:${registrate_version}")
     compileOnly("maven.modrinth:sound-physics-remastered:neoforge-${minecraft_version}-${spr_version}")
     runtimeOnly("maven.modrinth:sound-physics-remastered:neoforge-${minecraft_version}-${spr_version}")
+    libraries("com.github.wendykierp:JTransforms:${jtransform_version}")
+    jarJar("com.github.wendykierp:JTransforms:${jtransform_version}"){
+        version{
+            strictly "[${jtransform_version},3.2)"
+            prefer "${jtransform_version}"
+        }
+    }
+    jarJar("pl.edu.icm:JLargeArrays:1.5"){
+        version{
+            strictly "[1.5,1.6)"
+            prefer "1.5"
+        }
+    }
+    jarJar("org.apache.commons:commons-math3:3.5"){
+        version{
+            strictly "[3.5,3.6)"
+            prefer "3.5"
+        }
+    }
 }
 var generateModMetadata=tasks.register("generateModMetadata",ProcessResources){
     var replaceProperties=[minecraft_version:minecraft_version,minecraft_version_range:minecraft_version_range,

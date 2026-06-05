@@ -26,7 +26,8 @@ public class Configs{
     public static final AudioFormat format=new AudioFormat(sample_rate,16,1,true,false);
     public static final double base_max_amp=0.02;
     public static final double base_current_f=120.0;
-    public static final double max_distance=96;
+    public static final double near_distance=32.0;
+    public static final double far_distance=96.0;
     //speed
     public static final double max_acc_ratio=1.05;
     public static final int speeds_length=5;

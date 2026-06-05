@@ -1,4 +1,5 @@
-package createvvvfsim;
+package genengine;
+import createvvvfsim.Configs;
 import vvvfsimulator.generation.audio.trainsound.Audio;
 import vvvfsimulator.generation.audio.trainsound.AudioFilter.CppConvolutionFilter;
 import vvvfsimulator.generation.audio.trainsound.AudioResourceManager;
@@ -12,7 +13,7 @@ public class VVVFSoundGen extends SoundGen{
     private volatile double target_f=0.0;
     private double current_f=0.0;
     private final Struct.PulseControl pulse_control=new Struct.PulseControl();
-    private final CarrierParameter.RandomFrequency carrier_random_f=new CarrierParameter.RandomFrequency(0.0,1.0);
+    private final CarrierParameter.RandomFrequency carrier_random_f=new CarrierParameter.RandomFrequency(0.0,30.0);
     private final CarrierParameter.ConstantFrequency carrier_main_f=new CarrierParameter.ConstantFrequency(0.0);
     private final CarrierParameter carrier_f=new CarrierParameter(carrier_random_f,carrier_main_f);
     private final Struct.ElectricalParameter elect_state=new Struct.ElectricalParameter(false,false,2,pulse_control,carrier_f,null,0.0,0.0);
@@ -27,19 +28,13 @@ public class VVVFSoundGen extends SoundGen{
         train_config.impulseResponse=AudioResourceManager.resampleLinear(ir,ir_sample_rate[0],sample_rate);
         train_config.setCalculatedGearHarmonic(19,120);
         if(train_config.harmonicSound.isEmpty()) addDefaultMotorHarmonics(train_config);
-        train_config.motorVolumeDb=0.5;
-        train_config.totalVolumeDb=-2.5;
+        train_config.motorVolumeDb=0;
+        train_config.totalVolumeDb=-2;
         conv_filter=new CppConvolutionFilter(conv_block_size,train_config.impulseResponse);
         domain.electricalState=elect_state;
     }
-    public static double customCalcSound(vvvfsimulator.vvvf.model.Struct.Domain control,vvvfsimulator.data.trainaudio.Struct data,double base_f) {
-        double motorPwm = control.motor.parameter.diffTe * Math.pow(10, data.motorVolumeDb);
-        double motor = Audio.calculateHarmonicSounds(control, data.harmonicSound);
-        double gear = Audio.calculateHarmonicSounds(control, data.gearSound);
-        return (motorPwm + motor + gear) * Math.pow(10, data.totalVolumeDb);
-    }
     private static void addDefaultMotorHarmonics(vvvfsimulator.data.trainaudio.Struct config){
-        double[] harmonics={1.0,2.0,9.5};
+        double[] harmonics={1.0,2.0,9.5},amps={0.3,0.3,1.2};
         for(int i=0;i<harmonics.length;i++){
             vvvfsimulator.data.trainaudio.Struct.HarmonicData h=new vvvfsimulator.data.trainaudio.Struct.HarmonicData();
             h.harmonic=harmonics[i];
@@ -49,7 +44,8 @@ public class VVVFSoundGen extends SoundGen{
             h.amplitude.start=0.0;
             h.amplitude.startValue=0.0;
             h.amplitude.end=40.0;
-            h.amplitude.endValue=0.16*Math.pow(0.62,i);
+            //h.amplitude.endValue=0.16*Math.pow(0.62,i);
+            h.amplitude.endValue=0.1*Math.pow(0.8,amps[i]);
             h.amplitude.minimumValue=0.0;
             h.amplitude.maximumValue=0.16;
             config.harmonicSound.add(h);
@@ -157,7 +153,7 @@ public class VVVFSoundGen extends SoundGen{
             domain.getCarrierInstance().time+=sample_dt;
             Struct.PhaseState state=Common.getCalculator(2,pulse_type).calculate(domain,0.0);
             domain.motor.process(domain.getDeltaTime(),MyMath.M_2PI*base_f,state);
-            double train_sound=customCalcSound(domain,train_config,base_f);
+            double train_sound=Audio.calculateTrainSoundFromCurrentState(domain,train_config);
             dry_buffer[i]=train_sound*current_amp;
         }
         conv_filter.process(dry_buffer,0,wet_buffer,0,buffer_size);

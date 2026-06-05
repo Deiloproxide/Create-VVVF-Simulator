@@ -2,6 +2,8 @@ package mixin;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.content.trains.entity.CarriageSounds;
 import createvvvfsim.Configs;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
@@ -17,4 +19,7 @@ public class NoCarriageSounds{
     @Redirect(method={"tick(Lcom/simibubi/create/content/trains/entity/Carriage$DimensionalCarriageEntity;)V"},require=0,expect=0,
             at=@At(target="Lnet/minecraft/world/level/Level;playLocalSound(DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V",value="INVOKE"))
     private void noPlayLocalSound(Level self,double x,double y,double z,SoundEvent event,SoundSource source,float volume,float pitch,boolean distanceDelay){}
+    @Redirect(method={"playIfMissing(Lnet/minecraft/client/Minecraft;Lcom/simibubi/create/content/trains/entity/CarriageSounds$LoopingSound;Lnet/minecraft/sounds/SoundEvent;Z)Lcom/simibubi/create/content/trains/entity/CarriageSounds$LoopingSound;"},
+            at=@At(target="Lnet/minecraft/client/sounds/SoundManager;play(Lnet/minecraft/client/resources/sounds/SoundInstance;)V",value="INVOKE"),require=0,expect=0)
+    private void noPlay(SoundManager self,SoundInstance sound){}
 }
