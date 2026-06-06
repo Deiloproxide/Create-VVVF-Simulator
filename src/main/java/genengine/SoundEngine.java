@@ -3,6 +3,7 @@ import createvvvfsim.Configs;
 import createvvvfsim.TrainData;
 import createvvvfsim.TrainStatus;
 import java.util.Arrays;
+import java.util.List;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
@@ -34,12 +35,11 @@ public class SoundEngine{
     private static void mixLoop(){
         while(true){
             Arrays.fill(mix_buffer,0.0);
-            synchronized(TrainStatus.train_lock){
-                for(TrainData train_data:TrainStatus.all_trains){
-                    train_data.base_gen.mixTo(mix_buffer);
-                    train_data.vvvf_gen.mixTo(mix_buffer);
-                    train_data.wind_gen.mixTo(mix_buffer);
-                }
+            List<TrainData> train_datas=TrainStatus.getTrainDatas();
+            for(TrainData train_data:train_datas){
+                train_data.base_gen.mixTo(mix_buffer);
+                train_data.vvvf_gen.mixTo(mix_buffer);
+                train_data.wind_gen.mixTo(mix_buffer);
             }
             sound_handler.handle(mix_buffer);
             double amp_step=(target_main_amp-current_main_amp)/buffer_size;

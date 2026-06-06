@@ -10,6 +10,7 @@ import vvvfsimulator.vvvf.model.Struct.ElectricalParameter.CarrierParameter;
 public class VVVFSoundGen extends SoundGen{
     private static final double max_base_f=Configs.max_base_f;
     private static final int conv_block_size=Configs.conv_block_size;
+    private static final double vvvf_amp=Configs.vvvf_amp;
     private volatile double target_f=0.0;
     private double current_f=0.0;
     private final Struct.PulseControl pulse_control=new Struct.PulseControl();
@@ -78,7 +79,6 @@ public class VVVFSoundGen extends SoundGen{
                 pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;
                 pulse_count=1;
                 pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
-                //carrier_main_f.value=14.0*base_f+198.0;
                 carrier_main_f.value=240.0*Math.pow(1.875,(base_f-3.0)/15.0);
             }//Async 240Hz-450Hz
             else if(base_f<44.0){
@@ -157,6 +157,6 @@ public class VVVFSoundGen extends SoundGen{
             dry_buffer[i]=train_sound*current_amp;
         }
         conv_filter.process(dry_buffer,0,wet_buffer,0,buffer_size);
-        for(int i=0;i<buffer_size;i++) mix_buffer[i]+=wet_buffer[i]*0.5;
+        for(int i=0;i<buffer_size;i++) mix_buffer[i]+=wet_buffer[i]*vvvf_amp;
     }
 }
