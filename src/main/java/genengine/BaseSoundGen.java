@@ -9,6 +9,7 @@ public class BaseSoundGen extends SoundGen{
         double amp_step=(target_amp-current_amp)/buffer_size;
         for(int i=0;i<buffer_size;i++){
             current_amp+=amp_step;
+            if(current_amp<1e-2) continue;
             mix_buffer[i]+=Math.sin(phase)*current_amp*max_amp;
             phase+=2*Math.PI*current_f*sample_dt;
             if(phase>=2.0*Math.PI) phase-=2.0*Math.PI;

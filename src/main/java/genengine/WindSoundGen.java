@@ -61,7 +61,6 @@ public class WindSoundGen extends SoundGen{
         double norm_factor=main_wind_amp/peak;
         for(int i=0;i<table_size;i++) main_wind[i]*=norm_factor;
     }
-
     private class PinkNoiseFilter{
         private double state=0.0;
         public double process(double white){
@@ -112,11 +111,16 @@ public class WindSoundGen extends SoundGen{
     public void setF(double speed){
         target_f=speed;
     }
+    private double quad(double x){
+        if(x<0.5) return 2.0*x*x;
+        else if(x<1) return ((-2.0*x)+4.0)*x-1.0;
+        return 1.0;
+    }
     private double bgFactor(){
-        return 10.0*target_f*target_amp;
+        return 10.0*quad(current_f*current_amp);
     }
     private double mainFactor(){
-        return 0.03*target_f;
+        return 0.03*current_f;
     }
     @Override
     public void mixTo(double[] mix_buffer){
@@ -126,19 +130,15 @@ public class WindSoundGen extends SoundGen{
         for(int i=0;i<buffer_size;i++){
             current_f+=f_step;
             current_amp+=amp_step;
-            double bg_offset=bg_shear.step();
-            double bg_cutoff=Math.clamp(bg_shear_base+bg_offset,400.0,1200.0);
-            bg_lpf.setCutoff(bg_cutoff);
-            double white_bg=tlr.nextGaussian()*0.5;
-            double current_pink_bg=pink_bg.process(white_bg);
+            if(current_amp<1e-2) continue;
+            bg_lpf.setCutoff(Math.clamp(bg_shear_base+bg_shear.step(),400.0,1200.0));
             double bg_lfo=0.5+0.5*Math.sin(2.0*Math.PI*wind_mod_f*total_t);
+            double current_pink_bg=pink_bg.process(tlr.nextGaussian()*0.5);
             double bg_amp=Math.min(0.5,wind_base_amp*(1.0+wind_mod_depth*bg_lfo));
-            double bg_lp=bg_lpf.process(current_pink_bg)*bg_amp;
-            double bg_wind=bg_hpf.process(bg_lp);
+            double bg_wind=bg_hpf.process(bg_lpf.process(current_pink_bg)*bg_amp);
             double main_lfo=0.5+0.5*Math.sin(2.0*Math.PI*main_mod_f*total_t);
-            double main_amp=1.0+main_mod_depth*main_lfo;
             if(table_index==table_size) table_index=0;
-            double current_main_wind=main_wind[table_index]*main_amp;
+            double current_main_wind=main_wind[table_index]*(1.0+main_mod_depth*main_lfo);
             mix_buffer[i]+=(bg_wind+current_main_wind*mainFactor())*bgFactor();
             total_t+=sample_dt;
             table_index++;

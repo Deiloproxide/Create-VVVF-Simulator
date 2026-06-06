@@ -21,6 +21,14 @@ public class TrainStatus{
             all_trains.add(new TrainData(train));
         }
     }
+    public static void removeTrain(UUID id){
+        synchronized(train_lock){
+            all_trains.removeIf(data->data.train.id.equals(id));
+        }
+        synchronized(speed_lock){
+            cached_speeds.remove(id);
+        }
+    }
     public static void getServerSpeed(TrainSyncModel model,IPayloadContext context){
         synchronized(speed_lock){
             cached_speeds.put(model.train_id(),model.speed());
@@ -65,6 +73,10 @@ public class TrainStatus{
                         train_data.f_smoother.reloadF(speed);
                         train_data.is_reloaded=true;
                     }
+                }
+                if(train_data.train.derailed){
+                    speed=0.0;
+                    train_data.f_smoother.reloadF(speed);
                 }
                 for(Carriage carriage:train_data.train.carriages){
                     DimensionalCarriageEntity dce=carriage.getDimensionalIfPresent(level.dimension());
