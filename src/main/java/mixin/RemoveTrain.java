@@ -14,7 +14,7 @@ public abstract class RemoveTrain{
     @Shadow
     public abstract UUID id();
     @Inject(method="handle",at=@At("RETURN"))
-    private void onHandle(LocalPlayer player,CallbackInfo ci){
+    private void handle(LocalPlayer player,CallbackInfo ci){
         TrainStatus.removeTrain(id());
     }
 }

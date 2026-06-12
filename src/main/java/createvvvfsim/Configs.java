@@ -2,7 +2,8 @@ package createvvvfsim;
 import javax.sound.sampled.AudioFormat;
 import net.minecraft.client.Minecraft;
 import soundphysics.Handler;
-import soundphysics.remastered.HandlerPhysics;
+import soundphysics.perfected.HandlerPerfected;
+import soundphysics.remastered.HandlerRemastered;
 public class Configs{
     //register
     public static final String mod_id="create_vvvf_simulator";
@@ -13,9 +14,13 @@ public class Configs{
     public static final int mixin_priority=1027;
     public static final int sync_period=3;
     public static final int eval_period=5;
-    //physics handler
-    public static final boolean physics_available=HandlerPhysics.register();
-    public static final Handler handler=physics_available?new HandlerPhysics():new Handler();
+    //sound physics handler
+    public static final Handler handler;
+    static{
+        if(HandlerRemastered.register()) handler=new HandlerRemastered();
+        else if(HandlerPerfected.register()) handler=new HandlerPerfected();
+        else handler=new Handler();
+    }
     //command
     public static final String command_vvvf="vvvf";
     public static final String command_reload="reload";
@@ -34,8 +39,8 @@ public class Configs{
     public static final double brown_sigma=0.05;
     public static final double brown_range=2.0;
     //base amp
-    public static final double base_amp=0.05;
-    public static final double brown_amp=0.025;
+    public static final double base_amp=0.04;
+    public static final double brown_amp=0.02;
     //vvvf
     public static final double max_base_f=115.0;
     public static final int conv_block_size=512;
@@ -58,8 +63,8 @@ public class Configs{
     public static final double main_mod_depth=0.3;
     public static final int table_ratio=32;
     //wind amp
-    public static final double bg_wind_amp=4.0;
-    public static final double main_wind_amp=0.2;
+    public static final double bg_wind_amp=3.0;
+    public static final double main_wind_amp=0.15;
     //sound spread
     public static final double near_distance=32.0;
     public static final double far_distance=96.0;

@@ -49,7 +49,7 @@ public class TrainStatus{
             cached_speeds.clear();
         }
     }
-    public static List<TrainData> getTrainDatas(){
+    public static List<TrainData> getTrainData(){
         List<TrainData> train_datas;
         synchronized(train_lock){
             train_datas=new ArrayList<>(all_trains);
@@ -57,7 +57,7 @@ public class TrainStatus{
         return train_datas;
     }
     public static void forceReload(){
-        List<TrainData> train_datas=getTrainDatas();
+        List<TrainData> train_datas=getTrainData();
         for(TrainData train_data:train_datas){
             Double speed;
             synchronized(speed_lock){
@@ -75,7 +75,7 @@ public class TrainStatus{
         synchronized(train_lock){
             all_trains.removeIf(data->data.train.invalid);
         }
-        List<TrainData> train_datas=getTrainDatas();
+        List<TrainData> train_datas=getTrainData();
         for(TrainData train_data:train_datas){
             double near_factor=0.0,far_factor=0.0;
             Double speed;
@@ -117,24 +117,20 @@ public class TrainStatus{
     }
     public static void evalTrains(Level level,Player player,int period_state){
         if(level==null) return;
-        if(period_state==0) eval_trains=getTrainDatas();
+        if(period_state==0) eval_trains=getTrainData();
         for(int i=period_state;i<eval_trains.size();i+=eval_period){
             TrainData train_data=eval_trains.get(i);
             List<Carriage> carriages=train_data.train.carriages;
-            Vec3 total=Vec3.ZERO;
-            int valid_cnt=0;
+            List<EnvData> envs=new ArrayList<>();
             for(Carriage carriage:carriages){
                 DimensionalCarriageEntity dce=carriage.getDimensionalIfPresent(level.dimension());
                 if(dce==null) continue;
                 CarriageContraptionEntity entity=dce.entity.get();
                 if(entity==null) continue;
                 if(entity.isRemoved()) continue;
-                total=total.add(entity.position());
-                valid_cnt++;
+                envs.add(handler.getEnv(entity.position(),player.position(),level));
             }
-            if(valid_cnt==0) continue;
-            Vec3 avg=total.scale(1.0/valid_cnt);
-            train_data.env_data=handler.getEnv(avg,player.position(),level);
+            train_data.target_env=EnvData.avg(envs);
         }
     }
 }

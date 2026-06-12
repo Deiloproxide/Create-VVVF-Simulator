@@ -4,7 +4,7 @@ import com.simibubi.create.infrastructure.config.CTrains;
 import java.util.Arrays;
 public class FSmoother{
     private static final CTrains train_config=AllConfigs.server().trains;
-    private static final double max_speed=train_config.trainTopSpeed.getF();;
+    private static final double max_speed=train_config.trainTopSpeed.getF();
     private static final double max_acc=train_config.trainAcceleration.getF()*Configs.max_acc_ratio/20.0;
     private static final int speeds_length=Configs.speeds_length;
     private int speeds_index=0;

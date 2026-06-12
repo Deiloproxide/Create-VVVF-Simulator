@@ -36,7 +36,7 @@ public class SoundEngine{
     private static void mixLoop(){
         while(true){
             Arrays.fill(mix_buffer,0.0);
-            List<TrainData> train_datas=TrainStatus.getTrainDatas();
+            List<TrainData> train_datas=TrainStatus.getTrainData();
             handler.handle(mix_buffer,train_datas);
             double amp_step=(settings_amp*main_amp-current_amp)/buffer_size;
             for(int i=0;i<buffer_size;i++){
