@@ -90,7 +90,6 @@ public final class SVM{
                     ft.t1=-beta;
                     ft.t2=MyMath.M_SQRT3_2*alpha+0.5*beta;
                 }
-
             }
             ft.t0=1.0-ft.t1-ft.t2;
             return ft;

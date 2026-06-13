@@ -35,8 +35,7 @@ public class RemasteredConst{
             throw new RuntimeException(e);
         }
     }
-    private static Object getValue(Object config,String field_name)
-            throws ReflectiveOperationException{
+    private static Object getValue(Object config,String field_name) throws ReflectiveOperationException{
         Field field=config.getClass().getField(field_name);
         Object entry=field.get(config);
         return entry.getClass().getMethod("get").invoke(entry);

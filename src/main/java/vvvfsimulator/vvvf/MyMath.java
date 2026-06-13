@@ -18,8 +18,8 @@ public final class MyMath{
     public static final class Functions{
         public static double triangle(double x){
             double phase=M_2_PI*x-4.0*Math.floor(x*M_1_2PI);
-            if (1.0<=phase && phase<3.0) return 2.0-phase;
-            if (3.0<=phase) return phase-4.0;
+            if(1.0<=phase && phase<3.0) return 2.0-phase;
+            if(3.0<=phase) return phase-4.0;
             return phase;
         }
         public static double saw(double x){

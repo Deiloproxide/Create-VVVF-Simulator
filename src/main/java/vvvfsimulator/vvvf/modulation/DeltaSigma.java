@@ -19,7 +19,7 @@ public class DeltaSigma{
         lastProcessTime=nowTime;
         double quantized=(lastOutBit==1)?1.0:-1.0;
         integrator+=(input-quantized)*dt;
-        if (nowTime-lastUpdateTime>=feedbackInterval){
+        if(nowTime-lastUpdateTime>=feedbackInterval){
             lastOutBit=(integrator>=0.0)?1:0;
             lastUpdateTime=nowTime;
         }
@@ -35,6 +35,6 @@ public class DeltaSigma{
         lastProcessTime=nowTime;
     }
     public void resetIfLastTime(double lastTime){
-        if (lastTime!=lastProcessTime) reset(lastTime);
+        if(lastTime!=lastProcessTime) reset(lastTime);
     }
 }

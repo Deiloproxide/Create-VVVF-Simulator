@@ -2,6 +2,9 @@ package vvvfsimulator.vvvf.modulation;
 import java.util.Random;
 import vvvfsimulator.vvvf.MyMath;
 import vvvfsimulator.vvvf.model.Struct;
+import vvvfsimulator.vvvf.model.Struct.ElectricalParameter;
+import vvvfsimulator.vvvf.model.Struct.ElectricalParameter.CarrierParameter;
+import vvvfsimulator.vvvf.model.Struct.PulseControl.AsyncControl.CarrierFrequency.VibratoValue.BaseWaveType;
 public class Carrier{
     public double angleFrequency=0.0;
     public double time=0.0;
@@ -34,27 +37,27 @@ public class Carrier{
         clone.vibratoInstance=vibratoInstance.copy();
         return clone;
     }
-    public double calculateBaseCarrierFrequency(double nowTime,Struct.ElectricalParameter electricalState){
+    public double calculateBaseCarrierFrequency(double nowTime,ElectricalParameter electricalState){
         if(electricalState.isNone) return 0;
         Object baseCarrierFrequencyParameter=electricalState.carrierFrequency.baseFrequency;
-        if(baseCarrierFrequencyParameter instanceof Struct.ElectricalParameter.CarrierParameter.ConstantFrequency constant)
+        if(baseCarrierFrequencyParameter instanceof CarrierParameter.ConstantFrequency constant)
             return constant.value;
-        if(baseCarrierFrequencyParameter instanceof Struct.ElectricalParameter.CarrierParameter.VibratoFrequency vibrato){
+        if(baseCarrierFrequencyParameter instanceof CarrierParameter.VibratoFrequency vibrato){
             vibratoInstance.setState(useSimpleFrequency,nowTime);
-            vibratoInstance.setCustomParameter(vibrato,electricalState.pulsePattern.asyncModulationData.carrierWaveData.vibratoData.baseWave);
+            vibratoInstance.setCustomParameter(
+                    vibrato,electricalState.pulsePattern.asyncModulationData.carrierWaveData.vibratoData.baseWave);
             return vibratoInstance.calculate();
         }
         return 0;
     }
-
-    public double calculateCarrierFrequency(double nowTime,Struct.ElectricalParameter electricalState){
+    public double calculateCarrierFrequency(double nowTime,ElectricalParameter electricalState){
         if(electricalState.isNone) return 0;
         double baseCarrierFrequency=calculateBaseCarrierFrequency(nowTime,electricalState);
         randomInstance.setState(useSimpleFrequency,nowTime);
         randomInstance.setCustomParameter(electricalState.carrierFrequency.randomRange,baseCarrierFrequency);
         return randomInstance.calculate();
     }
-    public void processCarrierFrequency(double nowTime,Struct.ElectricalParameter electricalState){
+    public void processCarrierFrequency(double nowTime,ElectricalParameter electricalState){
         setAsyncFrequency(calculateCarrierFrequency(nowTime,electricalState));
     }
     public void resetIFrequencyTime(double nowTime){
@@ -69,7 +72,7 @@ public class Carrier{
     public static class RandomFrequency implements IFrequency{
         private boolean simple;
         private double time;
-        private Struct.ElectricalParameter.CarrierParameter.RandomFrequency parameter;
+        private CarrierParameter.RandomFrequency parameter;
         private double baseFrequency;
         private double lastRange;
         private double lastUpdateTime;
@@ -89,7 +92,7 @@ public class Carrier{
             this.simple=simple;
             this.time=time;
         }
-        public void setCustomParameter(Struct.ElectricalParameter.CarrierParameter.RandomFrequency parameter,double baseFrequency){
+        public void setCustomParameter(CarrierParameter.RandomFrequency parameter,double baseFrequency){
             this.parameter=parameter;
             this.baseFrequency=baseFrequency;
         }
@@ -114,8 +117,8 @@ public class Carrier{
     public static class VibratoFrequency implements IFrequency{
         private boolean simple;
         private double time;
-        private Struct.ElectricalParameter.CarrierParameter.VibratoFrequency parameter;
-        private Struct.PulseControl.AsyncControl.CarrierFrequency.VibratoValue.BaseWaveType baseWaveType;
+        private CarrierParameter.VibratoFrequency parameter;
+        private BaseWaveType baseWaveType;
         private double lastInterval;
         private double lastTime;
         public VibratoFrequency copy(){
@@ -133,8 +136,7 @@ public class Carrier{
             this.simple=simple;
             this.time=time;
         }
-        public void setCustomParameter(Struct.ElectricalParameter.CarrierParameter.VibratoFrequency parameter,
-                Struct.PulseControl.AsyncControl.CarrierFrequency.VibratoValue.BaseWaveType baseWaveType){
+        public void setCustomParameter(CarrierParameter.VibratoFrequency parameter,BaseWaveType baseWaveType){
             this.parameter=parameter;
             this.baseWaveType=baseWaveType;
         }

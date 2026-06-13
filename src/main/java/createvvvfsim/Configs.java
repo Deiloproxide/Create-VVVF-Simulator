@@ -13,7 +13,7 @@ public class Configs{
     public static final Minecraft mc=Minecraft.getInstance();
     public static final int mixin_priority=1027;
     public static final int sync_period=3;
-    public static final int eval_period=5;
+    public static final int eval_period=3;
     //sound physics handler
     public static final Handler handler;
     static{
@@ -25,6 +25,9 @@ public class Configs{
     public static final String command_vvvf="vvvf";
     public static final String command_reload="reload";
     public static final String command_return="§a[Create: VVVF-Simulator] Reloaded!§r";
+    //resource location
+    public static final String filter_wav="/assets/createvvvfsim/TrainSound/Filter.wav";
+    public static final String table="/assets/createvvvfsim/SwitchAngle/";
     //audio
     public static final int sample_rate=44100;
     public static final int buffer_size=1<<12;

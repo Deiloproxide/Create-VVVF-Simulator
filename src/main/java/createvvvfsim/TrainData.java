@@ -1,6 +1,5 @@
 package createvvvfsim;
 import com.simibubi.create.content.trains.entity.Train;
-import createvvvfsim.EnvData.ReverbSend;
 import genengine.BaseSoundGen;
 import genengine.VVVFSoundGen;
 import genengine.WindSoundGen;
@@ -29,29 +28,29 @@ public class TrainData{
     }
     public void setStep(int buffer_size){
         EnvData from=current_env,to=target_env;
-        env_step.direct_gain=(to.direct_gain-from.direct_gain)/buffer_size;
-        env_step.direct_cutoff=(to.direct_cutoff-from.direct_cutoff)/buffer_size;
+        env_step.gain=(to.gain-from.gain)/buffer_size;
+        env_step.cutoff=(to.cutoff-from.cutoff)/buffer_size;
         env_step.occlusion=(to.occlusion-from.occlusion)/buffer_size;
         env_step.shared_space=(to.shared_space-from.shared_space)/buffer_size;
         for(int i=0;i<4;i++){
-            env_step.sends[i].gain=(to.sends[i].gain-from.sends[i].gain)/buffer_size;
-            env_step.sends[i].cutoff=(to.sends[i].cutoff-from.sends[i].cutoff)/buffer_size;
+            env_step.gains[i]=(to.gains[i]-from.gains[i])/buffer_size;
+            env_step.cutoffs[i]=(to.cutoffs[i]-from.cutoffs[i])/buffer_size;
         }
     }
     public void addStep(){
-        current_env.direct_gain+=env_step.direct_gain;
-        current_env.direct_cutoff+=env_step.direct_cutoff;
+        current_env.gain+=env_step.gain;
+        current_env.cutoff+=env_step.cutoff;
         current_env.occlusion+=env_step.occlusion;
         current_env.shared_space+=env_step.shared_space;
         for(int i=0;i<4;i++){
-            current_env.sends[i].gain+=env_step.sends[i].gain;
-            current_env.sends[i].cutoff+=env_step.sends[i].cutoff;
+            current_env.gains[i]+=env_step.gains[i];
+            current_env.cutoffs[i]+=env_step.cutoffs[i];
         }
     }
     public void lowPass(double sample){
-        ReverbSend[] sends=current_env.sends;
-        filter+=(sample-filter)*Math.clamp(current_env.direct_cutoff,0.02,1.0);
+        double[] gains=current_env.gains,cutoffs=current_env.cutoffs;
+        filter+=(sample-filter)*Math.clamp(current_env.cutoff,0.02,1.0);
         for(int i=0;i<4;i++)
-            filters[i]+=(sample*sends[i].gain-filters[i])*Math.clamp(sends[i].cutoff,0.02,1.0);
+            filters[i]+=(sample*gains[i]-filters[i])*Math.clamp(cutoffs[i],0.02,1.0);
     }
 }

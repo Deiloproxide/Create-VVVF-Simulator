@@ -131,13 +131,13 @@ public class RemasteredHandler extends Handler{
                 if(reflect_ratio.length>i) send_gains[i]*=gain_fac[i];
                 send_gains[i]=Math.clamp(i<2?send_gains[i]:(send_gains[i]*1.05f-0.05f),0f,1f);
                 send_gains[i]*=(float)Math.pow(send_cutoffs[i],0.1)*send_gain_mul;
-                env_data.sends[i].gain=send_gains[i];
-                env_data.sends[i].cutoff=send_cutoffs[i];
+                env_data.gains[i]=send_gains[i];
+                env_data.cutoffs[i]=send_cutoffs[i];
             }
             avg_space*=0.25f;
             direct_cutoff=Math.max((float)Math.pow(avg_space,0.5)*0.2f,direct_cutoff);
-            env_data.direct_gain=(float)Math.pow(direct_cutoff,0.1);
-            env_data.direct_cutoff=direct_cutoff;
+            env_data.gain=(float)Math.pow(direct_cutoff,0.1);
+            env_data.cutoff=direct_cutoff;
             env_data.occlusion=occlusion;
             env_data.shared_space=shared_space;
         }
@@ -158,7 +158,7 @@ public class RemasteredHandler extends Handler{
             for(int i=0;i<buffer_size;i++){
                 train_data.addStep();
                 train_data.lowPass(train_buffer[i]);
-                mix_buffer[i]+=train_data.filter*current_env.direct_gain;
+                mix_buffer[i]+=train_data.filter*current_env.gain;
                 for(int j=0;j<4;j++){
                     int tail_ptr=head_ptr+i+RemasteredConst.send_delays[j];
                     if(tail_ptr>=tail_size) tail_ptr-=tail_size;
