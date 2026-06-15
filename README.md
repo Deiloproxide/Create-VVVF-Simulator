@@ -7,7 +7,8 @@
 - 通过服务器下发配置，保证远程和跨界速度的连续性
 ## 运行
 ### 预构建包
-本项目目前尚未配置任何预构建的模组包
+
+已发布到 [modrinth](https://modrinth.com/mod/create_vvvf_simulator)
 ### 从源码编译
 1. 安装 Java 版本21及以上
 2. Git 拉取仓库

@@ -1,29 +1,22 @@
 plugins{
     id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.141'
     id 'maven-publish'
     id 'idea'
-    id 'net.neoforged.moddev' version '2.0.141'
 }
 version=mod_version
 group=mod_group_id
+base{archivesName=mod_id}
 repositories{
-    mavenLocal()
     maven{url="https://maven.createmod.net"}
     maven{url="https://maven.ithundxr.dev/snapshots"}
     maven{url="https://maven.maxhenkel.de/repository/public"}
+    maven{url="https://maven.isxander.dev/releases"}
+    maven{url="https://maven.architectury.dev"}
     maven{url="https://api.modrinth.com/maven"}
-}
-base{
-    archivesName=mod_id
+    maven{url="https://thedarkcolour.github.io/KotlinForForge"}
 }
 java.toolchain.languageVersion=JavaLanguageVersion.of(21)
-configurations{
-    libraries
-    implementation.extendsFrom libraries
-}
-configurations.matching{it.name=="additionalRuntimeClasspath"}.configureEach{
-    extendsFrom configurations.libraries
-}
 neoForge{
     version=project.neo_version
     runs{
@@ -36,26 +29,15 @@ neoForge{
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces',project.mod_id
         }
-        gameTestServer{
-            type="gameTestServer"
-            systemProperty 'neoforge.enabledGameTestNamespaces',project.mod_id
-        }
-        data{
-            data()
-            programArguments.addAll '--mod',project.mod_id,'--all','--output',file('src/generated/resources/').getAbsolutePath(),'--existing',file('src/main/resources/').getAbsolutePath()
-        }
-        configureEach{
-            systemProperty 'forge.logging.markers','REGISTRIES'
-            logLevel=org.slf4j.event.Level.DEBUG
-        }
     }
     mods{
-        "${mod_id}"{
-            sourceSet(sourceSets.main)
-        }
+        "${mod_id}"{sourceSet sourceSets.main}
     }
 }
-sourceSets.main.resources{srcDir 'src/generated/resources'}
+configurations{
+    implementation.extendsFrom jarJar
+    additionalRuntimeClasspath.extendsFrom jarJar
+}
 dependencies{
     implementation("com.simibubi.create:create-${minecraft_version}:${create_version}:slim"){
         transitive=false
@@ -64,11 +46,12 @@ dependencies{
     compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}")
     runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
     implementation("com.tterrag.registrate:Registrate:${registrate_version}")
-    compileOnly("maven.modrinth:sound-physics-remastered:neoforge-${minecraft_version}-${spr_version}")
+    //compileOnly("maven.modrinth:sound-physics-remastered:neoforge-${minecraft_version}-${spr_version}")
     //runtimeOnly("maven.modrinth:sound-physics-remastered:neoforge-${minecraft_version}-${spr_version}")
-    compileOnly("maven.modrinth:sound-physics-perfected:${spp_version}")
-    runtimeOnly("maven.modrinth:sound-physics-perfected:${spp_version}")
-    libraries("com.github.wendykierp:JTransforms:${jtransform_version}")
+    compileOnly("maven.modrinth:sound-physics-perfected:${spp_version}-neoforge")
+    runtimeOnly("maven.modrinth:sound-physics-perfected:${spp_version}-neoforge")
+    runtimeOnly("dev.isxander:yet-another-config-lib:${yacl_version}+${minecraft_version}-neoforge")
+    runtimeOnly("dev.architectury:architectury-neoforge:${architectury_version}")
     jarJar("com.github.wendykierp:JTransforms:${jtransform_version}"){
         version{
             strictly "[${jtransform_version},3.2)"
@@ -104,14 +87,10 @@ sourceSets.main.resources.srcDir generateModMetadata
 neoForge.ideSyncTask generateModMetadata
 publishing{
     publications{
-        register('mavenJava',MavenPublication){
-            from components.java
-        }
+        register('mavenJava',MavenPublication){from components.java}
     }
     repositories{
-        maven{
-            url "file://${project.projectDir}/repo"
-        }
+        maven{url "file://${project.projectDir}/repo"}
     }
 }
 idea{

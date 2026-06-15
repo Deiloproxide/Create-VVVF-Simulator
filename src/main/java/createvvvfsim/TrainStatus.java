@@ -128,7 +128,7 @@ public class TrainStatus{
                 CarriageContraptionEntity entity=dce.entity.get();
                 if(entity==null) continue;
                 if(entity.isRemoved()) continue;
-                envs.add(handler.getEnv(entity.position(),player.position(),level));
+                envs.add(handler.getEnv(level,player,entity.position()));
             }
             train_data.target_env=EnvData.avg(envs);
         }

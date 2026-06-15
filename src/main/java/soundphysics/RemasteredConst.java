@@ -1,6 +1,6 @@
 package soundphysics;
 import createvvvfsim.Configs;
-import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 public class RemasteredConst{
     public static final int[] send_delays={
             (int)(Configs.sample_rate*0.0297),
@@ -21,23 +21,19 @@ public class RemasteredConst{
     public static final int ray_bounces;
     static{
         try{
-            Class<?> sound_physics_mod=Class.forName("com.sonicether.soundphysics.SoundPhysicsMod");
-            Object config=sound_physics_mod.getField("CONFIG").get(null);
-            max_process_distance=((Number)getValue(config,"maxSoundProcessingDistance")).doubleValue();
-            block_absorption=((Number)getValue(config,"blockAbsorption")).floatValue();
-            decrease_distance=((Number)getValue(config,"reverbAttenuationDistance")).floatValue();
-            reverb_distance=((Number)getValue(config,"reverbDistance")).floatValue();
-            ray_count=((Number)getValue(config,"environmentEvaluationRayCount")).intValue();
-            ray_bounces=((Number)getValue(config,"environmentEvaluationRayBounces")).intValue();
+            Instance sound_physics_mod=new Instance("com.sonicether.soundphysics.SoundPhysicsMod");
+            Method method=sound_physics_mod.getMethod("CONFIG");
+            Instance config=Instance.invokeStatic(method);
+            max_process_distance=config.get(Double.class,"maxSoundProcessingDistance");
+            block_absorption=config.get(Float.class,"blockAbsorption");
+            decrease_distance=config.get(Float.class,"reverbAttenuationDistance");
+            reverb_distance=config.get(Float.class,"reverbDistance");
+            ray_count=config.get(Integer.class,"environmentEvaluationRayCount");
+            ray_bounces=config.get(Integer.class,"environmentEvaluationRayBounces");
             d_rays=1f/(ray_count*ray_bounces);
         }
         catch(Exception e){
             throw new RuntimeException(e);
         }
-    }
-    private static Object getValue(Object config,String field_name) throws ReflectiveOperationException{
-        Field field=config.getClass().getField(field_name);
-        Object entry=field.get(config);
-        return entry.getClass().getMethod("get").invoke(entry);
     }
 }

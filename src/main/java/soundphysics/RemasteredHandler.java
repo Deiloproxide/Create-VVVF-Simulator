@@ -3,7 +3,6 @@ import createvvvfsim.Configs;
 import createvvvfsim.EnvData;
 import createvvvfsim.TrainData;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -11,6 +10,7 @@ import mixin.ISPRAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -23,10 +23,7 @@ public class RemasteredHandler extends Handler{
     private static final float angle=(float)(Math.PI*(Math.sqrt(5f)+1f));
     private static ResourceLocation sound_id;
     private static Constructor<?> constructor;
-    private static Method add_direct;
-    private static Method add_shared;
-    private static Method get_shared;
-    private static Method ray_cast;
+    private static Method add_direct,add_shared,get_shared,ray_cast;
     private static int head_ptr=0;
     private static final int tail_size=buffer_size*64;
     private static final double[] train_buffer=new double[buffer_size];
@@ -37,42 +34,40 @@ public class RemasteredHandler extends Handler{
         if(!ModList.get().isLoaded("sound_physics_remastered")) return false;
         try{
             sound_id=ResourceLocation.fromNamespaceAndPath(Configs.mod_id,Configs.spr_sound_name);
-            Class<?> reflected_audio=Class.forName("com.sonicether.soundphysics.ReflectedAudio");
+            Instance reflected_audio=new Instance("com.sonicether.soundphysics.ReflectedAudio");
             constructor=reflected_audio.getConstructor(double.class,ResourceLocation.class);
             add_direct=reflected_audio.getMethod("addDirectAirspace",Vec3.class);
             add_shared=reflected_audio.getMethod("addSharedAirspace",Vec3.class,double.class);
             get_shared=reflected_audio.getMethod("getSharedAirspaces");
-            Class<?> raycast_utils=Class.forName("com.sonicether.soundphysics.utils.RaycastUtils");
-            ray_cast=raycast_utils.getMethod("rayCast",BlockGetter.class,Vec3.class,Vec3.class,BlockPos.class);
+            Instance raycast_utils=new Instance("com.sonicether.soundphysics.utils.RaycastUtils");
+            ray_cast=raycast_utils.getMethod(
+                    "rayCast",BlockGetter.class,Vec3.class,Vec3.class,BlockPos.class);
         }
         catch(Throwable ignored){
             return false;
         }
         return true;
     }
-    private static Object invoke(Method method,Object instance,Object... args)
-            throws InvocationTargetException,IllegalAccessException{
-        return method.invoke(instance,args);
-    }
     @Override
-    public EnvData getEnv(Vec3 train_pos,Vec3 player_pos,Level level){
+    public EnvData getEnv(Level level,Player player,Vec3 train_pos){
         EnvData env_data=new EnvData();
+        Vec3 player_pos=player.position();
         double distance=train_pos.distanceTo(player_pos);
         if(distance>RemasteredConst.max_process_distance) return env_data;
         try{
             double occlusion=ISPRAccessor.calculateOcclusion(train_pos,player_pos,SoundSource.NEUTRAL,sound_id);
-            Object audio_direction=constructor.newInstance(occlusion,sound_id);
+            Instance audio_direction=new Instance(constructor,occlusion,sound_id);
             Vec3 airspace=ISPRAccessor.getSharedAirspace(train_pos,player_pos);
             float[] reflect_ratio=new float[RemasteredConst.ray_bounces];
-            if(airspace!=null) invoke(add_direct,audio_direction,airspace);
+            if(airspace!=null) audio_direction.invoke(add_direct,airspace);
             float[] send_gains=new float[4],send_cutoffs=new float[4];
             for(int i=0;i<RemasteredConst.ray_count;i++){
                 float latitude=(float)Math.asin(2f*i/RemasteredConst.ray_count-1f),longitude=angle*i;
                 Vec3 ray_dir=new Vec3(Math.cos(latitude)*Math.cos(longitude),
                         Math.cos(latitude)*Math.sin(longitude),Math.sin(latitude));
                 Vec3 ray_end=train_pos.add(ray_dir.scale(far_distance));
-                BlockHitResult ray_hit=(BlockHitResult)invoke(
-                        ray_cast,null,level,train_pos,ray_end,BlockPos.containing(train_pos));
+                BlockHitResult ray_hit=Instance.invokeStatic(BlockHitResult.class,
+                        ray_cast,train_pos,ray_end,BlockPos.containing(train_pos));
                 if(ray_hit.getType()!=HitResult.Type.BLOCK) continue;
                 double total_ray_distance=(float)train_pos.distanceTo(ray_hit.getLocation());
                 BlockPos last_hit_block=ray_hit.getBlockPos();
@@ -81,13 +76,13 @@ public class RemasteredHandler extends Handler{
                 Vec3 last_hit_normal=new Vec3(ray_hit.getDirection().step());
                 Vec3 first_shared_airspace=ISPRAccessor.getSharedAirspace(ray_hit,player_pos);
                 if(first_shared_airspace!=null)
-                    invoke(add_shared,audio_direction,first_shared_airspace,total_ray_distance);
+                    audio_direction.invoke(add_shared,first_shared_airspace,total_ray_distance);
                 for(int j=0;j<RemasteredConst.ray_bounces;j++){
                     Vec3 new_ray_dir=ISPRAccessor.reflect(last_ray_dir,last_hit_normal);
                     Vec3 new_ray_start=last_hit_pos;
                     Vec3 new_ray_end=new_ray_start.add(new_ray_dir.scale(far_distance));
-                    BlockHitResult new_ray_hit=(BlockHitResult)invoke(
-                            ray_cast,null,level,new_ray_start,new_ray_end,last_hit_block);
+                    BlockHitResult new_ray_hit=Instance.invokeStatic(BlockHitResult.class,
+                            ray_cast,level,new_ray_start,new_ray_end,last_hit_block);
                     float block_reflectivity=ISPRAccessor.getBlockReflectivity(last_hit_block);
                     float energy=0.25f*(block_reflectivity*0.75f+0.25f);
                     if(new_ray_hit.getType()==HitResult.Type.MISS)
@@ -103,7 +98,7 @@ public class RemasteredHandler extends Handler{
                         last_hit_block=new_ray_hit.getBlockPos();
                         Vec3 shared_airspace=ISPRAccessor.getSharedAirspace(new_ray_hit,player_pos);
                         if(shared_airspace!=null)
-                            invoke(add_shared,audio_direction,shared_airspace,total_ray_distance);
+                            audio_direction.invoke(add_shared,shared_airspace,total_ray_distance);
                     }
                     if(total_ray_distance>RemasteredConst.decrease_distance){
                         float reflection_delay=(float)Math.max(total_ray_distance,0f)*0.12f*block_reflectivity;
@@ -117,7 +112,7 @@ public class RemasteredHandler extends Handler{
                 }
             }
             for(int i=0;i<RemasteredConst.ray_bounces;i++) reflect_ratio[i]/=RemasteredConst.ray_count;
-            float shared_space=(Integer)invoke(get_shared,audio_direction)*64f*RemasteredConst.d_rays;
+            float shared_space=audio_direction.invoke(Integer.class,get_shared)*64f*RemasteredConst.d_rays;
             float avg_space=0f,direct_cutoff=(float)Math.exp(-occlusion*RemasteredConst.block_absorption*3f);
             float send_gain_mul=1f-Math.min((float)(distance/(far_distance*RemasteredConst.reverb_distance)),1f);
             float[] factor={20f,15f,10f,10f},gain_fac={
@@ -141,9 +136,7 @@ public class RemasteredHandler extends Handler{
             env_data.occlusion=occlusion;
             env_data.shared_space=shared_space;
         }
-        catch(Throwable e){
-            System.out.println(e.getMessage());
-        }
+        catch(Throwable ignored){}
         return env_data;
     }
     @Override
