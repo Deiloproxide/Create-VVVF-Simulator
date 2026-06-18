@@ -12,11 +12,15 @@ import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.ClientPauseChangeEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import vvvfsimulator.vvvf.modulation.CustomPwm;
 @EventBusSubscriber(modid=Configs.mod_id,value=Dist.CLIENT)
 public class ClientEvents{
-    private static final Minecraft mc=Configs.mc;
+    private static final Minecraft mc=Minecraft.getInstance();
     private static final int eval_period=Configs.eval_period;
     private static int eval_current=eval_period;
+    static{
+        CustomPwm.CustomPwmPresets.preload();
+    }
     @SubscribeEvent
     public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event){
         SoundEngine.setAmp(mc.options.getSoundSourceVolume(SoundSource.MASTER));

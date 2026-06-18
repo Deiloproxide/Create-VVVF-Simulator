@@ -87,8 +87,9 @@ public class PerfectedHandler extends Handler{
         catch(Throwable ignored){}
         return env_data;
     }
+    /*
+    TODO
     @Override
-    public void handle(double[] mix_buffer,List<TrainData> train_datas){
-        //TODO
-    }
+    public void handle(double[] mix_buffer,List<TrainData> train_datas){}
+    */
 }

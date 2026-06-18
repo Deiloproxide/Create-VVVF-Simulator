@@ -1,26 +1,13 @@
 package createvvvfsim;
-import javax.sound.sampled.AudioFormat;
-import net.minecraft.client.Minecraft;
-import soundphysics.Handler;
-import soundphysics.PerfectedHandler;
-import soundphysics.RemasteredHandler;
 public class Configs{
     //register
     public static final String mod_id="create_vvvf_simulator";
     public static final String sync_model_name="train_sync";
     public static final String spr_sound_name="spr_mix";
     public static final String version="1.0.0";
-    public static final Minecraft mc=Minecraft.getInstance();
     public static final int mixin_priority=1027;
     public static final int sync_period=3;
     public static final int eval_period=3;
-    //sound physics handler
-    public static final Handler handler;
-    static{
-        if(RemasteredHandler.register()) handler=new RemasteredHandler();
-        else if(PerfectedHandler.register()) handler=new PerfectedHandler();
-        else handler=new Handler();
-    }
     //command
     public static final String command_vvvf="vvvf";
     public static final String command_reload="reload";
@@ -31,7 +18,6 @@ public class Configs{
     //audio
     public static final int sample_rate=44100;
     public static final int buffer_size=1<<12;
-    public static final AudioFormat format=new AudioFormat(sample_rate,16,1,true,false);
     //main amp
     public static final double main_amp=1.5;
     //train start

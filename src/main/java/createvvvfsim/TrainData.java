@@ -3,7 +3,12 @@ import com.simibubi.create.content.trains.entity.Train;
 import genengine.BaseSoundGen;
 import genengine.VVVFSoundGen;
 import genengine.WindSoundGen;
+import net.minecraft.world.phys.Vec3;
+import soundphysics.Handler;
+import soundphysics.PerfectedHandler;
+import soundphysics.RemasteredHandler;
 public class TrainData{
+    public static final Handler handler;
     public final Train train;
     public final BaseSoundGen base_gen=new BaseSoundGen();
     public final VVVFSoundGen vvvf_gen=new VVVFSoundGen();
@@ -12,9 +17,17 @@ public class TrainData{
     public volatile EnvData target_env=new EnvData();
     public final EnvData current_env=new EnvData();
     public final EnvData env_step=new EnvData();
-    public boolean is_reloaded=false,is_move=false,is_last_move=false;
+    public boolean use_server=false,server_reloaded=false;
+    public Vec3 now_pos,last_pos;
+    public Double raw_speed=null,last_raw_speed=null;
+    public boolean is_move=false,is_last_move=false;
     public double filter=0.0;
     public double[] filters=new double[]{0.0,0.0,0.0,0.0};
+    static{
+        if(RemasteredHandler.register()) handler=new RemasteredHandler();
+        else if(PerfectedHandler.register()) handler=new PerfectedHandler();
+        else handler=new Handler();
+    }
     public TrainData(Train train){
         this.train=train;
     }

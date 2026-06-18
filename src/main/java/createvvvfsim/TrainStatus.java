@@ -10,7 +10,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import soundphysics.Handler;
 public class TrainStatus{
     private static final double near_distance=Configs.near_distance;
     private static final double far_distance=Configs.far_distance;
@@ -18,7 +17,6 @@ public class TrainStatus{
     private static final double gas_amp=Configs.gas_amp;
     private static final double switch_amp=Configs.switch_amp;
     private static final int eval_period=Configs.eval_period;
-    private static final Handler handler=Configs.handler;
     public static final Object speed_lock=new Object(),train_lock=new Object();
     public static final Map<UUID,Double> cached_speeds=new HashMap<>();
     private static final List<TrainData> all_trains=new ArrayList<>();
@@ -59,14 +57,17 @@ public class TrainStatus{
     public static void forceReload(){
         List<TrainData> train_datas=getTrainData();
         for(TrainData train_data:train_datas){
-            Double speed;
-            synchronized(speed_lock){
-                speed=cached_speeds.get(train_data.train.id);
+            if(!train_data.use_server)
+                synchronized(speed_lock){
+                    if(cached_speeds.containsKey(train_data.train.id)) train_data.use_server=true;
+                }
+            if(train_data.use_server){
+                synchronized(speed_lock){
+                    double speed=cached_speeds.get(train_data.train.id);
+                    train_data.f_smoother.reloadF(speed);
+                }
             }
-            if(speed!=null){
-                train_data.f_smoother.reloadF(speed);
-                train_data.is_reloaded=true;
-            }
+            else if(train_data.raw_speed!=null) train_data.f_smoother.reloadF(train_data.raw_speed);
         }
     }
     public static void tick(Level level,Player player){
@@ -78,21 +79,8 @@ public class TrainStatus{
         List<TrainData> train_datas=getTrainData();
         for(TrainData train_data:train_datas){
             double near_factor=0.0,far_factor=0.0;
-            Double speed;
-            synchronized(speed_lock){
-                speed=cached_speeds.get(train_data.train.id);
-            }
-            if(!train_data.is_reloaded){
-                if(speed==null) continue;
-                else{
-                    train_data.f_smoother.reloadF(speed);
-                    train_data.is_reloaded=true;
-                }
-            }
-            if(train_data.train.derailed){
-                speed=0.0;
-                train_data.f_smoother.reloadF(speed);
-            }
+            Vec3 avg_pos=Vec3.ZERO;
+            int carriage_count=0;
             for(Carriage carriage:train_data.train.carriages){
                 DimensionalCarriageEntity dce=carriage.getDimensionalIfPresent(level.dimension());
                 if(dce==null) continue;
@@ -100,9 +88,36 @@ public class TrainStatus{
                 if(entity==null) continue;
                 if(entity.isRemoved()) continue;
                 Vec3 train_pos=entity.position();
+                avg_pos=avg_pos.add(train_pos);
+                carriage_count++;
                 double distance=train_pos.distanceTo(player_pos);
                 near_factor+=Math.max(0.0,1.0-distance/near_distance);
                 far_factor+=Math.max(0.0,1.0-distance/far_distance);
+            }
+            if(!train_data.use_server)
+                synchronized(speed_lock){
+                    if(cached_speeds.containsKey(train_data.train.id)) train_data.use_server=true;
+                }
+            train_data.now_pos=carriage_count==0?null:avg_pos.scale(1.0/carriage_count);
+            if(train_data.now_pos!=null && train_data.last_pos!=null)
+                train_data.raw_speed=train_data.last_pos.distanceTo(train_data.now_pos)*20.0;
+            else train_data.raw_speed=null;
+            double speed;
+            if(train_data.use_server){
+                synchronized(speed_lock){
+                    speed=cached_speeds.get(train_data.train.id);
+                    if(!train_data.server_reloaded){
+                        train_data.f_smoother.reloadF(speed);
+                        train_data.server_reloaded=true;
+                    }
+                }
+            }
+            else{
+                speed=train_data.raw_speed==null?0.0:train_data.raw_speed;
+                if(train_data.raw_speed==null && train_data.last_raw_speed!=null)
+                    train_data.f_smoother.reloadF(0.0);
+                if(train_data.raw_speed!=null && train_data.last_raw_speed==null)
+                    train_data.f_smoother.reloadF(speed);
             }
             train_data.is_move=speed>1e-2;
             if(train_data.is_move && !train_data.is_last_move && near_factor>1e-2){
@@ -112,6 +127,8 @@ public class TrainStatus{
                         (float)(main_amp*switch_amp*near_factor),2f);
             }
             train_data.set(speed,near_factor,far_factor);
+            train_data.last_pos=train_data.now_pos;
+            train_data.last_raw_speed=train_data.raw_speed;
             train_data.is_last_move=train_data.is_move;
         }
     }
@@ -128,7 +145,7 @@ public class TrainStatus{
                 CarriageContraptionEntity entity=dce.entity.get();
                 if(entity==null) continue;
                 if(entity.isRemoved()) continue;
-                envs.add(handler.getEnv(level,player,entity.position()));
+                envs.add(TrainData.handler.getEnv(level,player,entity.position()));
             }
             train_data.target_env=EnvData.avg(envs);
         }

@@ -8,14 +8,13 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import soundphysics.Handler;
 public class SoundEngine{
+    private static final int sample_rate=Configs.sample_rate;
     private static final int buffer_size=Configs.buffer_size;
-    private static final AudioFormat format=Configs.format;
+    private static final AudioFormat format=new AudioFormat(sample_rate,16,1,true,false);
     private static final double[] mix_buffer=new double[buffer_size];
     private static final byte[] out_buffer=new byte[buffer_size*2];
     private static final Thread thread=new Thread(SoundEngine::mixLoop);
-    private static final Handler handler=Configs.handler;
     private static final double main_amp=Configs.main_amp;
     private static volatile double settings_amp=0.0;
     private static double current_amp=0.0;
@@ -37,7 +36,7 @@ public class SoundEngine{
         while(true){
             Arrays.fill(mix_buffer,0.0);
             List<TrainData> train_datas=TrainStatus.getTrainData();
-            handler.handle(mix_buffer,train_datas);
+            TrainData.handler.handle(mix_buffer,train_datas);
             double amp_step=(settings_amp*main_amp-current_amp)/buffer_size;
             for(int i=0;i<buffer_size;i++){
                 current_amp+=amp_step;
