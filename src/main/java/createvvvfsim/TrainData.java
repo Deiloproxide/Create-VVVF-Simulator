@@ -3,7 +3,6 @@ import com.simibubi.create.content.trains.entity.Train;
 import genengine.BaseSoundGen;
 import genengine.VVVFSoundGen;
 import genengine.WindSoundGen;
-import net.minecraft.world.phys.Vec3;
 import soundphysics.Handler;
 import soundphysics.PerfectedHandler;
 import soundphysics.RemasteredHandler;
@@ -18,9 +17,8 @@ public class TrainData{
     public final EnvData current_env=new EnvData();
     public final EnvData env_step=new EnvData();
     public boolean use_server=false,server_reloaded=false;
-    public Vec3 now_pos,last_pos;
-    public Double raw_speed=null,last_raw_speed=null;
-    public boolean is_move=false,is_last_move=false;
+    public boolean is_last_valid=false,is_last_move=false;
+    public int reload_timer=0;
     public double filter=0.0;
     public double[] filters=new double[]{0.0,0.0,0.0,0.0};
     static{
@@ -31,13 +29,15 @@ public class TrainData{
     public TrainData(Train train){
         this.train=train;
     }
-    public void set(double speed,double near_factor,double far_factor){
+    public void set(double speed,double near_factor,double far_factor,boolean valid,boolean move){
         double smoothed=f_smoother.smoothF(speed);
         base_gen.setAmp(near_factor);
         vvvf_gen.setAmp(near_factor);
         wind_gen.setAmp(far_factor);
         vvvf_gen.setF(smoothed);
         wind_gen.setF(smoothed);
+        is_last_valid=valid;
+        is_last_move=move;
     }
     public void setStep(int buffer_size){
         EnvData from=current_env,to=target_env;

@@ -21,7 +21,7 @@ public class FSmoother{
         return Math.clamp(last_speed/max_speed,0.0,1.0);
     }
     public void reloadF(double speed){
-        Arrays.fill(speed_samples,speed);
+        Arrays.fill(speed_samples,Math.min(speed,max_speed));
         last_speed=speed;
     }
 }
