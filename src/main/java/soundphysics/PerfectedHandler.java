@@ -3,21 +3,23 @@ import createvvvfsim.Configs;
 import createvvvfsim.EnvData;
 import createvvvfsim.TrainData;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
 public class PerfectedHandler extends Handler{
+    private static final int buffer_size=Configs.buffer_size;
     private static final double far_distance=Configs.far_distance;
-    private static Method count_blocks;
-    private static Method reverb_strength;
-    private static Method reverb_denom;
-    private static Method outdoor_leak;
-    private static Method leak_denom;
-    private static Method weighted_strength;
-    private static Method early_reflection;
-    private static Method enhanced_reverb;
+    private static Method count_blocks,reverb_strength,reverb_denom,outdoor_leak;
+    private static Method leak_denom,weighted_strength,early_reflection,enhanced_reverb;
+    private static int head_ptr=0;
+    private static final int tail_size=buffer_size*64;
+    private static final double[] train_buffer=new double[buffer_size];
+    private static final double[][] tail_buffers=new double[4][tail_size];
+    private static final double[] filters=new double[]{0.0,0.0,0.0,0.0};
+    private static double filter=0.0;
     public static boolean register(){
         if(!ModList.get().isLoaded("sound_physics_perfected")) return false;
         try{
@@ -87,9 +89,44 @@ public class PerfectedHandler extends Handler{
         catch(Throwable ignored){}
         return env_data;
     }
-    /*
-    TODO
     @Override
-    public void handle(double[] mix_buffer,List<TrainData> train_datas){}
-    */
+    public void handle(double[] mix_buffer,List<TrainData> train_datas){
+        for(TrainData train_data:train_datas){
+            Arrays.fill(train_buffer,0.0);
+            train_data.base_gen.mixTo(train_buffer);
+            train_data.vvvf_gen.mixTo(train_buffer);
+            train_data.wind_gen.mixTo(train_buffer);
+            train_data.setStep(buffer_size);
+            EnvData current_env=train_data.current_env;
+            for(int i=0;i<buffer_size;i++){
+                train_data.addStep();
+                train_data.lowPass(train_buffer[i]);
+                mix_buffer[i]+=train_data.filter*current_env.gain;
+                for(int j=0;j<4;j++){
+                    int tail_ptr=head_ptr+i+PerfectedConst.send_delays[j];
+                    if(tail_ptr>=tail_size) tail_ptr-=tail_size;
+                    tail_buffers[j][tail_ptr]+=train_data.filters[j];
+                }
+            }
+        }
+        for(int i=0;i<buffer_size;i++){
+            double wet=0.0;
+            for(int j=0;j<4;j++){
+                double current=tail_buffers[j][head_ptr];
+                tail_buffers[j][head_ptr]=0.0;
+                filters[j]+=(current-filters[j])*0.78;
+                wet+=filters[j];
+            }
+            double feedback_mix=wet*0.18;
+            for(int j=0;j<4;j++){
+                int tail_ptr=head_ptr+PerfectedConst.send_delays[j];
+                if(tail_ptr>=tail_size) tail_ptr-=tail_size;
+                tail_buffers[j][tail_ptr]+=(0.35*feedback_mix+0.937*filters[j])*PerfectedConst.send_feedbacks[j];
+            }
+            filter+=(wet-filter)*0.88;
+            mix_buffer[i]+=filter;
+            head_ptr++;
+            if(head_ptr==tail_size) head_ptr=0;
+        }
+    }
 }

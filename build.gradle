@@ -46,10 +46,10 @@ dependencies{
     compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}")
     runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
     implementation("com.tterrag.registrate:Registrate:${registrate_version}")
-    //compileOnly("maven.modrinth:sound-physics-remastered:neoforge-${minecraft_version}-${spr_version}")
+    compileOnly("maven.modrinth:sound-physics-remastered:neoforge-${minecraft_version}-${spr_version}")
     //runtimeOnly("maven.modrinth:sound-physics-remastered:neoforge-${minecraft_version}-${spr_version}")
     compileOnly("maven.modrinth:sound-physics-perfected:${spp_version}-neoforge")
-    runtimeOnly("maven.modrinth:sound-physics-perfected:${spp_version}-neoforge")
+    //runtimeOnly("maven.modrinth:sound-physics-perfected:${spp_version}-neoforge")
     runtimeOnly("dev.isxander:yet-another-config-lib:${yacl_version}+${minecraft_version}-neoforge")
     runtimeOnly("dev.architectury:architectury-neoforge:${architectury_version}")
     jarJar("com.github.wendykierp:JTransforms:${jtransform_version}"){

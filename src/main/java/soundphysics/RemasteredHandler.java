@@ -28,8 +28,8 @@ public class RemasteredHandler extends Handler{
     private static final int tail_size=buffer_size*64;
     private static final double[] train_buffer=new double[buffer_size];
     private static final double[][] tail_buffers=new double[4][tail_size];
+    private static final double[] filters={0.0,0.0,0.0,0.0};
     private static double filter=0.0;
-    private static double[] filters=new double[]{0.0,0.0,0.0,0.0};
     public static boolean register(){
         if(!ModList.get().isLoaded("sound_physics_remastered")) return false;
         try{
@@ -67,7 +67,7 @@ public class RemasteredHandler extends Handler{
                         Math.cos(latitude)*Math.sin(longitude),Math.sin(latitude));
                 Vec3 ray_end=train_pos.add(ray_dir.scale(far_distance));
                 BlockHitResult ray_hit=Instance.invokeStatic(BlockHitResult.class,
-                        ray_cast,train_pos,ray_end,BlockPos.containing(train_pos));
+                        ray_cast,level,train_pos,ray_end,BlockPos.containing(train_pos));
                 if(ray_hit.getType()!=HitResult.Type.BLOCK) continue;
                 double total_ray_distance=(float)train_pos.distanceTo(ray_hit.getLocation());
                 BlockPos last_hit_block=ray_hit.getBlockPos();

@@ -1,6 +1,5 @@
 package soundphysics;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 public class Instance{
     public final Class<?> clazz;
@@ -38,14 +37,8 @@ public class Instance{
     public static Instance invokeStatic(Method method,Object... args) throws ReflectiveOperationException{
         return Instance.fromObject(method.invoke(null,args));
     }
-    public <T> T get(Class<T> type,Field field) throws ReflectiveOperationException{
-        return type.cast(field.get(object));
-    }
     public <T> T get(Class<T> type,String field_name) throws ReflectiveOperationException{
         return type.cast(clazz.getField(field_name).get(object));
-    }
-    public Instance get(Field field) throws ReflectiveOperationException{
-        return Instance.fromObject(field.get(object));
     }
     public Instance get(String field_name) throws ReflectiveOperationException{
         return Instance.fromObject(clazz.getField(field_name).get(object));

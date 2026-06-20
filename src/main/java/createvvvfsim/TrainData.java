@@ -20,7 +20,7 @@ public class TrainData{
     public boolean is_last_valid=false,is_last_move=false;
     public int reload_timer=0;
     public double filter=0.0;
-    public double[] filters=new double[]{0.0,0.0,0.0,0.0};
+    public double[] filters={0.0,0.0,0.0,0.0};
     static{
         if(RemasteredHandler.register()) handler=new RemasteredHandler();
         else if(PerfectedHandler.register()) handler=new PerfectedHandler();

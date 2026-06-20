@@ -1,15 +1,16 @@
 package createvvvfsim;
+import java.util.Arrays;
 import java.util.List;
 public class EnvData{
     public double gain=1.0,cutoff=1.0;
-    public double[] gains=new double[]{0.0,0.0,0.0,0.0},cutoffs=new double[]{1.0,1.0,1.0,1.0};
+    public double[] gains={0.0,0.0,0.0,0.0},cutoffs={1.0,1.0,1.0,1.0};
     public double occlusion=0.0;
     public double shared_space=0.0;
     public static EnvData avg(List<EnvData> envs){
         int length=envs.size();
         if(length==0) return new EnvData();
         double avg_gain=0.0,avg_cutoff=0.0,avg_occlusion=0.0,avg_shared_space=0.0;
-        double[] avg_gains=new double[]{0.0,0.0,0.0,0.0},avg_cutoffs=new double[]{0.0,0.0,0.0,0.0};
+        double[] avg_gains={0.0,0.0,0.0,0.0},avg_cutoffs={0.0,0.0,0.0,0.0};
         for(EnvData env:envs){
             avg_gain+=env.gain;
             avg_cutoff+=env.cutoff;

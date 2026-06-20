@@ -7,7 +7,7 @@ public class RemasteredConst{
             (int)(Configs.sample_rate*0.0411),
             (int)(Configs.sample_rate*0.0677),
             (int)(Configs.sample_rate*0.0973)};
-    public static final double[] send_feedbacks=new double[]{
+    public static final double[] send_feedbacks={
             Math.pow(10.0,-3.0*0.0297/0.08),
             Math.pow(10.0,-3.0*0.0411/0.25),
             Math.pow(10.0,-3.0*0.0677/0.58),
@@ -22,18 +22,23 @@ public class RemasteredConst{
     static{
         try{
             Instance sound_physics_mod=new Instance("com.sonicether.soundphysics.SoundPhysicsMod");
-            Method method=sound_physics_mod.getMethod("CONFIG");
-            Instance config=Instance.invokeStatic(method);
-            max_process_distance=config.get(Double.class,"maxSoundProcessingDistance");
-            block_absorption=config.get(Float.class,"blockAbsorption");
-            decrease_distance=config.get(Float.class,"reverbAttenuationDistance");
-            reverb_distance=config.get(Float.class,"reverbDistance");
-            ray_count=config.get(Integer.class,"environmentEvaluationRayCount");
-            ray_bounces=config.get(Integer.class,"environmentEvaluationRayBounces");
+            Instance config=sound_physics_mod.get("CONFIG");
+            max_process_distance=getConfig(Double.class,config,"maxSoundProcessingDistance");
+            block_absorption=getConfig(Float.class,config,"blockAbsorption");
+            decrease_distance=getConfig(Float.class,config,"reverbAttenuationDistance");
+            reverb_distance=getConfig(Float.class,config,"reverbDistance");
+            ray_count=getConfig(Integer.class,config,"environmentEvaluationRayCount");
+            ray_bounces=getConfig(Integer.class,config,"environmentEvaluationRayBounces");
             d_rays=1f/(ray_count*ray_bounces);
         }
         catch(Exception e){
             throw new RuntimeException(e);
         }
+    }
+    private static <T> T getConfig(Class<T> clazz,Instance config,String field_name)
+            throws ReflectiveOperationException{
+        Instance config_entry=config.get(field_name);
+        Method method_get=config_entry.getMethod("get");
+        return config_entry.invoke(clazz,method_get);
     }
 }
