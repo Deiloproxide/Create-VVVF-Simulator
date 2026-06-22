@@ -2,8 +2,8 @@ package createvvvfsim;
 public class Configs{
     //register
     public static final String mod_id="create_vvvf_simulator";
-    public static final String sync_model_name="train_sync";
-    public static final String spr_sound_name="spr_mix";
+    public static final String sync_name="train_sync";
+    public static final String sound_name="train_vvvf";
     public static final String version="1.0.0";
     public static final int mixin_priority=1027;
     public static final int sync_period=3;

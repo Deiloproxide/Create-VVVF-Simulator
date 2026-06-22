@@ -1,5 +1,4 @@
 package createvvvfsim;
-import java.util.Arrays;
 import java.util.List;
 public class EnvData{
     public double gain=1.0,cutoff=1.0;

@@ -8,7 +8,7 @@ displayName="${mod_name}"
 displayURL="https://deiloproxide.cn"
 logoFile="icon.png"
 authors="${mod_authors}"
-description='''${mod_description}'''
+description="""${mod_description}"""
 [[mixins]]
 config="${mod_id}.mixins.json"
 [[dependencies."${mod_id}"]]

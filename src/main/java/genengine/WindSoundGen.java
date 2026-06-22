@@ -57,15 +57,15 @@ public class WindSoundGen extends SoundGen{
         double norm_factor=main_cauchy_amp/peak;
         for(int i=0;i<table_size;i++) main_wind[i]*=norm_factor;
     }
-    private class PinkNoiseFilter{
+    private static class PinkNoiseFilter{
         private double state=0.0;
         public double process(double white){
             state=pink_r0*state+(1.0-pink_r0)*white;
             return state;
         }
     }
-    private class OnePoleLPF{
-        private double alpha=0.0;
+    private static class OnePoleLPF{
+        private double alpha;
         private double y=0.0;
         public OnePoleLPF(double cutoff){
             setCutoff(cutoff);
@@ -78,22 +78,21 @@ public class WindSoundGen extends SoundGen{
             return y;
         }
     }
-    private class OnePoleHPF{
-        private double alpha=0.0;
-        private double y=0.0;
+    private static class OnePoleHPF{
+        private final double alpha;
         private double prev_x=0.0;
         private double prev_y=0.0;
         public OnePoleHPF(double cutoff){
             alpha=Math.exp(-2.0*Math.PI*cutoff/sample_rate);
         }
         public double process(double x){
-            y=alpha*(prev_y+x-prev_x);
+            double y=alpha*(prev_y+x-prev_x);
             prev_x=x;
             prev_y=y;
             return y;
         }
     }
-    private class RandomWalk{
+    private static class RandomWalk{
         private static final double sigma=bg_shear_rate*Math.sqrt(sample_dt);
         private double value=0.0;
         public double step(){

@@ -11,7 +11,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 public class TrainStatus{
     private static final double near_distance=Configs.near_distance;
     private static final double far_distance=Configs.far_distance;
@@ -36,9 +35,9 @@ public class TrainStatus{
             cached_speeds.remove(id);
         }
     }
-    public static void getServerSpeed(TrainSyncModel model,IPayloadContext context){
+    public static void getServerSpeed(UUID id,double speed){
         synchronized(speed_lock){
-            cached_speeds.put(model.train_id(),model.speed());
+            cached_speeds.put(id,speed);
         }
     }
     public static void clearDataCache(){

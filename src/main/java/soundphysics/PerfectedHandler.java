@@ -8,7 +8,6 @@ import java.util.List;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.ModList;
 public class PerfectedHandler extends Handler{
     private static final int buffer_size=Configs.buffer_size;
     private static final double far_distance=Configs.far_distance;
@@ -21,7 +20,6 @@ public class PerfectedHandler extends Handler{
     private static final double[] filters=new double[]{0.0,0.0,0.0,0.0};
     private static double filter=0.0;
     public static boolean register(){
-        if(!ModList.get().isLoaded("sound_physics_perfected")) return false;
         try{
             Instance raycasting_helper=new Instance("com.redsmods.sound_physics_perfected.RaycastingHelper");
             count_blocks=raycasting_helper.getMethod(

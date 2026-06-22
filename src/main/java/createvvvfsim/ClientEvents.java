@@ -1,9 +1,11 @@
 package createvvvfsim;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import genengine.SoundEngine;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -12,6 +14,9 @@ import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.ClientPauseChangeEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
 @EventBusSubscriber(modid=Configs.mod_id,value=Dist.CLIENT)
 public class ClientEvents{
@@ -20,6 +25,17 @@ public class ClientEvents{
     private static int eval_current=eval_period;
     static{
         CustomPwm.CustomPwmPresets.preload();
+    }
+    @SubscribeEvent
+    public static void registerModel(RegisterPayloadHandlersEvent event){
+        PayloadRegistrar registrar=event.registrar(Configs.version).optional();
+        registrar.playToClient(TrainSyncModel.model_type,TrainSyncModel.stream_codec,ClientEvents::onGetSpeed);
+    }
+    @SubscribeEvent
+    public static void registerCommand(RegisterClientCommandsEvent event){
+        LiteralArgumentBuilder<CommandSourceStack> vvvf=Commands.literal(Configs.command_vvvf),
+                reload=Commands.literal(Configs.command_reload);
+        event.getDispatcher().register(vvvf.then(reload.executes(ClientEvents::onReload)));
     }
     @SubscribeEvent
     public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event){
@@ -33,11 +49,14 @@ public class ClientEvents{
     public static void onPauseChange(ClientPauseChangeEvent.Post event){
         SoundEngine.setAmp(event.isPaused()?0.0:mc.options.getSoundSourceVolume(SoundSource.MASTER));
     }
-    @SubscribeEvent
-    public static void registerCommands(RegisterClientCommandsEvent event){
-        LiteralArgumentBuilder<CommandSourceStack> vvvf=Commands.literal(Configs.command_vvvf),
-                reload=Commands.literal(Configs.command_reload);
-        event.getDispatcher().register(vvvf.then(reload.executes(CreateVVVFSim::reloadCommand)));
+    public static void onGetSpeed(TrainSyncModel model,IPayloadContext ignored){
+        TrainStatus.getServerSpeed(model.train_id(),model.speed());
+    }
+    public static int onReload(CommandContext<CommandSourceStack> context){
+        Component msg=Component.literal(Configs.command_return);
+        TrainStatus.forceReload();
+        context.getSource().sendSuccess(()->msg,false);
+        return 1;
     }
     @SubscribeEvent
     public static void tick(ClientTickEvent.Post event){
