@@ -42,7 +42,7 @@ public class CustomPwm{
         }
     }
     public int getPwm(double m,double x){
-        int index=Math.clamp((int)((m-minimumModulationIndex)/modulationIndexDivision),0,(int)blockCount-1);
+        int index=Math.min(Math.max((int)((m-minimumModulationIndex)/modulationIndexDivision),0),(int)blockCount-1);
         SwitchEntry[] alpha=new SwitchEntry[switchCount];
         byte startLevel=startLevelTable[index];
         System.arraycopy(switchAngleTable,index*switchCount,alpha,0,switchCount);

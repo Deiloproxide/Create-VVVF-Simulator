@@ -8,7 +8,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 public record TrainSyncModel(UUID train_id,double speed) implements CustomPacketPayload{
     public static final Type<TrainSyncModel> model_type=new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Configs.mod_id,Configs.sync_name));
+            ResourceLocation.tryBuild(Configs.mod_id,Configs.sync_name));
     public static final StreamCodec<RegistryFriendlyByteBuf,TrainSyncModel> stream_codec=StreamCodec.composite(
             UUIDUtil.STREAM_CODEC,TrainSyncModel::train_id,
             ByteBufCodecs.DOUBLE,TrainSyncModel::speed,

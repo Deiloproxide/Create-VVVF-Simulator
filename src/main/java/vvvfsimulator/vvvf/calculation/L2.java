@@ -28,7 +28,7 @@ public final class L2{
             double ampAbs=Math.abs(domain.electricalState.baseWaveAmplitude);
             int ampSign=domain.electricalState.baseWaveAmplitude<0?-1:1;
             double sineVal=-MyMath.Functions.triangle(x)+
-                    sign*(1-MyMath.Functions.arcSine(Math.clamp(ampAbs*MyMath.M_PI_4,0,1))*MyMath.M_2_PI);
+                    sign*(1-MyMath.Functions.arcSine(Math.min(Math.max(ampAbs*MyMath.M_PI_4,0),1))*MyMath.M_2_PI);
             return sineVal>0?-ampSign+1:ampSign+1;
         }
         if(pulseMode.pulseCount==3 && pulseMode.alternative==PulseAlternative.Alt1){

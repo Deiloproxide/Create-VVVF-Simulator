@@ -40,7 +40,7 @@ public class SoundEngine{
             double amp_step=(settings_amp*main_amp-current_amp)/buffer_size;
             for(int i=0;i<buffer_size;i++){
                 current_amp+=amp_step;
-                double clipped=Math.clamp(mix_buffer[i],-1.0,1.0)*current_amp;
+                double clipped=Math.min(Math.max(mix_buffer[i],-1.0),1.0)*current_amp;
                 short sample=(short)(clipped*Short.MAX_VALUE);
                 out_buffer[i*2]=(byte)(sample&0xFF);
                 out_buffer[i*2+1]=(byte)((sample>>8)&0xFF);

@@ -17,6 +17,6 @@ public abstract class AddTrain{
     boolean add;
     @Inject(method="handle",at=@At("RETURN"))
     private void handle(NetworkEvent.Context context,CallbackInfoReturnable<Boolean> cir){
-        if(add) context.enqueueWork(()->TrainStatus.addTrain(train));
+        if(add && train!=null) TrainStatus.addTrain(train);
     }
 }

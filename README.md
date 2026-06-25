@@ -13,6 +13,21 @@ Simulates VVVF on Minecraft Create Train
 - Config delivery from server ensure remote or cross-dimension speed continuity
 ## Dependencies
 [![create](icon/create.svg)](https://github.com/Creators-of-Create/Create)
+## Recommendations
+
+The following options are recommended
+```toml
+[trains]
+manualTrainSpeedModifier=1
+[trains.trainStats]
+trainTopSpeed=32
+trainTurningTopSpeed=28
+trainAcceleration=1
+[trains.poweredTrainStats]
+poweredTrainTopSpeed=32
+poweredTrainTurningTopSpeed=28
+poweredTrainAcceleration=1
+```
 ## Run
 ### Environments
 - Client necessary

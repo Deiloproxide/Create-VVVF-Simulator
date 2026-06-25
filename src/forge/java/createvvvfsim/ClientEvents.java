@@ -2,7 +2,6 @@ package createvvvfsim;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import genengine.SoundEngine;
-import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -14,7 +13,6 @@ import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.NetworkEvent;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
 @Mod.EventBusSubscriber(modid=Configs.mod_id,value=Dist.CLIENT)
 public class ClientEvents{
@@ -37,11 +35,6 @@ public class ClientEvents{
     @SubscribeEvent
     public static void onExit(ClientPlayerNetworkEvent.LoggingOut event){
         TrainStatus.clearDataCache();
-    }
-    public static void onGetSpeed(TrainSyncModel model,Supplier<NetworkEvent.Context> context){
-        NetworkEvent.Context ctx=context.get();
-        ctx.enqueueWork(()->TrainStatus.getServerSpeed(model.train_id(),model.speed()));
-        ctx.setPacketHandled(true);
     }
     public static int onReload(CommandContext<CommandSourceStack> context){
         Component msg=Component.literal(Configs.command_return);

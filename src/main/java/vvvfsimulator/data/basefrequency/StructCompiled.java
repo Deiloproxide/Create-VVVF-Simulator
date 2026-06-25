@@ -31,7 +31,7 @@ public class StructCompiled{
     }
     public double getEstimatedSteps(double sampleTime){
         if(points.isEmpty()) return 0;
-        return points.getLast().endTime/sampleTime;
+        return points.get(points.size()-1).endTime/sampleTime;
     }
     public static class Point{
         public double startTime;

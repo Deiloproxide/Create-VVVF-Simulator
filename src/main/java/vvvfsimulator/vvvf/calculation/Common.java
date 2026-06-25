@@ -153,7 +153,7 @@ public final class Common{
             harmonicWave+=wave*harmonicData.amplitude*(harmonicData.isAmplitudeProportional?amp:1);
         }
         double wave=baseWave+harmonicWave;
-        return Math.clamp(wave,-1,1);
+        return Math.min(Math.max(wave,-1),1);
     }
     private static double getBaseWave(double x,double amp,BaseWaveType baseWaveType){
         double getModifiedSine=Math.round(MyMath.Functions.sine(x)*2.0)/2.0;

@@ -62,8 +62,8 @@ public class TrainData{
     }
     public void lowPass(double sample){
         double[] gains=current_env.gains,cutoffs=current_env.cutoffs;
-        filter+=(sample-filter)*Math.clamp(current_env.cutoff,0.02,1.0);
+        filter+=(sample-filter)*Math.min(Math.max(current_env.cutoff,0.02),1.0);
         for(int i=0;i<4;i++)
-            filters[i]+=(sample*gains[i]-filters[i])*Math.clamp(cutoffs[i],0.02,1.0);
+            filters[i]+=(sample*gains[i]-filters[i])*Math.min(Math.max(cutoffs[i],0.02),1.0);
     }
 }

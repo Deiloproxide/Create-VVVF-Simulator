@@ -5,7 +5,7 @@ import vvvfsimulator.vvvf.model.Struct.Domain;
 public final class Analyze{
     private static int getPointAtNum(double time,StructCompiled compiled){
         if(compiled.points.isEmpty()) return -1;
-        if(time<compiled.points.getFirst().startTime || compiled.points.getLast().endTime<time)
+        if(time<compiled.points.get(0).startTime || compiled.points.get(compiled.points.size()-1).endTime<time)
             return -1;
         int left=0;
         int right=compiled.points.size()-1;

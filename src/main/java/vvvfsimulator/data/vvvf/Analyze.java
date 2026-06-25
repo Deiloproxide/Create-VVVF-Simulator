@@ -173,7 +173,7 @@ public final class Analyze{
                 List<TableValue.Parameter> table=new ArrayList<>(
                         solvePattern.asyncModulationDataEx.carrierWaveData.carrierFrequencyTable.table);
                 table.sort(Comparator.comparingDouble((TableValue.Parameter p)->p.controlFrequencyFrom).reversed());
-                TableValue.Parameter target=table.isEmpty()?null:table.getFirst();
+                TableValue.Parameter target=table.isEmpty()?null:table.get(0);
                 for(TableValue.Parameter p:table){
                     boolean flag1=p.freeRunStuckAtHere && domain.getBaseWaveFrequency()>=p.controlFrequencyFrom &&
                             domain.isFreeRun();

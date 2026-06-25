@@ -31,7 +31,7 @@ public class RemasteredHandler extends Handler{
     private static double filter=0.0;
     public static boolean register(){
         try{
-            sound_id=ResourceLocation.fromNamespaceAndPath(Configs.mod_id,Configs.sound_name);
+            sound_id=ResourceLocation.tryBuild(Configs.mod_id,Configs.sound_name);
             Instance reflected_audio=new Instance("com.sonicether.soundphysics.ReflectedAudio");
             constructor=reflected_audio.getConstructor(double.class,ResourceLocation.class);
             add_direct=reflected_audio.getMethod("addDirectAirspace",Vec3.class);
@@ -102,7 +102,7 @@ public class RemasteredHandler extends Handler{
                         float reflection_delay=(float)Math.max(total_ray_distance,0f)*0.12f*block_reflectivity;
                         for(int k=0;k<4;k++){
                             float value=k==3?reflection_delay-2f:1f-Math.abs(reflection_delay-k);
-                            float cross=Math.clamp(value,0f,1f),amp=k==0?6.4f:12.8f;
+                            float cross=Math.min(Math.max(value,0f),1f),amp=k==0?6.4f:12.8f;
                             send_gains[k]+=cross*energy*amp*RemasteredConst.d_rays;
                         }
                     }
@@ -118,11 +118,11 @@ public class RemasteredHandler extends Handler{
                     RemasteredConst.ray_bounces>2?(float)Math.pow(reflect_ratio[2],3.0):1f,
                     RemasteredConst.ray_bounces>3?(float)Math.pow(reflect_ratio[3],4.0):1f};
             for(int i=0;i<4;i++){
-                float space_weight=Math.clamp(shared_space/factor[i],0f,1f);
+                float space_weight=Math.min(Math.max(shared_space/factor[i],0f),1f);
                 avg_space+=space_weight;
                 send_cutoffs[i]=direct_cutoff*(1f-space_weight)+space_weight;
                 if(reflect_ratio.length>i) send_gains[i]*=gain_fac[i];
-                send_gains[i]=Math.clamp(i<2?send_gains[i]:(send_gains[i]*1.05f-0.05f),0f,1f);
+                send_gains[i]=Math.min(Math.max(i<2?send_gains[i]:(send_gains[i]*1.05f-0.05f),0f),1f);
                 send_gains[i]*=(float)Math.pow(send_cutoffs[i],0.1)*send_gain_mul;
                 env_data.gains[i]=send_gains[i];
                 env_data.cutoffs[i]=send_cutoffs[i];

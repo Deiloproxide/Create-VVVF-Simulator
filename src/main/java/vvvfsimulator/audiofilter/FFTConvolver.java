@@ -40,7 +40,7 @@ public class FFTConvolver{
             double[] re=new double[fftComplexSize];
             double[] im=new double[fftComplexSize];
             int remaining=irLen-i*this.blockSize;
-            int copySize=Math.clamp(remaining,0,this.blockSize);
+            int copySize=Math.min(Math.max(remaining,0),this.blockSize);
             Utilities.CopyAndPad(fftBuffer,ir,i*this.blockSize,copySize);
             fft.fft(fftBuffer,re,im);
             segmentsIRRe.add(re);
@@ -81,7 +81,7 @@ public class FFTConvolver{
             System.arraycopy(preMultipliedRe,0,convRe,0,fftComplexSize);
             System.arraycopy(preMultipliedIm,0,convIm,0,fftComplexSize);
             Utilities.ComplexMultiplyAccumulate(convRe,convIm,segmentsRe.get(current),segmentsIm.get(current),
-                    segmentsIRRe.getFirst(),segmentsIRIm.getFirst(),fftComplexSize);
+                    segmentsIRRe.get(0),segmentsIRIm.get(0),fftComplexSize);
             fft.ifft(fftBuffer,convRe,convIm);
             Utilities.Sum(output,outputOffset+processed,fftBuffer,
                     inputBufferPos,overlap,inputBufferPos,processing);

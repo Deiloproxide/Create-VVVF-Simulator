@@ -33,7 +33,7 @@ public final class Audio{
                     case Line->(value.u-value.v)/2.0;
                     case PhaseCurrent->(2.0*value.u-value.v-value.w)/4.0;
                 };
-                short pcm=(short)Math.clamp(sample*0.35*Short.MAX_VALUE,Short.MIN_VALUE,Short.MAX_VALUE);
+                short pcm=(short)Math.min(Math.max(sample*0.35*Short.MAX_VALUE,Short.MIN_VALUE),Short.MAX_VALUE);
                 out.write(pcm&0xFF);
                 out.write((pcm>>8)&0xFF);
                 sampleCount++;

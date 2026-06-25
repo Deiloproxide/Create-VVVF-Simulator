@@ -17,6 +17,6 @@ public abstract class RemoveTrain{
     boolean add;
     @Inject(method="handle",at=@At("RETURN"))
     private void handle(NetworkEvent.Context context,CallbackInfoReturnable<Boolean> cir){
-        if(!add) context.enqueueWork(()->TrainStatus.removeTrain(trainId));
+        if(!add) TrainStatus.removeTrain(trainId);
     }
 }
