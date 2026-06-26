@@ -15,7 +15,7 @@ Simulates VVVF on Minecraft Create Train
 [![create](icon/create.svg)](https://github.com/Creators-of-Create/Create)
 ## Recommendations
 
-The following options are recommended
+The following Create server train configs are recommended
 ```toml
 [trains]
 manualTrainSpeedModifier=1

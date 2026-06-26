@@ -16,19 +16,24 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import utils.Instance;
+import utils.Lowpass;
 public class RemasteredHandler extends Handler{
     private static final int buffer_size=Configs.buffer_size;
-    private static final double far_distance=Configs.far_distance;
+    private static final int tail_size=buffer_size*64;
     private static final float angle=(float)(Math.PI*(Math.sqrt(5f)+1f));
+    private static final double far_distance=Configs.far_distance;
+    private static final double[] train_buffer=new double[buffer_size];
+    private static final double[][] tail_buffers=new double[4][tail_size];
+    private static final Lowpass[] filters=new Lowpass[5];
     private static ResourceLocation sound_id;
     private static Constructor<?> constructor;
     private static Method add_direct,add_shared,get_shared,ray_cast;
     private static int head_ptr=0;
-    private static final int tail_size=buffer_size*64;
-    private static final double[] train_buffer=new double[buffer_size];
-    private static final double[][] tail_buffers=new double[4][tail_size];
-    private static final double[] filters={0.0,0.0,0.0,0.0};
-    private static double filter=0.0;
+    static{
+        for(int i=0;i<4;i++) filters[i]=new Lowpass(0.82);
+        filters[4]=new Lowpass(0.92);
+    }
     public static boolean register(){
         try{
             sound_id=ResourceLocation.tryBuild(Configs.mod_id,Configs.sound_name);
@@ -147,29 +152,27 @@ public class RemasteredHandler extends Handler{
             train_data.setStep(buffer_size);
             EnvData current_env=train_data.current_env;
             for(int i=0;i<buffer_size;i++){
-                train_data.addStep();
-                train_data.lowPass(train_buffer[i]);
-                mix_buffer[i]+=train_data.filter*current_env.gain;
+                train_data.applyStep();
+                mix_buffer[i]+=train_data.filters[4].process(train_buffer[i])*current_env.gain;
                 for(int j=0;j<4;j++){
                     int tail_ptr=head_ptr+i+RemasteredConst.send_delays[j];
                     if(tail_ptr>=tail_size) tail_ptr-=tail_size;
-                    tail_buffers[j][tail_ptr]+=train_data.filters[j];
+                    tail_buffers[j][tail_ptr]+=train_data.filters[j].process(
+                            train_buffer[i]*current_env.gains[j]);
                 }
             }
         }
         for(int i=0;i<buffer_size;i++){
             double wet=0.0;
             for(int j=0;j<4;j++){
-                double current=tail_buffers[j][head_ptr];
+                double current=tail_buffers[j][head_ptr],filtered=filters[j].process(current);
                 tail_buffers[j][head_ptr]=0.0;
-                filters[j]+=(current-filters[j])*0.82;
-                wet+=filters[j];
+                wet+=filtered;
                 int tail_ptr=head_ptr+RemasteredConst.send_delays[j];
                 if(tail_ptr>=tail_size) tail_ptr-=tail_size;
-                tail_buffers[j][tail_ptr]+=filters[j]*RemasteredConst.send_feedbacks[j];
+                tail_buffers[j][tail_ptr]+=filtered*RemasteredConst.send_feedbacks[j];
             }
-            filter+=(wet-filter)*0.92;
-            mix_buffer[i]+=filter;
+            mix_buffer[i]+=filters[4].process(wet);
             head_ptr++;
             if(head_ptr==tail_size) head_ptr=0;
         }

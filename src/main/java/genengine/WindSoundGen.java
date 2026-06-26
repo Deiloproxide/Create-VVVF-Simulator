@@ -2,14 +2,16 @@ package genengine;
 import createvvvfsim.Configs;
 import java.util.concurrent.ThreadLocalRandom;
 import org.jtransforms.fft.DoubleFFT_1D;
+import utils.Highpass;
+import utils.Lowpass;
+import utils.RandomWalk;
 public class WindSoundGen extends SoundGen{
-    private static final double pink_r0=Configs.pink_r0;
     private static final double wind_base_amp=Configs.wind_base_amp;
     private static final double wind_mod_f=Configs.wind_mod_f;
     private static final double wind_mod_depth=Configs.wind_mod_depth;
     private static final double bg_shear_base=Configs.bg_shear_base;
     private static final double bg_shear_range=Configs.bg_shear_range;
-    private static final double bg_shear_rate=Configs.bg_shear_rate;
+    private static final double bg_shear_sigma=Configs.bg_shear_rate*Math.sqrt(sample_dt);
     private static final double hp_cutoff=Configs.hp_cutoff;
     private static final double bg_wind_amp=Configs.bg_wind_amp;
     private static final double main_cauchy_amp=Configs.main_cauchy_amp;
@@ -20,10 +22,10 @@ public class WindSoundGen extends SoundGen{
     private static final double main_wind_amp=Configs.main_wind_amp;
     private static final int table_size=Configs.buffer_size*Configs.table_ratio;
     private static final double[] main_wind=new double[table_size];
-    private final PinkNoiseFilter pink_bg=new PinkNoiseFilter();
-    private final OnePoleLPF bg_lpf=new OnePoleLPF(bg_shear_base);
-    private final OnePoleHPF bg_hpf=new OnePoleHPF(hp_cutoff);
-    private final RandomWalk bg_shear=new RandomWalk();
+    private final Lowpass pink_bg=new Lowpass(1.0-Configs.pink_r0);
+    private final Lowpass bg_lpf=new Lowpass(1.0-Math.exp(-2.0*Math.PI*bg_shear_base/sample_rate));
+    private final Highpass bg_hpf=new Highpass(Math.exp(-2.0*Math.PI*hp_cutoff/sample_rate));
+    private final RandomWalk bg_shear=new RandomWalk(0.0,bg_shear_sigma,bg_shear_range);
     private static ThreadLocalRandom tlr;
     private volatile double target_f=0.0;
     private double current_f=0.0;
@@ -57,51 +59,6 @@ public class WindSoundGen extends SoundGen{
         double norm_factor=main_cauchy_amp/peak;
         for(int i=0;i<table_size;i++) main_wind[i]*=norm_factor;
     }
-    private static class PinkNoiseFilter{
-        private double state=0.0;
-        public double process(double white){
-            state=pink_r0*state+(1.0-pink_r0)*white;
-            return state;
-        }
-    }
-    private static class OnePoleLPF{
-        private double alpha;
-        private double y=0.0;
-        public OnePoleLPF(double cutoff){
-            setCutoff(cutoff);
-        }
-        public void setCutoff(double cutoff){
-            alpha=Math.exp(-2.0*Math.PI*cutoff/sample_rate);
-        }
-        public double process(double x){
-            y=x*(1.0-alpha)+alpha*y;
-            return y;
-        }
-    }
-    private static class OnePoleHPF{
-        private final double alpha;
-        private double prev_x=0.0;
-        private double prev_y=0.0;
-        public OnePoleHPF(double cutoff){
-            alpha=Math.exp(-2.0*Math.PI*cutoff/sample_rate);
-        }
-        public double process(double x){
-            double y=alpha*(prev_y+x-prev_x);
-            prev_x=x;
-            prev_y=y;
-            return y;
-        }
-    }
-    private static class RandomWalk{
-        private static final double sigma=bg_shear_rate*Math.sqrt(sample_dt);
-        private double value=0.0;
-        public double step(){
-            value+=tlr.nextGaussian(0.0,sigma);
-            if(value<-bg_shear_range) value=-2.0*bg_shear_range-value;
-            if(value>bg_shear_range) value=2.0*bg_shear_range-value;
-            return value;
-        }
-    }
     public void setF(double speed){
         target_f=speed;
     }
@@ -120,7 +77,7 @@ public class WindSoundGen extends SoundGen{
             current_f+=f_step;
             current_amp+=amp_step;
             if(current_amp<1e-2 || current_f<1e-2) continue;
-            bg_lpf.setCutoff(bg_shear_base+bg_shear.step());
+            bg_lpf.setAlpha(1.0-Math.exp(-2.0*Math.PI*(bg_shear_base+bg_shear.step())/sample_rate));
             double bg_lfo=0.5+0.5*Math.sin(2.0*Math.PI*wind_mod_f*total_t);
             double current_pink_bg=pink_bg.process(tlr.nextGaussian()*0.5);
             double bg_amp=Math.min(0.5,wind_base_amp*(1.0+wind_mod_depth*bg_lfo));

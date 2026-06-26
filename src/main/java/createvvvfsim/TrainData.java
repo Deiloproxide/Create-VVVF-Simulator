@@ -3,9 +3,11 @@ import com.simibubi.create.content.trains.entity.Train;
 import genengine.BaseSoundGen;
 import genengine.VVVFSoundGen;
 import genengine.WindSoundGen;
+import java.util.Arrays;
 import soundphysics.Handler;
 import soundphysics.PerfectedHandler;
 import soundphysics.RemasteredHandler;
+import utils.Lowpass;
 public class TrainData{
     public static final Handler handler;
     public final Train train;
@@ -16,17 +18,17 @@ public class TrainData{
     public volatile EnvData target_env=new EnvData();
     public final EnvData current_env=new EnvData();
     public final EnvData env_step=new EnvData();
+    public final Lowpass[] filters=new Lowpass[5];
     public boolean use_server=false,server_reloaded=false;
     public boolean is_last_valid=false,is_last_move=false;
     public int reload_timer=0;
-    public double filter=0.0;
-    public double[] filters={0.0,0.0,0.0,0.0};
     static{
         if(RemasteredHandler.register()) handler=new RemasteredHandler();
         else if(PerfectedHandler.register()) handler=new PerfectedHandler();
         else handler=new Handler();
     }
     public TrainData(Train train){
+        Arrays.setAll(filters,i->new Lowpass(0.0));
         this.train=train;
     }
     public void set(double speed,double near_factor,double far_factor,boolean valid,boolean move){
@@ -50,7 +52,7 @@ public class TrainData{
             env_step.cutoffs[i]=(to.cutoffs[i]-from.cutoffs[i])/buffer_size;
         }
     }
-    public void addStep(){
+    public void applyStep(){
         current_env.gain+=env_step.gain;
         current_env.cutoff+=env_step.cutoff;
         current_env.occlusion+=env_step.occlusion;
@@ -59,11 +61,8 @@ public class TrainData{
             current_env.gains[i]+=env_step.gains[i];
             current_env.cutoffs[i]+=env_step.cutoffs[i];
         }
-    }
-    public void lowPass(double sample){
-        double[] gains=current_env.gains,cutoffs=current_env.cutoffs;
-        filter+=(sample-filter)*Math.min(Math.max(current_env.cutoff,0.02),1.0);
-        for(int i=0;i<4;i++)
-            filters[i]+=(sample*gains[i]-filters[i])*Math.min(Math.max(cutoffs[i],0.02),1.0);
+        double[] cutoffs=current_env.cutoffs;
+        for(int i=0;i<4;i++) filters[i].setAlpha(Math.min(Math.max(cutoffs[i],0.02),1.0));
+        filters[4].setAlpha(Math.min(Math.max(current_env.cutoff,0.02),1.0));
     }
 }

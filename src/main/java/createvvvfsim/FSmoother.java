@@ -3,7 +3,7 @@ import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.config.CTrains;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import soundphysics.Instance;
+import utils.Instance;
 public class FSmoother{
     private static final CTrains train_config=AllConfigs.server().trains;
     private static final double max_speed;

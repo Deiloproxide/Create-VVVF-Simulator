@@ -1,6 +1,7 @@
 package soundphysics;
 import createvvvfsim.Configs;
 import java.lang.reflect.Method;
+import utils.Instance;
 public class PerfectedConst{
     public static final int[] send_delays={
             (int)(Configs.sample_rate*0.012),

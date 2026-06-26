@@ -8,17 +8,23 @@ import java.util.List;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import utils.Instance;
+import utils.Lowpass;
 public class PerfectedHandler extends Handler{
     private static final int buffer_size=Configs.buffer_size;
+    private static final int tail_size=buffer_size*64;
     private static final double far_distance=Configs.far_distance;
+    private static final double[] train_buffer=new double[buffer_size];
+    private static final double[][] tail_buffers=new double[4][tail_size];
+    private static final double[] filtered=new double[4];
+    private static final Lowpass[] filters=new Lowpass[5];
     private static Method count_blocks,reverb_strength,reverb_denom,outdoor_leak;
     private static Method leak_denom,weighted_strength,early_reflection,enhanced_reverb;
     private static int head_ptr=0;
-    private static final int tail_size=buffer_size*64;
-    private static final double[] train_buffer=new double[buffer_size];
-    private static final double[][] tail_buffers=new double[4][tail_size];
-    private static final double[] filters=new double[]{0.0,0.0,0.0,0.0};
-    private static double filter=0.0;
+    static{
+        for(int i=0;i<4;i++) filters[i]=new Lowpass(0.78);
+        filters[4]=new Lowpass(0.88);
+    }
     public static boolean register(){
         try{
             Instance raycasting_helper=new Instance("com.redsmods.sound_physics_perfected.RaycastingHelper");
@@ -97,13 +103,13 @@ public class PerfectedHandler extends Handler{
             train_data.setStep(buffer_size);
             EnvData current_env=train_data.current_env;
             for(int i=0;i<buffer_size;i++){
-                train_data.addStep();
-                train_data.lowPass(train_buffer[i]);
-                mix_buffer[i]+=train_data.filter*current_env.gain;
+                train_data.applyStep();
+                mix_buffer[i]+=train_data.filters[4].process(train_buffer[i])*current_env.gain;
                 for(int j=0;j<4;j++){
                     int tail_ptr=head_ptr+i+PerfectedConst.send_delays[j];
                     if(tail_ptr>=tail_size) tail_ptr-=tail_size;
-                    tail_buffers[j][tail_ptr]+=train_data.filters[j];
+                    tail_buffers[j][tail_ptr]+=train_data.filters[j].process(
+                            train_buffer[i]*current_env.gains[j]);
                 }
             }
         }
@@ -112,17 +118,15 @@ public class PerfectedHandler extends Handler{
             for(int j=0;j<4;j++){
                 double current=tail_buffers[j][head_ptr];
                 tail_buffers[j][head_ptr]=0.0;
-                filters[j]+=(current-filters[j])*0.78;
-                wet+=filters[j];
+                filtered[j]=filters[j].process(current);
+                wet+=filtered[j];
             }
-            double feedback_mix=wet*0.18;
             for(int j=0;j<4;j++){
                 int tail_ptr=head_ptr+PerfectedConst.send_delays[j];
                 if(tail_ptr>=tail_size) tail_ptr-=tail_size;
-                tail_buffers[j][tail_ptr]+=(0.35*feedback_mix+0.937*filters[j])*PerfectedConst.send_feedbacks[j];
+                tail_buffers[j][tail_ptr]+=(0.063*wet+0.937*filtered[j])*PerfectedConst.send_feedbacks[j];
             }
-            filter+=(wet-filter)*0.88;
-            mix_buffer[i]+=filter;
+            mix_buffer[i]+=filters[4].process(wet);
             head_ptr++;
             if(head_ptr==tail_size) head_ptr=0;
         }
