@@ -13,8 +13,26 @@ Simulates VVVF on Minecraft Create Train
 - Config delivery from server ensure remote or cross-dimension speed continuity
 ## Dependencies
 [![create](icon/create.svg)](https://github.com/Creators-of-Create/Create)
-## Recommendations
+## Run
+### Pre-build
+![forge](icon/forge.svg)
+![neoforge](icon/neoforge.svg)
 
+[![modrinth](icon/modrinth.svg)](https://modrinth.com/mod/create_vvvf_simulator)
+[![curseforge](icon/curseforge.svg)]()
+[![github](icon/github.svg)](https://github.com/Deiloproxide/Create-VVVF-Simulator/releases)
+### Build from source
+![java](icon/java.svg)
+![gradle](icon/gradle.svg)
+### Environments
+- Client necessary
+- Server optional
+
+| Behaviour          | Server available    | Server unavailable    |
+|--------------------|---------------------|-----------------------|
+| Client available   | Full part functions | Client side functions |
+| Client unavailable | Compatible          | -                     |
+### Recommendations
 The following Create server train configs are recommended
 ```toml
 [trains]
@@ -28,25 +46,8 @@ poweredTrainTopSpeed=32
 poweredTrainTurningTopSpeed=28
 poweredTrainAcceleration=1
 ```
-## Run
-### Environments
-- Client necessary
-- Server optional
-
-| Behaviour          | Server available    | Server unavailable    |
-|--------------------|---------------------|-----------------------|
-| Client available   | Full part functions | Client side functions |
-| Client unavailable | Compatible          | -                     |
-### Pre-build
-![forge](icon/forge.svg)
-![neoforge](icon/neoforge.svg)
-
-[![modrinth](icon/modrinth.svg)](https://modrinth.com/mod/create_vvvf_simulator)
-[![curseforge](icon/curseforge.svg)]()
-[![github](icon/github.svg)](https://github.com/Deiloproxide/Create-VVVF-Simulator/releases)
-### Build from source
-![java](icon/java.svg)
-![gradle](icon/gradle.svg)
+### Command
+If train speed not match with vvvf, you can type `/vvvf reload` to reload speed
 ## Contributions
 Your contributions to our [project](https://github.com/Deiloproxide/Create-VVVF-Simulator) are well-welcome!
 Please feel free to feed back issues, make comments or submit a pull request

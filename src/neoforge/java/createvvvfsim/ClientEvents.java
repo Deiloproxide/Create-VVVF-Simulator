@@ -39,6 +39,7 @@ public class ClientEvents{
     }
     @SubscribeEvent
     public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event){
+        FSmoother.reloadMaxSpeed();
         SoundEngine.setAmp(mc.options.getSoundSourceVolume(SoundSource.MASTER));
     }
     @SubscribeEvent
@@ -54,6 +55,7 @@ public class ClientEvents{
     }
     public static int onReload(CommandContext<CommandSourceStack> context){
         Component msg=Component.literal(Configs.command_return);
+        FSmoother.reloadMaxSpeed();
         TrainStatus.forceReload();
         context.getSource().sendSuccess(()->msg,false);
         return 1;

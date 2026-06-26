@@ -28,26 +28,21 @@ public class VVVFSoundGen extends SoundGen{
         train_config.impulseResponseSampleRate=sample_rate;
         train_config.impulseResponse=AudioResourceManager.resampleLinear(ir,ir_sample_rate[0],sample_rate);
         train_config.setCalculatedGearHarmonic(19,120);
-        addDefaultMotorHarmonics(train_config);
         train_config.motorVolumeDb=0;
         train_config.totalVolumeDb=-2;
         conv_filter=new CppConvolutionFilter(conv_block_size,train_config.impulseResponse);
         domain.electricalState=elect_state;
         pulse_control.pulseMode.carrierWave.type=Struct.PulseControl.Pulse.CarrierWaveConfiguration.CarrierWaveType.Sine;
+        addThirdHarmonicInjection(pulse_control.pulseMode);
     }
-    private static void addDefaultMotorHarmonics(vvvfsimulator.data.trainaudio.Struct config){
-        vvvfsimulator.data.trainaudio.Struct.HarmonicData h=new vvvfsimulator.data.trainaudio.Struct.HarmonicData();
-        h.harmonic=3.0;
-        h.disappear=-1.0;
-        h.range.start=0.0;
-        h.range.end=44.0;
-        h.amplitude.start=0.0;
-        h.amplitude.startValue=0.0;
-        h.amplitude.end=44.0;
-        h.amplitude.endValue=0.2;
-        h.amplitude.minimumValue=0.0;
-        h.amplitude.maximumValue=0.2;
-        config.harmonicSound.add(h);
+    private static void addThirdHarmonicInjection(Struct.PulseControl.Pulse pulse){
+        Struct.PulseControl.Pulse.PulseHarmonic harmonic=new Struct.PulseControl.Pulse.PulseHarmonic();
+        harmonic.harmonic=3.0;
+        harmonic.amplitude=1.0/6.0;
+        harmonic.isHarmonicProportional=true;
+        harmonic.isAmplitudeProportional=true;
+        harmonic.type=Struct.PulseControl.Pulse.PulseHarmonic.PulseHarmonicType.Sine;
+        pulse.pulseHarmonics.add(harmonic);
     }
     public void setF(double speed){
         target_f=speed*max_base_f;

@@ -19,7 +19,7 @@ public class Configs{
     public static final int sample_rate=44100;
     public static final int buffer_size=1<<12;
     //main amp
-    public static final double main_amp=1.5;
+    public static final double main_amp=1;
     //train start
     public static final double gas_amp=0.6;
     public static final double switch_amp=0.4;
