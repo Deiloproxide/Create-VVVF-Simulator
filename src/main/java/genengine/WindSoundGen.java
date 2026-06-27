@@ -63,10 +63,10 @@ public class WindSoundGen extends SoundGen{
         target_f=speed;
     }
     private double bgFactor(){
-        return bg_wind_amp*current_f*current_f;
+        return bg_wind_amp*current_f;
     }
     private double mainFactor(){
-        return main_wind_amp*Math.pow(Math.abs(current_f),2.5);
+        return main_wind_amp*Math.pow(current_f,1.5);
     }
     @Override
     public void mixTo(double[] mix_buffer){
@@ -76,6 +76,7 @@ public class WindSoundGen extends SoundGen{
         for(int i=0;i<buffer_size;i++){
             current_f+=f_step;
             current_amp+=amp_step;
+            current_f=Math.max(current_f,0);
             if(current_amp<1e-2 || current_f<1e-2) continue;
             bg_lpf.setAlpha(1.0-Math.exp(-2.0*Math.PI*(bg_shear_base+bg_shear.step())/sample_rate));
             double bg_lfo=0.5+0.5*Math.sin(2.0*Math.PI*wind_mod_f*total_t);

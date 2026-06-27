@@ -24,12 +24,12 @@ public class Configs{
     public static final double gas_amp=0.6;
     public static final double switch_amp=0.4;
     //base
-    public static final double base_current_f=120.0;
+    public static final double base_current_f=140.0;
     public static final double brown_sigma=0.05;
     public static final double brown_range=2.0;
     //base amp
-    public static final double base_amp=0.04;
-    public static final double brown_amp=0.02;
+    public static final double base_amp=0.06;
+    public static final double brown_amp=0.03;
     //vvvf
     public static final double max_base_f=115.0;
     public static final int conv_block_size=512;

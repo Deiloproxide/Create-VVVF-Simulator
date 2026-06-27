@@ -28,8 +28,8 @@ public class VVVFSoundGen extends SoundGen{
         train_config.impulseResponseSampleRate=sample_rate;
         train_config.impulseResponse=AudioResourceManager.resampleLinear(ir,ir_sample_rate[0],sample_rate);
         train_config.setCalculatedGearHarmonic(19,120);
-        train_config.motorVolumeDb=0;
-        train_config.totalVolumeDb=-2;
+        train_config.motorVolumeDb=0.5;
+        train_config.totalVolumeDb=-2.5;
         conv_filter=new CppConvolutionFilter(conv_block_size,train_config.impulseResponse);
         domain.electricalState=elect_state;
         pulse_control.pulseMode.carrierWave.type=Struct.PulseControl.Pulse.CarrierWaveConfiguration.CarrierWaveType.Sine;

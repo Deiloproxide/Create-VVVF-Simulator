@@ -19,7 +19,7 @@ Simulates VVVF on Minecraft Create Train
 ![neoforge](icon/neoforge.svg)
 
 [![modrinth](icon/modrinth.svg)](https://modrinth.com/mod/create_vvvf_simulator)
-[![curseforge](icon/curseforge.svg)]()
+[![curseforge](icon/curseforge.svg)](https://www.curseforge.com/minecraft/mc-mods/create-vvvf-simulator)
 [![github](icon/github.svg)](https://github.com/Deiloproxide/Create-VVVF-Simulator/releases)
 ### Build from source
 ![java](icon/java.svg)
