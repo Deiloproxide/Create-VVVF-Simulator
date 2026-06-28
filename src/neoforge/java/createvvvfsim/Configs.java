@@ -13,8 +13,8 @@ public class Configs{
     public static final String command_reload="reload";
     public static final String command_return="§a[Create: VVVF-Simulator] Reloaded!§r";
     //resource location
-    public static final String filter_wav="/assets/createvvvfsim/TrainSound/Filter.wav";
-    public static final String table="/assets/createvvvfsim/SwitchAngle/";
+    public static final String filter_wav="/assets/createvvvfsim/trainsound/Filter.wav";
+    public static final String table="/assets/createvvvfsim/switchangle/";
     //audio
     public static final int sample_rate=44100;
     public static final int buffer_size=1<<12;
