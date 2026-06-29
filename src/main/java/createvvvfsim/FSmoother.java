@@ -28,9 +28,7 @@ public class FSmoother implements Reloadable{
         Arrays.fill(speed_samples,Math.min(speed,max_speed));
         last_speed=speed;
     }
-    @Override
-    public void reload(){
-        max_acc_ratio=Configs.max_acc_ratio.get();
+    public static void reloadCreate(){
         try{
             Instance ctrains=Instance.fromObject(train_config);
             Instance top_speed=ctrains.get("trainTopSpeed");
@@ -41,5 +39,9 @@ public class FSmoother implements Reloadable{
             max_acc=acc.invoke(Float.class,get_acc)*max_acc_ratio/20.0;
         }
         catch(Exception ignored){}
+    }
+    @Override
+    public void reload(){
+        max_acc_ratio=Configs.max_acc_ratio.get();
     }
 }

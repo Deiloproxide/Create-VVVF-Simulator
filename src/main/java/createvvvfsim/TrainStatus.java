@@ -147,6 +147,13 @@ public class TrainStatus implements Reloadable{
             train_data.target_env=EnvData.avg(envs);
         }
     }
+    public static void reloadSpeed(){
+        List<TrainData> train_datas=getTrainData();
+        for(TrainData train_data:train_datas){
+            train_data.server_reloaded=false;
+            train_data.reload_timer=1;
+        }
+    }
     @Override
     public void reload(){
         near_distance=Configs.near_distance.get();
@@ -154,10 +161,5 @@ public class TrainStatus implements Reloadable{
         main_amp=Configs.main_amp.get();
         gas_amp=Configs.gas_amp.get();
         switch_amp=Configs.switch_amp.get();
-        List<TrainData> train_datas=getTrainData();
-        for(TrainData train_data:train_datas){
-            train_data.server_reloaded=false;
-            train_data.reload_timer=1;
-        }
     }
 }

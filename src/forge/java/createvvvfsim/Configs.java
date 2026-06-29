@@ -1,12 +1,13 @@
 package createvvvfsim;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.common.ModConfigSpec.Builder;
-import net.neoforged.neoforge.common.ModConfigSpec.DoubleValue;
-import net.neoforged.neoforge.common.ModConfigSpec.IntValue;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec.Builder;
+import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
+import net.minecraftforge.common.ForgeConfigSpec.IntValue;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 @Mod(Configs.mod_id)
 public class Configs{
     public static final int mixin_priority=1027;
@@ -19,8 +20,8 @@ public class Configs{
     public static final String command_return="[Create: VVVF-Simulator] §a\\u221a§r";
     public static final String filter_wav="/assets/createvvvfsim/trainsound/Filter.wav";
     public static final String table="/assets/createvvvfsim/switchangle/";
-    public static final ModConfigSpec server_config;
-    public static final ModConfigSpec client_config;
+    public static final ForgeConfigSpec server_config;
+    public static final ForgeConfigSpec client_config;
     public static final IntValue sync_period;
     public static final IntValue eval_period;
     public static final IntValue sample_rate;
@@ -123,9 +124,14 @@ public class Configs{
         client_builder.pop();
         client_config=client_builder.build();
     }
-    public Configs(ModContainer container){
-        container.registerConfig(ModConfig.Type.SERVER,server_config);
-        container.registerConfig(ModConfig.Type.CLIENT,client_config);
-        if(FMLEnvironment.dist.isClient()) ClientEvents.registerScreen(container);
+    public Configs(FMLJavaModLoadingContext context){
+        ModContainer container=context.getContainer();
+        container.addConfig(new ModConfig(ModConfig.Type.SERVER,server_config,container));
+        container.addConfig(new ModConfig(ModConfig.Type.CLIENT,client_config,container));
+        if(FMLEnvironment.dist.isClient()){
+            ClientEvents.registerScreen(container);
+            context.getModEventBus().addListener(ClientEvents::onLoad);
+        }
+        TrainSyncModel.register();
     }
 }

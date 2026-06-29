@@ -7,7 +7,6 @@ import utils.Lowpass;
 import utils.RandomWalk;
 public class WindSoundGen extends SoundGen{
     private static final int table_size=Configs.table_size.get();
-    private static volatile double pink_r0;
     private static volatile double wind_base_amp;
     private static volatile double wind_mod_f;
     private static volatile double wind_mod_depth;
@@ -23,11 +22,13 @@ public class WindSoundGen extends SoundGen{
     private static volatile double main_mod_f;
     private static volatile double main_mod_depth;
     private static volatile double main_wind_amp;
+    private static volatile double pink_alpha;
+    private static volatile double highpass_alpha;
     private static volatile double[] main_wind,temp=new double[table_size];
-    private final Lowpass pink_bg=new Lowpass(0.0);
-    private final Lowpass bg_lpf=new Lowpass(0.0);
-    private final Highpass bg_hpf=new Highpass(0.0);
-    private final RandomWalk bg_shear=new RandomWalk(0.0,0.0,0.0);
+    private final Lowpass pink_bg=new Lowpass();
+    private final Lowpass bg_lpf=new Lowpass();
+    private final Highpass bg_hpf=new Highpass();
+    private final RandomWalk bg_shear=new RandomWalk();
     private static ThreadLocalRandom tlr;
     private volatile double target_f=0.0;
     private double current_f=0.0;
@@ -52,11 +53,13 @@ public class WindSoundGen extends SoundGen{
             current_amp+=amp_step;
             current_f=Math.max(current_f,0);
             if(current_amp<1e-2 || current_f<1e-2) continue;
-            bg_lpf.setAlpha(1.0-Math.exp(-2.0*Math.PI*(bg_shear_base+bg_shear.step())/sample_rate));
+            double bg_shear_value=bg_shear.step(bg_shear_sigma,bg_shear_range);
+            double lowpass_alpha=1.0-Math.exp(-2.0*Math.PI*(bg_shear_base+bg_shear_value)/sample_rate);
             double bg_lfo=0.5+0.5*Math.sin(2.0*Math.PI*wind_mod_f*total_t);
-            double current_pink_bg=pink_bg.process(tlr.nextGaussian()*0.5);
+            double current_pink_bg=pink_bg.process(pink_alpha,tlr.nextGaussian()*0.5);
             double bg_amp=Math.min(0.5,wind_base_amp*(1.0+wind_mod_depth*bg_lfo));
-            double bg_wind=bg_hpf.process(bg_lpf.process(current_pink_bg)*bg_amp);
+            double lowpass_value=bg_lpf.process(lowpass_alpha,current_pink_bg);
+            double bg_wind=bg_hpf.process(highpass_alpha,lowpass_value*bg_amp);
             double main_lfo=0.5+0.5*Math.sin(2.0*Math.PI*main_mod_f*total_t);
             if(table_index==table_size) table_index=0;
             double current_main_wind=main_wind[table_index]*(1.0+main_mod_depth*main_lfo);
@@ -67,7 +70,6 @@ public class WindSoundGen extends SoundGen{
     }
     @Override
     public void reload(){
-        pink_r0=Configs.pink_r0.get();
         wind_base_amp=Configs.wind_base_amp.get();
         wind_mod_f=Configs.wind_mod_f.get();
         wind_mod_depth=Configs.wind_mod_depth.get();
@@ -83,10 +85,8 @@ public class WindSoundGen extends SoundGen{
         main_mod_f=Configs.main_mod_f.get();
         main_mod_depth=Configs.main_mod_depth.get();
         main_wind_amp=Configs.main_wind_amp.get();
-        pink_bg.setAlpha(1.0-pink_r0);
-        bg_lpf.setAlpha(1.0-Math.exp(-2.0*Math.PI*bg_shear_base/sample_rate));
-        bg_hpf.setAlpha(Math.exp(-2.0*Math.PI*hp_cutoff/sample_rate));
-        bg_shear.set(0.0,bg_shear_sigma,bg_shear_range);
+        pink_alpha=1.0-Configs.pink_r0.get();
+        highpass_alpha=Math.exp(-2.0*Math.PI*hp_cutoff/sample_rate);
         tlr=ThreadLocalRandom.current();
         for(int i=0;i<table_size;i++) temp[i]=tlr.nextGaussian();
         DoubleFFT_1D fft=new DoubleFFT_1D(table_size);

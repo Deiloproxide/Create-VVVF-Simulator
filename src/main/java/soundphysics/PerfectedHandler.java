@@ -13,6 +13,7 @@ import utils.Lowpass;
 public class PerfectedHandler extends Handler{
     private static final int buffer_size=Configs.buffer_size.get();
     private static final int tail_size=Configs.tail_size.get();
+    private static final double filters_alpha=0.78,filter_alpha=0.88;
     private static volatile double far_distance;
     private static final double[] train_buffer=new double[buffer_size];
     private static final double[][] tail_buffers=new double[4][tail_size];
@@ -22,8 +23,7 @@ public class PerfectedHandler extends Handler{
     private static Method leak_denom,weighted_strength,early_reflection,enhanced_reverb;
     private static int head_ptr=0;
     static{
-        for(int i=0;i<4;i++) filters[i]=new Lowpass(0.78);
-        filters[4]=new Lowpass(0.88);
+        Arrays.setAll(filters,i->new Lowpass());
     }
     public static boolean register(){
         try{
@@ -103,12 +103,15 @@ public class PerfectedHandler extends Handler{
             train_data.setStep(buffer_size);
             EnvData current_env=train_data.current_env;
             for(int i=0;i<buffer_size;i++){
-                train_data.applyStep();
-                mix_buffer[i]+=train_data.filters[4].process(train_buffer[i])*current_env.gain;
+                train_data.addStep();
+                double[] cutoffs=current_env.cutoffs;
+                double alpha=Math.min(Math.max(current_env.cutoff,0.02),1.0);
+                mix_buffer[i]+=train_data.filters[4].process(alpha,train_buffer[i])*current_env.gain;
                 for(int j=0;j<4;j++){
                     int tail_ptr=head_ptr+i+PerfectedConst.send_delays[j];
                     if(tail_ptr>=tail_size) tail_ptr-=tail_size;
-                    tail_buffers[j][tail_ptr]+=train_data.filters[j].process(
+                    alpha=Math.min(Math.max(cutoffs[j],0.02),1.0);
+                    tail_buffers[j][tail_ptr]+=train_data.filters[j].process(alpha,
                             train_buffer[i]*current_env.gains[j]);
                 }
             }
@@ -118,7 +121,7 @@ public class PerfectedHandler extends Handler{
             for(int j=0;j<4;j++){
                 double current=tail_buffers[j][head_ptr];
                 tail_buffers[j][head_ptr]=0.0;
-                filtered[j]=filters[j].process(current);
+                filtered[j]=filters[j].process(filters_alpha,current);
                 wet+=filtered[j];
             }
             for(int j=0;j<4;j++){
@@ -126,7 +129,7 @@ public class PerfectedHandler extends Handler{
                 if(tail_ptr>=tail_size) tail_ptr-=tail_size;
                 tail_buffers[j][tail_ptr]+=(0.063*wet+0.937*filtered[j])*PerfectedConst.send_feedbacks[j];
             }
-            mix_buffer[i]+=filters[4].process(wet);
+            mix_buffer[i]+=filters[4].process(filter_alpha,wet);
             head_ptr++;
             if(head_ptr==tail_size) head_ptr=0;
         }

@@ -8,16 +8,20 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.network.PacketDistributor;
+import utils.Reloadable;
 @Mod.EventBusSubscriber(modid=Configs.mod_id)
-public class ServerEvents{
+public class ServerEvents implements Reloadable{
     private static final List<ServerPlayer> all_players=new ArrayList<>();
     private static final Object player_lock=new Object();
-    private static final int sync_period=Configs.sync_period;
-    private static int sync_current=sync_period;
+    private static final Reloadable reloadable=new ServerEvents();
+    private static volatile int sync_period;
+    private static int sync_current;
     @SubscribeEvent
     public static void onJoin(PlayerEvent.PlayerLoggedInEvent event){
-        if(!(event.getEntity() instanceof ServerPlayer player)) return;
+        ServerPlayer player=(ServerPlayer)(event.getEntity());
         if(TrainSyncModel.channel.isRemotePresent(player.connection.connection))
             synchronized(player_lock){
                 all_players.add(player);
@@ -27,6 +31,22 @@ public class ServerEvents{
     public static void onExit(PlayerEvent.PlayerLoggedOutEvent event){
         synchronized(player_lock){
             all_players.remove((ServerPlayer)(event.getEntity()));
+        }
+    }
+    @SubscribeEvent
+    public static void onLoad(ModConfigEvent.Loading event){
+        if(Configs.mod_id.equals(event.getConfig().getModId())){
+            if(event.getConfig().getType()==ModConfig.Type.SERVER){
+                reloadable.reload();
+            }
+        }
+    }
+    @SubscribeEvent
+    public static void onReload(ModConfigEvent.Reloading event){
+        if(Configs.mod_id.equals(event.getConfig().getModId())){
+            if(event.getConfig().getType()==ModConfig.Type.SERVER){
+                reloadable.reload();
+            }
         }
     }
     @SubscribeEvent
@@ -45,5 +65,10 @@ public class ServerEvents{
             }
         }
         sync_current++;
+    }
+    @Override
+    public void reload(){
+        sync_period=Configs.sync_period.get();
+        sync_current=sync_period;
     }
 }

@@ -28,7 +28,7 @@ public class TrainData{
         else handler=new Handler();
     }
     public TrainData(Train train){
-        Arrays.setAll(filters,i->new Lowpass(0.0));
+        Arrays.setAll(filters,i->new Lowpass());
         this.train=train;
     }
     public void set(double speed,double near_factor,double far_factor,boolean valid,boolean move){
@@ -52,7 +52,7 @@ public class TrainData{
             env_step.cutoffs[i]=(to.cutoffs[i]-from.cutoffs[i])/buffer_size;
         }
     }
-    public void applyStep(){
+    public void addStep(){
         current_env.gain+=env_step.gain;
         current_env.cutoff+=env_step.cutoff;
         current_env.occlusion+=env_step.occlusion;
@@ -61,8 +61,5 @@ public class TrainData{
             current_env.gains[i]+=env_step.gains[i];
             current_env.cutoffs[i]+=env_step.cutoffs[i];
         }
-        double[] cutoffs=current_env.cutoffs;
-        for(int i=0;i<4;i++) filters[i].setAlpha(Math.min(Math.max(cutoffs[i],0.02),1.0));
-        filters[4].setAlpha(Math.min(Math.max(current_env.cutoff,0.02),1.0));
     }
 }

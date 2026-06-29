@@ -1,24 +1,32 @@
 package createvvvfsim;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import genengine.BaseSoundGen;
 import genengine.SoundEngine;
+import genengine.VVVFSoundGen;
+import genengine.WindSoundGen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import utils.Reloadable;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
 @Mod.EventBusSubscriber(modid=Configs.mod_id,value=Dist.CLIENT)
-public class ClientEvents{
+public class ClientEvents implements Reloadable{
     private static final Minecraft mc=Minecraft.getInstance();
-    private static final int eval_period=Configs.eval_period;
-    private static int eval_current=eval_period;
+    private static Reloadable[] reloadables;
+    private static volatile int eval_period;
+    private static int eval_current;
     static{
         CustomPwm.CustomPwmPresets.preload();
     }
@@ -28,9 +36,20 @@ public class ClientEvents{
                 reload=Commands.literal(Configs.command_reload);
         event.getDispatcher().register(vvvf.then(reload.executes(ClientEvents::onReload)));
     }
+    public static void registerScreen(ModContainer container){
+        container.registerExtensionPoint(ConfigScreenFactory.class,
+                ()->new ConfigScreenFactory(ForgeConfigScreen::new));
+    }
+    @SubscribeEvent
+    public static void onLoad(FMLClientSetupEvent event){
+        reloadables=new Reloadable[]{
+                new BaseSoundGen(),new VVVFSoundGen(),new WindSoundGen(),new SoundEngine(),
+                TrainData.handler,new ClientEvents(),new FSmoother(),new TrainStatus()};
+        for(Reloadable reloadable:reloadables) reloadable.reload();
+    }
     @SubscribeEvent
     public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event){
-        FSmoother.reloadMaxSpeed();
+        FSmoother.reloadCreate();
         SoundEngine.setAmp(mc.options.getSoundSourceVolume(SoundSource.MASTER));
     }
     @SubscribeEvent
@@ -39,8 +58,9 @@ public class ClientEvents{
     }
     public static int onReload(CommandContext<CommandSourceStack> context){
         Component msg=Component.literal(Configs.command_return);
-        FSmoother.reloadMaxSpeed();
-        TrainStatus.forceReload();
+        for(Reloadable reloadable:reloadables) reloadable.reload();
+        FSmoother.reloadCreate();
+        TrainStatus.reloadSpeed();
         context.getSource().sendSuccess(()->msg,false);
         return 1;
     }
@@ -50,7 +70,12 @@ public class ClientEvents{
         SoundEngine.setAmp(mc.isPaused()?0.0:mc.options.getSoundSourceVolume(SoundSource.MASTER));
         TrainStatus.tick(mc.level,mc.player);
         if(eval_current==eval_period) eval_current=0;
-        TrainStatus.evalTrains(mc.level,mc.player,eval_current);
+        TrainStatus.evalTrains(mc.level,mc.player,eval_current,eval_period);
         eval_current++;
+    }
+    @Override
+    public void reload(){
+        eval_period=Configs.eval_period.get();
+        eval_current=eval_period;
     }
 }

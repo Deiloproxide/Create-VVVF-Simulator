@@ -9,7 +9,7 @@ import vvvfsimulator.vvvf.model.Struct;
 import vvvfsimulator.vvvf.model.Struct.ElectricalParameter.CarrierParameter;
 public class VVVFSoundGen extends SoundGen{
     private static final double max_base_f=115.0;
-    private static volatile int conv_size=Configs.conv_size.get();
+    private static final int conv_size=Configs.conv_size.get();
     private static volatile double vvvf_amp;
     private static volatile double dry_wet_ratio;
     private static volatile double line_train_ratio;

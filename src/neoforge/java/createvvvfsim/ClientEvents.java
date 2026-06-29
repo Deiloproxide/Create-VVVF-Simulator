@@ -58,6 +58,7 @@ public class ClientEvents implements Reloadable{
     }
     @SubscribeEvent
     public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event){
+        FSmoother.reloadCreate();
         SoundEngine.setAmp(mc.options.getSoundSourceVolume(SoundSource.MASTER));
     }
     @SubscribeEvent
@@ -74,6 +75,8 @@ public class ClientEvents implements Reloadable{
     public static int onReload(CommandContext<CommandSourceStack> context){
         Component msg=Component.literal(Configs.command_return);
         for(Reloadable reloadable:reloadables) reloadable.reload();
+        FSmoother.reloadCreate();
+        TrainStatus.reloadSpeed();
         context.getSource().sendSuccess(()->msg,false);
         return 1;
     }
