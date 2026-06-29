@@ -2,10 +2,12 @@ package genengine;
 import createvvvfsim.Configs;
 import utils.RandomWalk;
 public class BaseSoundGen extends SoundGen{
-    private static final double current_f=Configs.base_current_f;
-    private static final double base_amp=Configs.base_amp;
-    private static final double brown_amp=Configs.brown_amp;
-    private final RandomWalk brown=new RandomWalk(0.0,Configs.brown_sigma,Configs.brown_range);
+    private static volatile double current_f;
+    private static volatile double base_amp;
+    private static volatile double brown_amp;
+    private static volatile double brown_sigma;
+    private static volatile double brown_range;
+    private final RandomWalk brown=new RandomWalk(0.0,0.0,0.0);
     private double phase=0.0;
     @Override
     public void mixTo(double[] mix_buffer){
@@ -18,5 +20,14 @@ public class BaseSoundGen extends SoundGen{
             phase+=2.0*current_f*sample_dt;
             if(phase>=2.0) phase-=2.0;
         }
+    }
+    @Override
+    public void reload(){
+        current_f=Configs.base_current_f.get();
+        base_amp=Configs.base_amp.get();
+        brown_amp=Configs.brown_amp.get();
+        brown_sigma=Configs.brown_sigma.get();
+        brown_range=Configs.brown_range.get();
+        brown.set(0.0,brown_sigma,brown_range);
     }
 }

@@ -3,11 +3,12 @@ import createvvvfsim.Configs;
 import java.lang.reflect.Method;
 import utils.Instance;
 public class RemasteredConst{
+    private static final int sample_rate=Configs.sample_rate.get();
     public static final int[] send_delays={
-            (int)(Configs.sample_rate*0.0297),
-            (int)(Configs.sample_rate*0.0411),
-            (int)(Configs.sample_rate*0.0677),
-            (int)(Configs.sample_rate*0.0973)};
+            (int)(sample_rate*0.0297),
+            (int)(sample_rate*0.0411),
+            (int)(sample_rate*0.0677),
+            (int)(sample_rate*0.0973)};
     public static final double[] send_feedbacks={
             Math.pow(10.0,-3.0*0.0297/0.08),
             Math.pow(10.0,-3.0*0.0411/0.25),

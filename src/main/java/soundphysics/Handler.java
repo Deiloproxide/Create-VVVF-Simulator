@@ -5,7 +5,8 @@ import java.util.List;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-public class Handler{
+import utils.Reloadable;
+public class Handler implements Reloadable{
     public EnvData getEnv(Level level,Player player,Vec3 train_pos){
         return new EnvData();
     }
@@ -16,4 +17,6 @@ public class Handler{
             train_data.wind_gen.mixTo(mix_buffer);
         }
     }
+    @Override
+    public void reload(){}
 }

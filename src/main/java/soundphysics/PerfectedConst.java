@@ -3,11 +3,12 @@ import createvvvfsim.Configs;
 import java.lang.reflect.Method;
 import utils.Instance;
 public class PerfectedConst{
+    private static final int sample_rate=Configs.sample_rate.get();
     public static final int[] send_delays={
-            (int)(Configs.sample_rate*0.012),
-            (int)(Configs.sample_rate*0.032),
-            (int)(Configs.sample_rate*0.071),
-            (int)(Configs.sample_rate*0.137)};
+            (int)(sample_rate*0.012),
+            (int)(sample_rate*0.032),
+            (int)(sample_rate*0.071),
+            (int)(sample_rate*0.137)};
     public static final double[] send_feedbacks={
             Math.pow(10.0,-3.0*0.012/0.10),
             Math.pow(10.0,-3.0*0.032/0.35),

@@ -11,9 +11,9 @@ import net.minecraft.world.phys.Vec3;
 import utils.Instance;
 import utils.Lowpass;
 public class PerfectedHandler extends Handler{
-    private static final int buffer_size=Configs.buffer_size;
-    private static final int tail_size=buffer_size*64;
-    private static final double far_distance=Configs.far_distance;
+    private static final int buffer_size=Configs.buffer_size.get();
+    private static final int tail_size=Configs.tail_size.get();
+    private static volatile double far_distance;
     private static final double[] train_buffer=new double[buffer_size];
     private static final double[][] tail_buffers=new double[4][tail_size];
     private static final double[] filtered=new double[4];
@@ -72,7 +72,7 @@ public class PerfectedHandler extends Handler{
             boolean indoors=reverb.get(Boolean.class,"isIndoors");
             double bias=indoors?PerfectedConst.indoor_bias:PerfectedConst.outdoor_bias;
             double enclosure=Math.min(Math.max((indoors?1.0-outdoor_leak:reverb_strength-outdoor_leak)*bias,0.0),1.0);
-            double distance_mul=1.0-Math.min(Math.max(distance/far_distance,0.0),1.0);
+            double distance_mul=1.0-Math.min(distance/far_distance,1.0);
             double room_mul=Math.min(Math.max(room/20.0,0.15),1.0);
             double overall=Math.min(Math.max(enclosure*distance_mul*room_mul*
                     (PerfectedConst.base_gain+reverb_strength*PerfectedConst.gain_mul)*
@@ -130,5 +130,9 @@ public class PerfectedHandler extends Handler{
             head_ptr++;
             if(head_ptr==tail_size) head_ptr=0;
         }
+    }
+    @Override
+    public void reload(){
+        far_distance=Configs.far_distance.get();
     }
 }

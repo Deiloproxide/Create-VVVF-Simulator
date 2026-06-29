@@ -19,10 +19,10 @@ import net.minecraft.world.phys.Vec3;
 import utils.Instance;
 import utils.Lowpass;
 public class RemasteredHandler extends Handler{
-    private static final int buffer_size=Configs.buffer_size;
-    private static final int tail_size=buffer_size*64;
+    private static final int buffer_size=Configs.buffer_size.get();
+    private static final int tail_size=Configs.tail_size.get();
     private static final float angle=(float)(Math.PI*(Math.sqrt(5f)+1f));
-    private static final double far_distance=Configs.far_distance;
+    private static volatile double far_distance;
     private static final double[] train_buffer=new double[buffer_size];
     private static final double[][] tail_buffers=new double[4][tail_size];
     private static final Lowpass[] filters=new Lowpass[5];
@@ -176,5 +176,9 @@ public class RemasteredHandler extends Handler{
             head_ptr++;
             if(head_ptr==tail_size) head_ptr=0;
         }
+    }
+    @Override
+    public void reload(){
+        far_distance=Configs.far_distance.get();
     }
 }

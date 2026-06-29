@@ -1,5 +1,6 @@
 package vvvfsimulator.generation.audio.trainsound;
 import createvvvfsim.Configs;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

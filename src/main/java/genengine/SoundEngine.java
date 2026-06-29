@@ -8,14 +8,15 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-public class SoundEngine{
-    private static final int sample_rate=Configs.sample_rate;
-    private static final int buffer_size=Configs.buffer_size;
+import utils.Reloadable;
+public class SoundEngine implements Reloadable{
+    private static final int sample_rate=Configs.sample_rate.get();
+    private static final int buffer_size=Configs.buffer_size.get();
     private static final AudioFormat format=new AudioFormat(sample_rate,16,1,true,false);
     private static final double[] mix_buffer=new double[buffer_size];
     private static final byte[] out_buffer=new byte[buffer_size*2];
     private static final Thread thread=new Thread(SoundEngine::mixLoop);
-    private static final double main_amp=Configs.main_amp;
+    private static volatile double main_amp;
     private static volatile double settings_amp=0.0;
     private static double current_amp=0.0;
     private static SourceDataLine dataline;
@@ -47,5 +48,9 @@ public class SoundEngine{
             }
             dataline.write(out_buffer,0,buffer_size*2);
         }
+    }
+    @Override
+    public void reload(){
+        main_amp=Configs.main_amp.get();
     }
 }

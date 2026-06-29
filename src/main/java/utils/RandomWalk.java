@@ -1,11 +1,16 @@
 package utils;
 import java.util.concurrent.ThreadLocalRandom;
 public class RandomWalk{
-    private final double mu;
-    private final double sigma;
-    private final double range;
+    private double mu;
+    private double sigma;
+    private double range;
     private double value=0.0;
     public RandomWalk(double mu,double sigma,double range){
+        this.mu=mu;
+        this.sigma=sigma;
+        this.range=range;
+    }
+    public void set(double mu,double sigma,double range){
         this.mu=mu;
         this.sigma=sigma;
         this.range=range;

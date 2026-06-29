@@ -11,13 +11,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-public class TrainStatus{
-    private static final double near_distance=Configs.near_distance;
-    private static final double far_distance=Configs.far_distance;
-    private static final double main_amp=Configs.main_amp;
-    private static final double gas_amp=Configs.gas_amp;
-    private static final double switch_amp=Configs.switch_amp;
-    private static final int eval_period=Configs.eval_period;
+import utils.Reloadable;
+public class TrainStatus implements Reloadable{
+    private static volatile double near_distance;
+    private static volatile double far_distance;
+    private static volatile double main_amp;
+    private static volatile double gas_amp;
+    private static volatile double switch_amp;
     public static final Object speed_lock=new Object(),train_lock=new Object();
     public static final Map<UUID,Double> cached_speeds=new HashMap<>();
     private static final List<TrainData> all_trains=new ArrayList<>();
@@ -54,13 +54,6 @@ public class TrainStatus{
             train_datas=new ArrayList<>(all_trains);
         }
         return train_datas;
-    }
-    public static void forceReload(){
-        List<TrainData> train_datas=getTrainData();
-        for(TrainData train_data:train_datas){
-            train_data.server_reloaded=false;
-            train_data.reload_timer=1;
-        }
     }
     public static void tick(Level level,Player player){
         if(level==null) return;
@@ -136,7 +129,7 @@ public class TrainStatus{
             train_data.set(speed,near_factor,far_factor,is_valid,is_move);
         }
     }
-    public static void evalTrains(Level level,Player player,int period_state){
+    public static void evalTrains(Level level,Player player,int period_state,int eval_period){
         if(level==null) return;
         if(period_state==0) eval_trains=getTrainData();
         for(int i=period_state;i<eval_trains.size();i+=eval_period){
@@ -152,6 +145,19 @@ public class TrainStatus{
                 envs.add(TrainData.handler.getEnv(level,player,entity.position()));
             }
             train_data.target_env=EnvData.avg(envs);
+        }
+    }
+    @Override
+    public void reload(){
+        near_distance=Configs.near_distance.get();
+        far_distance=Configs.far_distance.get();
+        main_amp=Configs.main_amp.get();
+        gas_amp=Configs.gas_amp.get();
+        switch_amp=Configs.switch_amp.get();
+        List<TrainData> train_datas=getTrainData();
+        for(TrainData train_data:train_datas){
+            train_data.server_reloaded=false;
+            train_data.reload_timer=1;
         }
     }
 }

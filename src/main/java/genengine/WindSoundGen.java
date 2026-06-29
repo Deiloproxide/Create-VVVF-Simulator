@@ -6,59 +6,33 @@ import utils.Highpass;
 import utils.Lowpass;
 import utils.RandomWalk;
 public class WindSoundGen extends SoundGen{
-    private static final double wind_base_amp=Configs.wind_base_amp;
-    private static final double wind_mod_f=Configs.wind_mod_f;
-    private static final double wind_mod_depth=Configs.wind_mod_depth;
-    private static final double bg_shear_base=Configs.bg_shear_base;
-    private static final double bg_shear_range=Configs.bg_shear_range;
-    private static final double bg_shear_sigma=Configs.bg_shear_rate*Math.sqrt(sample_dt);
-    private static final double hp_cutoff=Configs.hp_cutoff;
-    private static final double bg_wind_amp=Configs.bg_wind_amp;
-    private static final double main_cauchy_amp=Configs.main_cauchy_amp;
-    private static final double main_center_f=Configs.main_center_f;
-    private static final double main_cauchy_gamma=Configs.main_cauchy_gamma;
-    private static final double main_mod_f=Configs.main_mod_f;
-    private static final double main_mod_depth=Configs.main_mod_depth;
-    private static final double main_wind_amp=Configs.main_wind_amp;
-    private static final int table_size=Configs.buffer_size*Configs.table_ratio;
-    private static final double[] main_wind=new double[table_size];
-    private final Lowpass pink_bg=new Lowpass(1.0-Configs.pink_r0);
-    private final Lowpass bg_lpf=new Lowpass(1.0-Math.exp(-2.0*Math.PI*bg_shear_base/sample_rate));
-    private final Highpass bg_hpf=new Highpass(Math.exp(-2.0*Math.PI*hp_cutoff/sample_rate));
-    private final RandomWalk bg_shear=new RandomWalk(0.0,bg_shear_sigma,bg_shear_range);
+    private static final int table_size=Configs.table_size.get();
+    private static volatile double pink_r0;
+    private static volatile double wind_base_amp;
+    private static volatile double wind_mod_f;
+    private static volatile double wind_mod_depth;
+    private static volatile double bg_shear_base;
+    private static volatile double bg_shear_range;
+    private static volatile double bg_shear_rate;
+    private static volatile double bg_shear_sigma;
+    private static volatile double hp_cutoff;
+    private static volatile double bg_wind_amp;
+    private static volatile double main_cauchy_amp;
+    private static volatile double main_center_f;
+    private static volatile double main_cauchy_gamma;
+    private static volatile double main_mod_f;
+    private static volatile double main_mod_depth;
+    private static volatile double main_wind_amp;
+    private static volatile double[] main_wind,temp=new double[table_size];
+    private final Lowpass pink_bg=new Lowpass(0.0);
+    private final Lowpass bg_lpf=new Lowpass(0.0);
+    private final Highpass bg_hpf=new Highpass(0.0);
+    private final RandomWalk bg_shear=new RandomWalk(0.0,0.0,0.0);
     private static ThreadLocalRandom tlr;
     private volatile double target_f=0.0;
     private double current_f=0.0;
     private double total_t=0.0;
     private int table_index=0;
-    static{
-        tlr=ThreadLocalRandom.current();
-        for(int i=0;i<table_size;i++) main_wind[i]=tlr.nextGaussian();
-        DoubleFFT_1D fft=new DoubleFFT_1D(table_size);
-        fft.realForward(main_wind);
-        double log_ratio0=Math.log(1e-6/main_center_f);
-        double gain_0=1.0/(1.0+Math.pow(log_ratio0/main_cauchy_gamma,2));
-        double log_ratio_nyq=Math.log(sample_rate/main_center_f/2.0);
-        double gain_nyq=1.0/(1.0+Math.pow(log_ratio_nyq/main_cauchy_gamma,2));
-        main_wind[0]*=gain_0;
-        main_wind[1]*=gain_nyq;
-        int num_bins=table_size/2;
-        for(int i=1;i<num_bins;i++){
-            double freq=(double)i/(table_size*sample_dt);
-            double log_ratio=Math.log(freq/main_center_f);
-            double gain=1.0/(1.0+Math.pow(log_ratio/main_cauchy_gamma,2));
-            main_wind[2*i]*=gain;
-            main_wind[2*i+1]*=gain;
-        }
-        fft.realInverse(main_wind,true);
-        double peak=0;
-        for(int i=0;i<table_size;i++){
-            double abs_val=Math.abs(main_wind[i]);
-            if(peak<abs_val) peak=abs_val;
-        }
-        double norm_factor=main_cauchy_amp/peak;
-        for(int i=0;i<table_size;i++) main_wind[i]*=norm_factor;
-    }
     public void setF(double speed){
         target_f=speed;
     }
@@ -90,5 +64,56 @@ public class WindSoundGen extends SoundGen{
             total_t+=sample_dt;
             table_index++;
         }
+    }
+    @Override
+    public void reload(){
+        pink_r0=Configs.pink_r0.get();
+        wind_base_amp=Configs.wind_base_amp.get();
+        wind_mod_f=Configs.wind_mod_f.get();
+        wind_mod_depth=Configs.wind_mod_depth.get();
+        bg_shear_base=Configs.bg_shear_base.get();
+        bg_shear_range=Configs.bg_shear_range.get();
+        bg_shear_rate=Configs.bg_shear_rate.get();
+        bg_shear_sigma=bg_shear_rate*Math.sqrt(sample_dt);
+        hp_cutoff=Configs.hp_cutoff.get();
+        bg_wind_amp=Configs.bg_wind_amp.get();
+        main_cauchy_amp=Configs.main_cauchy_amp.get();
+        main_center_f=Configs.main_center_f.get();
+        main_cauchy_gamma=Configs.main_cauchy_gamma.get();
+        main_mod_f=Configs.main_mod_f.get();
+        main_mod_depth=Configs.main_mod_depth.get();
+        main_wind_amp=Configs.main_wind_amp.get();
+        pink_bg.setAlpha(1.0-pink_r0);
+        bg_lpf.setAlpha(1.0-Math.exp(-2.0*Math.PI*bg_shear_base/sample_rate));
+        bg_hpf.setAlpha(Math.exp(-2.0*Math.PI*hp_cutoff/sample_rate));
+        bg_shear.set(0.0,bg_shear_sigma,bg_shear_range);
+        tlr=ThreadLocalRandom.current();
+        for(int i=0;i<table_size;i++) temp[i]=tlr.nextGaussian();
+        DoubleFFT_1D fft=new DoubleFFT_1D(table_size);
+        fft.realForward(temp);
+        double log_ratio0=Math.log(1e-6/main_center_f);
+        double gain_0=1.0/(1.0+Math.pow(log_ratio0/main_cauchy_gamma,2));
+        double log_ratio_nyq=Math.log(sample_rate/main_center_f/2.0);
+        double gain_nyq=1.0/(1.0+Math.pow(log_ratio_nyq/main_cauchy_gamma,2));
+        temp[0]*=gain_0;
+        temp[1]*=gain_nyq;
+        int num_bins=table_size/2;
+        for(int i=1;i<num_bins;i++){
+            double freq=(double)i/(table_size*sample_dt);
+            double log_ratio=Math.log(freq/main_center_f);
+            double gain=1.0/(1.0+Math.pow(log_ratio/main_cauchy_gamma,2));
+            temp[2*i]*=gain;
+            temp[2*i+1]*=gain;
+        }
+        fft.realInverse(temp,true);
+        double peak=0;
+        for(int i=0;i<table_size;i++){
+            double abs_val=Math.abs(temp[i]);
+            if(peak<abs_val) peak=abs_val;
+        }
+        double norm_factor=main_cauchy_amp/peak;
+        for(int i=0;i<table_size;i++) temp[i]*=norm_factor;
+        main_wind=temp;
+        temp=new double[table_size];
     }
 }
