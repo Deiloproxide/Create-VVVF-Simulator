@@ -4,7 +4,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-public class ForgeConfigScreen extends Screen{
+public class ConfigScreen extends Screen{
     private static final Component[] texts={
             Component.literal("为什么Forge不提供自动配置页面的API啊啊啊啊啊"),
             Component.literal("不想写配置页面GUI，太麻烦，摆烂了(╯°□°）╯┻━┻"),
@@ -12,7 +12,7 @@ public class ForgeConfigScreen extends Screen{
             Component.literal("1.通过Neoforge的版本访问此页面（有汉化）"),
             Component.literal("2.通过机械动力访问其他模组配置（无汉化）"),
             Component.literal("3.直接通过版本文件夹访问配置文件")};
-    public ForgeConfigScreen(Minecraft client,Screen parent){
+    public ConfigScreen(Minecraft client,Screen parent){
         super(texts[0]);
     }
     @Override

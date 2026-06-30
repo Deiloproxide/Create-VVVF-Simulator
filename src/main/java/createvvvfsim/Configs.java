@@ -1,13 +1,8 @@
 package createvvvfsim;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.common.ModConfigSpec.Builder;
-import net.neoforged.neoforge.common.ModConfigSpec.DoubleValue;
-import net.neoforged.neoforge.common.ModConfigSpec.IntValue;
-@Mod(Configs.mod_id)
+import utils.ConfigSpec;
+import utils.ConfigSpec.Builder;
+import utils.ConfigSpec.DoubleValue;
+import utils.ConfigSpec.IntValue;
 public class Configs{
     public static final int mixin_priority=1027;
     public static final String mod_id="create_vvvf_simulator";
@@ -19,8 +14,8 @@ public class Configs{
     public static final String command_return="[Create: VVVF-Simulator] §a\\u221a§r";
     public static final String filter_wav="/assets/createvvvfsim/trainsound/Filter.wav";
     public static final String table="/assets/createvvvfsim/switchangle/";
-    public static final ModConfigSpec server_config;
-    public static final ModConfigSpec client_config;
+    public static final ConfigSpec server_config;
+    public static final ConfigSpec client_config;
     public static final IntValue sync_period;
     public static final IntValue eval_period;
     public static final IntValue sample_rate;
@@ -40,9 +35,17 @@ public class Configs{
     public static final DoubleValue main_wind_amp;
     public static final DoubleValue near_distance;
     public static final DoubleValue far_distance;
-    public static final DoubleValue base_current_f;
     public static final DoubleValue brown_sigma;
     public static final DoubleValue brown_range;
+    public static final DoubleValue base_current_f;
+    public static final DoubleValue first_amp;
+    public static final DoubleValue second_amp;
+    public static final DoubleValue third_amp;
+    public static final DoubleValue fourth_amp;
+    public static final DoubleValue first_phase;
+    public static final DoubleValue second_phase;
+    public static final DoubleValue third_phase;
+    public static final DoubleValue fourth_phase;
     public static final DoubleValue dry_wet_ratio;
     public static final DoubleValue line_train_ratio;
     public static final DoubleValue pink_r0;
@@ -83,9 +86,9 @@ public class Configs{
         main_amp=client_builder.defineInRange("main_amp",1.0,0.0,2.0);
         gas_amp=client_builder.defineInRange("gas_amp",0.6,0.0,2.0);
         switch_amp=client_builder.defineInRange("switch_amp",0.4,0.0,2.0);
-        base_amp=client_builder.defineInRange("base_amp",0.06,0.0,0.2);
-        brown_amp=client_builder.defineInRange("brown_amp",0.03,0.0,0.2);
-        vvvf_amp=client_builder.defineInRange("vvvf_amp",0.5,0.0,2.0);
+        base_amp=client_builder.defineInRange("base_amp",0.04,0.0,0.2);
+        brown_amp=client_builder.defineInRange("brown_amp",0.025,0.0,0.2);
+        vvvf_amp=client_builder.defineInRange("vvvf_amp",0.6,0.0,2.0);
         bg_wind_amp=client_builder.defineInRange("bg_wind_amp",3.0,0.0,10.0);
         main_wind_amp=client_builder.defineInRange("main_wind_amp",0.15,0.0,1.0);
         client_builder.pop();
@@ -95,9 +98,19 @@ public class Configs{
         client_builder.pop();
         client_builder.push("advanced");
         client_builder.push("equipment_sound");
-        base_current_f=client_builder.defineInRange("base_current_f",140.0,0.0,500.0);
         brown_sigma=client_builder.defineInRange("brown_sigma",0.05,0.0,0.2);
         brown_range=client_builder.defineInRange("brown_range",2.0,0.0,10.0);
+        base_current_f=client_builder.defineInRange("base_current_f",140.0,0.0,500.0);
+        client_builder.push("base_harmonic");
+        first_amp=client_builder.defineInRange("first_amp",0.189,0.0,1.0);
+        second_amp=client_builder.defineInRange("second_amp",0.223,0.0,1.0);
+        third_amp=client_builder.defineInRange("third_amp",0.097,0.0,1.0);
+        fourth_amp=client_builder.defineInRange("fourth_amp",0.065,0.0,1.0);
+        first_phase=client_builder.defineInRange("first_phase",0.538,0.0,6.2832);
+        second_phase=client_builder.defineInRange("second_phase",0.979,0.0,6.2832);
+        third_phase=client_builder.defineInRange("third_phase",1.98,0.0,6.2832);
+        fourth_phase=client_builder.defineInRange("fourth_phase",0.08,0.0,6.2832);
+        client_builder.pop();
         client_builder.pop();
         client_builder.push("vvvf_sound");
         dry_wet_ratio=client_builder.defineInRange("dry_wet_ratio",0.0,0.0,1.0);
@@ -122,10 +135,5 @@ public class Configs{
         client_builder.pop();
         client_builder.pop();
         client_config=client_builder.build();
-    }
-    public Configs(ModContainer container){
-        container.registerConfig(ModConfig.Type.SERVER,server_config);
-        container.registerConfig(ModConfig.Type.CLIENT,client_config);
-        if(FMLEnvironment.dist.isClient()) ClientEvents.registerScreen(container);
     }
 }

@@ -38,7 +38,7 @@ public class ClientEvents implements Reloadable{
     }
     public static void registerScreen(ModContainer container){
         container.registerExtensionPoint(ConfigScreenFactory.class,
-                ()->new ConfigScreenFactory(ForgeConfigScreen::new));
+                ()->new ConfigScreenFactory(ConfigScreen::new));
     }
     @SubscribeEvent
     public static void onLoad(FMLClientSetupEvent event){

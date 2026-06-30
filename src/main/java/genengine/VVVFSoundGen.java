@@ -63,17 +63,11 @@ public class VVVFSoundGen extends SoundGen{
 
             //Strategy1: Siemens
             Struct.PulseControl.Pulse.PulseAlternative pulse_alt;
-            if(base_f<3.0){
+            if(base_f<18.0){
                 pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;
                 pulse_count=1;
                 pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
-                carrier_main_f.value=240.0;
-            }//Start
-            else if(base_f<18.0){
-                pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;
-                pulse_count=1;
-                pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
-                carrier_main_f.value=240.0*Math.pow(1.875,(base_f-3.0)/15.0);
+                carrier_main_f.value=70.0*base_f/6.0+240;
             }//Async 240Hz-450Hz
             else if(base_f<44.0){
                 pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;
@@ -102,7 +96,7 @@ public class VVVFSoundGen extends SoundGen{
                 pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
             }//Square
             elect_state.baseWaveFrequency=base_f;
-            if(base_f<44.0) elect_state.baseWaveAmplitude=0.0211*base_f;
+            if(base_f<44.0) elect_state.baseWaveAmplitude=0.019292*base_f+0.08;
             else elect_state.baseWaveAmplitude=Math.min(0.0211*base_f-0.1657,1.245);
             domain.setBaseWaveAngleFrequency(MyMath.M_2PI*base_f);
             pulse_control.pulseMode.alternative=pulse_alt;

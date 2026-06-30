@@ -24,7 +24,7 @@ public class WindSoundGen extends SoundGen{
     private static volatile double main_wind_amp;
     private static volatile double pink_alpha;
     private static volatile double highpass_alpha;
-    private static volatile double[] main_wind,temp=new double[table_size];
+    private static volatile double[] main_wind,temp;
     private final Lowpass pink_bg=new Lowpass();
     private final Lowpass bg_lpf=new Lowpass();
     private final Highpass bg_hpf=new Highpass();
@@ -87,6 +87,7 @@ public class WindSoundGen extends SoundGen{
         main_wind_amp=Configs.main_wind_amp.get();
         pink_alpha=1.0-Configs.pink_r0.get();
         highpass_alpha=Math.exp(-2.0*Math.PI*hp_cutoff/sample_rate);
+        temp=new double[table_size];
         tlr=ThreadLocalRandom.current();
         for(int i=0;i<table_size;i++) temp[i]=tlr.nextGaussian();
         DoubleFFT_1D fft=new DoubleFFT_1D(table_size);
@@ -114,6 +115,5 @@ public class WindSoundGen extends SoundGen{
         double norm_factor=main_cauchy_amp/peak;
         for(int i=0;i<table_size;i++) temp[i]*=norm_factor;
         main_wind=temp;
-        temp=new double[table_size];
     }
 }
