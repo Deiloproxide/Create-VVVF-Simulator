@@ -1,5 +1,7 @@
 package createvvvfsim;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import genengine.BaseSoundGen;
 import genengine.SoundEngine;
@@ -32,8 +34,12 @@ public class ClientEvents implements Reloadable{
     }
     @SubscribeEvent
     public static void registerCommand(RegisterClientCommandsEvent event){
-        LiteralArgumentBuilder<CommandSourceStack> vvvf=Commands.literal(Configs.command_vvvf),
-                reload=Commands.literal(Configs.command_reload);
+        LiteralArgumentBuilder<CommandSourceStack> vvvf=Commands.literal(Configs.command_vvvf);
+        LiteralArgumentBuilder<CommandSourceStack> load=Commands.literal(Configs.command_load);
+        LiteralArgumentBuilder<CommandSourceStack> reload=Commands.literal(Configs.command_reload);
+        RequiredArgumentBuilder<CommandSourceStack,String> path=Commands.argument(Configs.command_path,
+                StringArgumentType.greedyString());
+        event.getDispatcher().register(vvvf.then(load.then(path.executes(ClientEvents::onLoad))));
         event.getDispatcher().register(vvvf.then(reload.executes(ClientEvents::onReload)));
     }
     public static void registerScreen(ModContainer container){
@@ -41,7 +47,7 @@ public class ClientEvents implements Reloadable{
                 ()->new ConfigScreenFactory(ConfigScreen::new));
     }
     @SubscribeEvent
-    public static void onLoad(FMLClientSetupEvent event){
+    public static void onInit(FMLClientSetupEvent event){
         reloadables=new Reloadable[]{
                 new BaseSoundGen(),new VVVFSoundGen(),new WindSoundGen(),new SoundEngine(),
                 TrainData.handler,new ClientEvents(),new FSmoother(),new TrainStatus()};
@@ -56,8 +62,15 @@ public class ClientEvents implements Reloadable{
     public static void onExit(ClientPlayerNetworkEvent.LoggingOut event){
         TrainStatus.clearDataCache();
     }
+    public static int onLoad(CommandContext<CommandSourceStack> context){
+        Component msg=Component.literal(Configs.command_ok);
+        String path=StringArgumentType.getString(context,Configs.command_path);
+        YamlLoader.loadYaml(path);
+        context.getSource().sendSuccess(()->msg,false);
+        return 1;
+    }
     public static int onReload(CommandContext<CommandSourceStack> context){
-        Component msg=Component.literal(Configs.command_return);
+        Component msg=Component.literal(Configs.command_ok);
         for(Reloadable reloadable:reloadables) reloadable.reload();
         FSmoother.reloadCreate();
         TrainStatus.reloadSpeed();

@@ -12,7 +12,7 @@ public class CreateVVVFSim{
         container.addConfig(new ModConfig(ModConfig.Type.CLIENT,Configs.client_config.get(),container));
         if(FMLEnvironment.dist.isClient()){
             ClientEvents.registerScreen(container);
-            context.getModEventBus().addListener(ClientEvents::onLoad);
+            context.getModEventBus().addListener(ClientEvents::onInit);
         }
         TrainSyncModel.register();
     }

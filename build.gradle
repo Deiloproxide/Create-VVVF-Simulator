@@ -28,6 +28,7 @@ group=mod_group_id
 base{archivesName=mod_id}
 java.toolchain.languageVersion=JavaLanguageVersion.of(deps.java)
 repositories{
+    mavenCentral()
     maven{url="https://repo.spongepowered.org/repository/maven-public/"}
     maven{url="https://maven.createmod.net"}
     maven{url="https://maven.tterrag.com"}
@@ -109,24 +110,10 @@ dependencies{
         runtimeOnly("dev.engine-room.flywheel:flywheel-${platform}-${minecraft_version}:${deps.flywheel}")
         implementation("com.tterrag.registrate:Registrate:${deps.registrate}")
     }
-    jarJar("com.github.wendykierp:JTransforms:3.1"){
-        version{
-            strictly "[3.1,3.2)"
-            prefer "3.1"
-        }
-    }
-    jarJar("pl.edu.icm:JLargeArrays:1.5"){
-        version{
-            strictly "[1.5,1.6)"
-            prefer "1.5"
-        }
-    }
-    jarJar("org.apache.commons:commons-math3:3.5"){
-        version{
-            strictly "[3.5,3.6)"
-            prefer "3.5"
-        }
-    }
+    jarJar("com.github.wendykierp:JTransforms:[3.1,)")
+    jarJar("pl.edu.icm:JLargeArrays:[1.5,)")
+    jarJar("org.apache.commons:commons-math3:[3.5,)")
+    jarJar("org.yaml:snakeyaml:[2.6,)")
 }
 var replaceProperties=[minecraft_version:minecraft_version,minecraft_range:deps.minecraft_range,
                        platform:platform,platform_range:deps.platform_range,

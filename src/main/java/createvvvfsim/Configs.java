@@ -7,13 +7,16 @@ public class Configs{
     public static final int mixin_priority=1027;
     public static final String mod_id="create_vvvf_simulator";
     public static final String sync_name="train_sync";
-    public static final String sound_name="train_vvvf";
     public static final String version="1.0.0";
     public static final String command_vvvf="vvvf";
+    public static final String command_load="load";
+    public static final String command_path="path";
     public static final String command_reload="reload";
-    public static final String command_return="[Create: VVVF-Simulator] §a\\u221a§r";
+    public static final String command_ok="[Create: VVVF-Simulator] §a\\u221a§r";
     public static final String filter_wav="/assets/createvvvfsim/trainsound/Filter.wav";
     public static final String table="/assets/createvvvfsim/switchangle/";
+    public static final String strategy="strategy/";
+    public static final String default_yaml="default.yaml";
     public static final ConfigSpec server_config;
     public static final ConfigSpec client_config;
     public static final IntValue sync_period;

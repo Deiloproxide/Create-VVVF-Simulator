@@ -27,7 +27,7 @@ public class RemasteredHandler extends Handler{
     private static final double[] train_buffer=new double[buffer_size];
     private static final double[][] tail_buffers=new double[4][tail_size];
     private static final Lowpass[] filters=new Lowpass[5];
-    private static ResourceLocation sound_id;
+    private static final ResourceLocation sound_id=ResourceLocation.tryBuild("","");
     private static Constructor<?> constructor;
     private static Method add_direct,add_shared,get_shared,ray_cast;
     private static int head_ptr=0;
@@ -36,7 +36,6 @@ public class RemasteredHandler extends Handler{
     }
     public static boolean register(){
         try{
-            sound_id=ResourceLocation.tryBuild(Configs.mod_id,Configs.sound_name);
             Instance reflected_audio=new Instance("com.sonicether.soundphysics.ReflectedAudio");
             constructor=reflected_audio.getConstructor(double.class,ResourceLocation.class);
             add_direct=reflected_audio.getMethod("addDirectAirspace",Vec3.class);
