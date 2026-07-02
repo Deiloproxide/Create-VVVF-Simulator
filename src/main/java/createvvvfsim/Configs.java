@@ -6,13 +6,16 @@ import utils.ConfigSpec.IntValue;
 public class Configs{
     public static final int mixin_priority=1027;
     public static final String mod_id="create_vvvf_simulator";
+    public static final String group_id="createvvvfsim";
     public static final String sync_name="train_sync";
     public static final String version="1.0.0";
     public static final String command_vvvf="vvvf";
     public static final String command_load="load";
     public static final String command_path="path";
     public static final String command_reload="reload";
-    public static final String command_ok="[Create: VVVF-Simulator] §a\\u221a§r";
+    public static final String status_path=mod_id+".command.load.status.";
+    public static final String exception_path=mod_id+".command.load.exception.";
+    public static final String reload_ok=mod_id+".command.reload.ok";
     public static final String filter_wav="/assets/createvvvfsim/trainsound/Filter.wav";
     public static final String table="/assets/createvvvfsim/switchangle/";
     public static final String strategy="strategy/";
@@ -27,6 +30,8 @@ public class Configs{
     public static final IntValue table_size;
     public static final IntValue tail_size;
     public static final IntValue speeds_length;
+    public static final IntValue first_gear;
+    public static final IntValue second_gear;
     public static final DoubleValue max_acc_ratio;
     public static final DoubleValue main_amp;
     public static final DoubleValue gas_amp;
@@ -49,6 +54,9 @@ public class Configs{
     public static final DoubleValue second_phase;
     public static final DoubleValue third_phase;
     public static final DoubleValue fourth_phase;
+    public static final DoubleValue max_speed_f;
+    public static final DoubleValue motor_db;
+    public static final DoubleValue gear_harmonic_db;
     public static final DoubleValue dry_wet_ratio;
     public static final DoubleValue line_train_ratio;
     public static final DoubleValue pink_r0;
@@ -116,6 +124,11 @@ public class Configs{
         client_builder.pop();
         client_builder.pop();
         client_builder.push("vvvf_sound");
+        first_gear=client_builder.defineInRange("first_gear",19,0,500);
+        second_gear=client_builder.defineInRange("second_gear",120,0,500);
+        max_speed_f=client_builder.defineInRange("max_speed_f",115.0,0.0,500.0);
+        motor_db=client_builder.defineInRange("motor_db",-2.0,-20.0,20.0);
+        gear_harmonic_db=client_builder.defineInRange("gear_harmonic_db",-2.5,-20.0,20.0);
         dry_wet_ratio=client_builder.defineInRange("dry_wet_ratio",0.0,0.0,1.0);
         line_train_ratio=client_builder.defineInRange("line_train_ratio",0.0,0.0,1.0);
         client_builder.pop();

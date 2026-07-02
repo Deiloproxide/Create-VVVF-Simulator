@@ -1,7 +1,5 @@
 package vvvfsimulator.data.vvvf;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,11 +9,20 @@ import java.util.List;
 import java.util.Map;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.composer.ComposerException;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.constructor.ConstructorException;
+import org.yaml.snakeyaml.constructor.DuplicateKeyException;
+import org.yaml.snakeyaml.error.Mark;
+import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.scanner.ScannerException;
+import utils.LoadContext;
+import utils.LoadException;
 import vvvfsimulator.data.vvvf.Struct.AmplitudeValue;
 import vvvfsimulator.data.vvvf.Struct.AsyncControlEx;
 import vvvfsimulator.data.vvvf.Struct.AsyncControlEx.CarrierFrequencyEx.TableValue.Parameter;
@@ -40,9 +47,9 @@ import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseHarmonic;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseTypeName;
 public final class Manager{
     private static final Struct TEMPLATE=new Struct();
-    public static Struct loadData;
-    public static Struct current=deepClone(TEMPLATE);
-    public static String loadPath="";
+    public static volatile Struct loadData;
+    public static volatile Struct current=deepClone(TEMPLATE);
+    public static volatile String loadPath="";
     public static boolean save(String path,Struct data,boolean useException){
         try(Writer writer=Files.newBufferedWriter(Path.of(path),StandardCharsets.UTF_8)){
             createYaml().dump(toYaml(data),writer);
@@ -56,23 +63,52 @@ public final class Manager{
     public static boolean save(String path,Struct data){
         return save(path,data,false);
     }
-    public static Struct load(String path,boolean useException){
-        try(Reader reader=Files.newBufferedReader(Path.of(path),StandardCharsets.UTF_8)){
-            YamlStruct yamlStruct=createYaml().loadAs(reader,YamlStruct.class);
-            return fromYaml(yamlStruct==null?new YamlStruct():yamlStruct);
-        }
-        catch(Exception e){
-            if(useException) throw new IllegalStateException("Failed to load VVVF yaml: "+path,e);
-            return null;
-        }
+    private static LoadContext createContext(LoadException exception,Mark mark){
+        if(mark==null) return new LoadContext(exception,0,0);
+        return new LoadContext(exception,mark.getLine(),mark.getColumn());
     }
-    public static Struct load(String path){
-        return load(path,false);
-    }
-    public static void loadCurrent(String path) throws IOException{
-        current=load(path,true);
+    public static LoadContext load(String path,InputStream inputStream){
+        YamlStruct yamlStruct=null;
+        LoadContext context=null;
+        try(Reader reader=new InputStreamReader(inputStream,StandardCharsets.UTF_8)){
+            try{
+                yamlStruct=createYaml().loadAs(reader,YamlStruct.class);
+                reader.close();
+            }
+            catch(ScannerException e){
+                context=createContext(LoadException.lex,e.getProblemMark());
+            }
+            catch(ParserException e){
+                context=createContext(LoadException.parse,e.getProblemMark());
+            }
+            catch(ComposerException e){
+                context=createContext(LoadException.compose,e.getProblemMark());
+            }
+            catch(DuplicateKeyException e){
+                context=createContext(LoadException.dump,e.getProblemMark());
+            }
+            catch(ConstructorException e){
+                context=createContext(LoadException.init,e.getProblemMark());
+            }
+            catch(YAMLException e){
+                if(e.getCause() instanceof IOException) context=new LoadContext(LoadException.io,0,0);
+                else context=new LoadContext(LoadException.init,0,0);
+            }
+        }
+        catch(IOException e){
+            context=new LoadContext(LoadException.io,0,0);
+        }
+        if(context!=null) return context;
+        if(yamlStruct==null) return new LoadContext(LoadException.empty,0,0);
+        try{
+            current=fromYaml(yamlStruct);
+        }
+        catch(RuntimeException e){
+            return new LoadContext(LoadException.init,0,0);
+        }
         loadPath=path;
         loadData=deepClone(current);
+        return new LoadContext(LoadException.normal,0,0);
     }
     public static boolean saveCurrent(String path){
         boolean result=save(path,current);
@@ -112,6 +148,7 @@ public final class Manager{
     }
     private static Yaml createYaml(){
         LoaderOptions loaderOptions=new LoaderOptions();
+        loaderOptions.setAllowDuplicateKeys(false);
         Constructor constructor=new Constructor(YamlStruct.class,loaderOptions);
         DumperOptions dumperOptions=new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);

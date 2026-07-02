@@ -139,14 +139,14 @@ public final class L2{
     private static int[] getKeys(Domain domain){
         int[] keys;
         switch(domain.electricalState.pulsePattern.pulseMode.pulseCount){
-            case 5 -> keys=new int[]{9,2,13,2,17,2,21,2,25,2,29,2,33,2,37,2};
-            case 7 -> keys=new int[]{15,4,15,3,7,1,11,2,19,4,23,4,27,4,31,4,35,4,39,4};
-            case 9 -> keys=new int[]{21,6,13,3,17,4,25,6,29,6,33,6,37,6};
-            case 11 -> keys=new int[]{27,8,19,5,23,6,31,8,35,8,39,8};
-            case 13 -> keys=new int[]{25,7,29,8,33,10,37,10};
-            case 15 -> keys=new int[]{31,9,35,10,39,12};
-            case 17 -> keys=new int[]{37,11};
-            default -> keys=new int[]{0};
+            case 5->keys=new int[]{9,2,13,2,17,2,21,2,25,2,29,2,33,2,37,2};
+            case 7->keys=new int[]{15,4,15,3,7,1,11,2,19,4,23,4,27,4,31,4,35,4,39,4};
+            case 9->keys=new int[]{21,6,13,3,17,4,25,6,29,6,33,6,37,6};
+            case 11->keys=new int[]{27,8,19,5,23,6,31,8,35,8,39,8};
+            case 13->keys=new int[]{25,7,29,8,33,10,37,10};
+            case 15->keys=new int[]{31,9,35,10,39,12};
+            case 17->keys=new int[]{37,11};
+            default->keys=new int[]{0};
         }
         return keys;
     }

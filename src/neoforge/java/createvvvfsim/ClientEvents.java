@@ -27,6 +27,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import utils.Reloadable;
+import utils.YamlLoader;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
 @EventBusSubscriber(modid=Configs.mod_id,value=Dist.CLIENT)
 public class ClientEvents implements Reloadable{
@@ -60,6 +61,7 @@ public class ClientEvents implements Reloadable{
         reloadables=new Reloadable[]{
                 new BaseSoundGen(),new VVVFSoundGen(),new WindSoundGen(),new SoundEngine(),
                 TrainData.handler,new ClientEvents(),new FSmoother(),new TrainStatus()};
+        YamlLoader.loadYaml(Configs.default_yaml);
         for(Reloadable reloadable:reloadables) reloadable.reload();
     }
     @SubscribeEvent
@@ -79,14 +81,14 @@ public class ClientEvents implements Reloadable{
         TrainStatus.getServerSpeed(model.train_id(),model.speed());
     }
     public static int onLoad(CommandContext<CommandSourceStack> context){
-        Component msg=Component.literal(Configs.command_ok);
         String path=StringArgumentType.getString(context,Configs.command_path);
-        YamlLoader.loadYaml(path);
+        Component msg=Component.literal(YamlLoader.loadYaml(path));
+        VVVFSoundGen.reloadYamlData();
         context.getSource().sendSuccess(()->msg,false);
         return 1;
     }
     public static int onReload(CommandContext<CommandSourceStack> context){
-        Component msg=Component.literal(Configs.command_ok);
+        Component msg=Component.translatable(Configs.reload_ok);
         for(Reloadable reloadable:reloadables) reloadable.reload();
         FSmoother.reloadCreate();
         TrainStatus.reloadSpeed();

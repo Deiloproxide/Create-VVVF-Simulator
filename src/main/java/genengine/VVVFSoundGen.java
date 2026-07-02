@@ -1,155 +1,89 @@
 package genengine;
 import createvvvfsim.Configs;
+import vvvfsimulator.data.trainaudio.Struct;
+import vvvfsimulator.data.vvvf.Analyze;
+import vvvfsimulator.data.vvvf.Manager;
 import vvvfsimulator.generation.audio.trainsound.Audio;
 import vvvfsimulator.generation.audio.trainsound.AudioFilter.CppConvolutionFilter;
 import vvvfsimulator.generation.audio.trainsound.AudioResourceManager;
 import vvvfsimulator.vvvf.MyMath;
 import vvvfsimulator.vvvf.calculation.Common;
-import vvvfsimulator.vvvf.model.Struct;
-import vvvfsimulator.vvvf.model.Struct.ElectricalParameter.CarrierParameter;
+import vvvfsimulator.vvvf.model.Struct.Domain;
+import vvvfsimulator.vvvf.model.Struct.PhaseState;
 public class VVVFSoundGen extends SoundGen{
-    private static final double max_base_f=115.0;
     private static final int conv_size=Configs.conv_size.get();
+    private static volatile int first_gear;
+    private static volatile int second_gear;
     private static volatile double vvvf_amp;
+    private static volatile double max_speed_f;
+    private static volatile double motor_db;
+    private static volatile double gear_harmonic_db;
     private static volatile double dry_wet_ratio;
     private static volatile double line_train_ratio;
+    private static volatile vvvfsimulator.data.vvvf.Struct vvvf_config;
     private volatile double target_f=0.0;
     private double current_f=0.0;
-    private final Struct.PulseControl pulse_control=new Struct.PulseControl();
-    private final CarrierParameter.RandomFrequency carrier_random_f=new CarrierParameter.RandomFrequency(0.0,30.0);
-    private final CarrierParameter.ConstantFrequency carrier_main_f=new CarrierParameter.ConstantFrequency(0.0);
-    private final CarrierParameter carrier_f=new CarrierParameter(carrier_random_f,carrier_main_f);
-    private final Struct.ElectricalParameter elect_state=new Struct.ElectricalParameter(false,false,2,pulse_control,carrier_f,null,0.0,0.0);
-    private final vvvfsimulator.data.trainaudio.Struct train_config=new vvvfsimulator.data.trainaudio.Struct();
+    private final Struct train_config=new Struct();
     private final CppConvolutionFilter conv_filter;
-    private final Struct.Domain domain=new Struct.Domain(train_config.motorSpec);
+    private final Domain domain=new Domain(train_config.motorSpec);
     private final double[] dry_buffer=new double[buffer_size],wet_buffer=new double[buffer_size];
     public VVVFSoundGen(){
         int[] ir_sample_rate={-1};
         double[] ir=AudioResourceManager.readResourceAudioFileSample(AudioResourceManager.SAMPLE_IR_PATH,ir_sample_rate);
         train_config.impulseResponseSampleRate=sample_rate;
         train_config.impulseResponse=AudioResourceManager.resampleLinear(ir,ir_sample_rate[0],sample_rate);
-        train_config.setCalculatedGearHarmonic(19,120);
-        train_config.motorVolumeDb=0.5;
-        train_config.totalVolumeDb=-2.5;
+        train_config.setCalculatedGearHarmonic(first_gear,second_gear);
+        train_config.motorVolumeDb=motor_db-gear_harmonic_db;
+        train_config.totalVolumeDb=gear_harmonic_db;
         conv_filter=new CppConvolutionFilter(conv_size,train_config.impulseResponse);
-        domain.electricalState=elect_state;
-        pulse_control.pulseMode.carrierWave.type=Struct.PulseControl.Pulse.CarrierWaveConfiguration.CarrierWaveType.Sine;
-        addThirdHarmonicInjection(pulse_control.pulseMode);
     }
-    private static void addThirdHarmonicInjection(Struct.PulseControl.Pulse pulse){
-        Struct.PulseControl.Pulse.PulseHarmonic harmonic=new Struct.PulseControl.Pulse.PulseHarmonic();
-        harmonic.harmonic=3.0;
-        harmonic.amplitude=1.0/6.0;
-        harmonic.isHarmonicProportional=true;
-        harmonic.isAmplitudeProportional=true;
-        harmonic.type=Struct.PulseControl.Pulse.PulseHarmonic.PulseHarmonicType.Sine;
-        pulse.pulseHarmonics.add(harmonic);
+    public static void reloadYamlData(){
+        vvvf_config=Manager.deepClone(Manager.current);
     }
     public void setF(double speed){
-        target_f=speed*max_base_f;
+        target_f=speed*max_speed_f;
     }
     @Override
     public void mixTo(double[] mix_buffer){
         double f_step=(target_f-current_f)/buffer_size;
         double amp_step=(target_amp-current_amp)/buffer_size;
+        vvvfsimulator.data.vvvf.Struct config=vvvf_config;
         for(int i=0;i<buffer_size;i++){
             double last_base_f=Math.max(current_f,0.0);
             current_f+=f_step;
             current_amp+=amp_step;
             double base_f=Math.max(current_f,0.0);
-            Struct.PulseControl.Pulse.PulseTypeName pulse_type;
-            int pulse_count;
-
-            //Strategy1: Siemens
-            Struct.PulseControl.Pulse.PulseAlternative pulse_alt;
-            if(base_f<18.0){
-                pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;
-                pulse_count=1;
-                pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
-                carrier_main_f.value=70.0*base_f/6.0+240;
-            }//Async 240Hz-450Hz
-            else if(base_f<44.0){
-                pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;
-                pulse_count=1;
-                pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
-                carrier_main_f.value=450.0;
-            }//Async 450Hz
-            else if(base_f<58.5){
-                pulse_type=Struct.PulseControl.Pulse.PulseTypeName.CHM;
-                pulse_count=9;
-                pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
-            }//CHM9 Default
-            else if(base_f<78.0){
-                pulse_type=Struct.PulseControl.Pulse.PulseTypeName.CHM;
-                pulse_count=7;
-                pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
-            }//CHM7 Default
-            else if(base_f<95.0){
-                pulse_type=Struct.PulseControl.Pulse.PulseTypeName.CHM;
-                pulse_count=5;
-                pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
-            }//CHM5 Default
-            else{
-                pulse_type=Struct.PulseControl.Pulse.PulseTypeName.SYNC;
-                pulse_count=1;
-                pulse_alt=Struct.PulseControl.Pulse.PulseAlternative.Default;
-            }//Square
-            elect_state.baseWaveFrequency=base_f;
-            if(base_f<44.0) elect_state.baseWaveAmplitude=0.019292*base_f+0.08;
-            else elect_state.baseWaveAmplitude=Math.min(0.0211*base_f-0.1657,1.245);
-            domain.setBaseWaveAngleFrequency(MyMath.M_2PI*base_f);
-            pulse_control.pulseMode.alternative=pulse_alt;
-            /*
-            //Strategy2: Alstom
-            double base_wave_amp=0.0196*base_f;
-            if(base_f<15){
-                pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;
-                pulse_count=1;
-                carrier_main_f.value=300;
-            }//Async 300Hz
-            else if(base_f<27){
-                pulse_type=Struct.PulseControl.Pulse.PulseTypeName.ASYNC;
-                pulse_count=1;
-                carrier_main_f.value=400;
-            }//Async 400Hz
-            else if(base_f<42){
-                pulse_type=Struct.PulseControl.Pulse.PulseTypeName.SYNC;
-                pulse_count=21;
-            }//Sync 21
-            else if(base_f<60){
-                pulse_type=Struct.PulseControl.Pulse.PulseTypeName.SYNC;
-                pulse_count=15;
-                base_wave_amp=0.04*base_f-0.88;
-            }//Sync 15
-            else{
-                pulse_type=Struct.PulseControl.Pulse.PulseTypeName.SYNC;
-                pulse_count=11;
-                base_wave_amp=0.41*base_f-23.0;
-            }//Sync 11
-            elect_state.baseWaveFrequency=base_f;
-            elect_state.baseWaveAmplitude=base_wave_amp;
-            domain.setBaseWaveAngleFrequency(MyMath.M_2PI*base_f);
-            */
-            elect_state.isZeroOutput=base_f<=0.0;
-            pulse_control.pulseMode.pulseType=pulse_type;
-            pulse_control.pulseMode.pulseCount=pulse_count;
             if(last_base_f>1e-9 && base_f>1e-9) domain.multiplyBaseWaveTime(last_base_f/base_f);
             else if(base_f<=1e-9) domain.setBaseWaveTime(0.0);
+            domain.setBraking(f_step<0);
+            domain.setPowerOff(base_f<=1e-9);
+            domain.setControlFrequency(base_f);
+            domain.setBaseWaveAngleFrequency(MyMath.M_2PI*base_f);
             domain.addTime(sample_dt);
             domain.addBaseWaveTime(sample_dt);
             domain.getCarrierInstance().time+=sample_dt;
-            Struct.PhaseState state=Common.getCalculator(2,pulse_type).calculate(domain,0.0);
-            domain.motor.process(domain.getDeltaTime(),MyMath.M_2PI*base_f,state);
-            dry_buffer[i]=Audio.calculateTrainSoundFromCurrentState(domain,train_config);
+            Analyze.calculate(domain,config);
+            PhaseState state=Common.calculatePhaseState(domain,0.0);
+            double line=0.01*(state.u-state.v);
+            double dry=Audio.calculateTrainSoundFromCurrentState(domain,train_config);
+            dry_buffer[i]=line*line_train_ratio+dry*(1-line_train_ratio);
         }
         conv_filter.process(dry_buffer,0,wet_buffer,0,buffer_size);
-        for(int i=0;i<buffer_size;i++) mix_buffer[i]+=wet_buffer[i]*vvvf_amp*current_amp;
+        for(int i=0;i<buffer_size;i++){
+            double mix=dry_buffer[i]*4*dry_wet_ratio+wet_buffer[i]*(1-dry_wet_ratio);
+            mix_buffer[i]+=mix*vvvf_amp*current_amp;
+        }
     }
     @Override
     public void reload(){
+        first_gear=Configs.first_gear.get();
+        second_gear=Configs.second_gear.get();
         vvvf_amp=Configs.vvvf_amp.get();
+        max_speed_f=Configs.max_speed_f.get();
+        motor_db=Configs.motor_db.get();
+        gear_harmonic_db=Configs.gear_harmonic_db.get();
         dry_wet_ratio=Configs.dry_wet_ratio.get();
         line_train_ratio=Configs.line_train_ratio.get();
+        reloadYamlData();
     }
 }
