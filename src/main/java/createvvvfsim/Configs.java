@@ -13,6 +13,9 @@ public class Configs{
     public static final String command_load="load";
     public static final String command_path="path";
     public static final String command_reload="reload";
+    public static final String autoload_dir="config/createvvvfsim/";
+    public static final String autoload_file="worldconfig.txt";
+    public static final String autoload_key="yamlfile";
     public static final String status_path=mod_id+".command.load.status.";
     public static final String exception_path=mod_id+".command.load.exception.";
     public static final String reload_ok=mod_id+".command.reload.ok";

@@ -15,6 +15,7 @@ public class YamlLoader{
     private static final ResourceManager manager=Minecraft.getInstance().getResourceManager();
     private static final List<LoadException> parse_errors=Arrays.asList(LoadException.lex,
             LoadException.parse,LoadException.compose,LoadException.dump,LoadException.init);
+    public static String success_name;
     public static String loadYaml(String path){
         List<String> err_list=new ArrayList<>();
         String[] paths;
@@ -40,6 +41,8 @@ public class YamlLoader{
             if(exception==LoadException.normal) break;
         }
         LoadStatus status=statuses[status_ptr];
+        if(status==LoadStatus.error) success_name=null;
+        else success_name=paths[status_ptr];
         StringBuilder msg=new StringBuilder(),err_msg=new StringBuilder();
         switch(status){
             case ok:

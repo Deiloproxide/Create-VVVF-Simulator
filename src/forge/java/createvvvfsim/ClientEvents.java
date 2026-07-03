@@ -12,6 +12,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -21,6 +22,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import utils.AutoLoad;
 import utils.Reloadable;
 import utils.YamlLoader;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
@@ -57,8 +59,14 @@ public class ClientEvents implements Reloadable{
     }
     @SubscribeEvent
     public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event){
-        FSmoother.reloadCreate();
         SoundEngine.setAmp(mc.options.getSoundSourceVolume(SoundSource.MASTER));
+        FSmoother.reloadCreate();
+        String path=AutoLoad.load(mc);
+        Component msg=Component.literal(YamlLoader.loadYaml(path));
+        VVVFSoundGen.reloadYamlData();
+        AutoLoad.save(mc,YamlLoader.success_name);
+        Player player=event.getPlayer();
+        player.sendSystemMessage(msg);
     }
     @SubscribeEvent
     public static void onExit(ClientPlayerNetworkEvent.LoggingOut event){
@@ -68,6 +76,7 @@ public class ClientEvents implements Reloadable{
         String path=StringArgumentType.getString(context,Configs.command_path);
         Component msg=Component.literal(YamlLoader.loadYaml(path));
         VVVFSoundGen.reloadYamlData();
+        AutoLoad.save(mc,YamlLoader.success_name);
         context.getSource().sendSuccess(()->msg,false);
         return 1;
     }
