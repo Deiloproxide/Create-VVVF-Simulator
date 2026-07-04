@@ -6,6 +6,9 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record TrainSyncModel(UUID train_id,double speed) implements CustomPacketPayload{
     public static final Type<TrainSyncModel> model_type=new Type<>(
             ResourceLocation.tryBuild(Configs.mod_id,Configs.sync_name));
@@ -16,5 +19,9 @@ public record TrainSyncModel(UUID train_id,double speed) implements CustomPacket
     @Override
     public Type<TrainSyncModel> type(){
         return model_type;
+    }
+    @OnlyIn(Dist.CLIENT)
+    public void handle(IPayloadContext ignored){
+        TrainStatus.getServerSpeed(train_id(),speed());
     }
 }

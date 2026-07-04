@@ -8,7 +8,8 @@ public class Configs{
     public static final String mod_id="create_vvvf_simulator";
     public static final String group_id="createvvvfsim";
     public static final String sync_name="train_sync";
-    public static final String version="1.0.0";
+    public static final String event_name="train_event";
+    public static final String version="1.1.0";
     public static final String command_vvvf="vvvf";
     public static final String command_load="load";
     public static final String command_path="path";
@@ -16,6 +17,8 @@ public class Configs{
     public static final String autoload_dir="config/createvvvfsim/";
     public static final String autoload_file="worldconfig.txt";
     public static final String autoload_key="yamlfile";
+    public static final String dimension_path=mod_id+".train.dimension.";
+    public static final String event_path=mod_id+".train.event.";
     public static final String status_path=mod_id+".command.load.status.";
     public static final String exception_path=mod_id+".command.load.exception.";
     public static final String reload_ok=mod_id+".command.reload.ok";

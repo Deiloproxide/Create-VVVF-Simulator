@@ -1,8 +1,8 @@
 package genengine;
 import createvvvfsim.Configs;
-import vvvfsimulator.data.trainaudio.Struct;
 import vvvfsimulator.data.vvvf.Analyze;
 import vvvfsimulator.data.vvvf.Manager;
+import vvvfsimulator.data.vvvf.Struct;
 import vvvfsimulator.generation.audio.trainsound.Audio;
 import vvvfsimulator.generation.audio.trainsound.AudioFilter.CppConvolutionFilter;
 import vvvfsimulator.generation.audio.trainsound.AudioResourceManager;
@@ -20,13 +20,14 @@ public class VVVFSoundGen extends SoundGen{
     private static volatile double gear_harmonic_db;
     private static volatile double dry_wet_ratio;
     private static volatile double line_train_ratio;
-    private static volatile vvvfsimulator.data.vvvf.Struct vvvf_config;
+    private static volatile Struct vvvf_config;
     private volatile double target_f=0.0;
     private double current_f=0.0;
-    private final Struct train_config=new Struct();
+    private final vvvfsimulator.data.trainaudio.Struct train_config=new vvvfsimulator.data.trainaudio.Struct();
     private final CppConvolutionFilter conv_filter;
     private final Domain domain=new Domain(train_config.motorSpec);
-    private final double[] dry_buffer=new double[buffer_size],wet_buffer=new double[buffer_size];
+    private final double[] dry_buffer=new double[buffer_size];
+    private final double[] wet_buffer=new double[buffer_size];
     public VVVFSoundGen(){
         int[] ir_sample_rate={-1};
         double[] ir=AudioResourceManager.readResourceAudioFileSample(AudioResourceManager.SAMPLE_IR_PATH,ir_sample_rate);
@@ -47,7 +48,7 @@ public class VVVFSoundGen extends SoundGen{
     public void mixTo(double[] mix_buffer){
         double f_step=(target_f-current_f)/buffer_size;
         double amp_step=(target_amp-current_amp)/buffer_size;
-        vvvfsimulator.data.vvvf.Struct config=vvvf_config;
+        Struct config=vvvf_config;
         for(int i=0;i<buffer_size;i++){
             double last_base_f=Math.max(current_f,0.0);
             current_f+=f_step;

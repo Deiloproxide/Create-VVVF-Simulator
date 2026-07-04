@@ -8,6 +8,7 @@ import genengine.SoundEngine;
 import genengine.VVVFSoundGen;
 import genengine.WindSoundGen;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -24,9 +25,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import org.joml.Vector3f;
 import utils.AutoLoad;
 import utils.Reloadable;
 import utils.YamlLoader;
@@ -39,11 +38,6 @@ public class ClientEvents implements Reloadable{
     private static int eval_current;
     static{
         CustomPwm.CustomPwmPresets.preload();
-    }
-    @SubscribeEvent
-    public static void registerModel(RegisterPayloadHandlersEvent event){
-        PayloadRegistrar registrar=event.registrar(Configs.version).optional();
-        registrar.playToClient(TrainSyncModel.model_type,TrainSyncModel.stream_codec,ClientEvents::onGetSpeed);
     }
     @SubscribeEvent
     public static void registerCommand(RegisterClientCommandsEvent event){
@@ -85,8 +79,12 @@ public class ClientEvents implements Reloadable{
     public static void onPauseChange(ClientPauseChangeEvent.Post event){
         SoundEngine.setAmp(event.isPaused()?0.0:mc.options.getSoundSourceVolume(SoundSource.MASTER));
     }
-    public static void onGetSpeed(TrainSyncModel model,IPayloadContext ignored){
-        TrainStatus.getServerSpeed(model.train_id(),model.speed());
+    public static void onGetTrainEvent(String name,String event,String dimension,Vector3f pos){
+        int x=Math.round(pos.x),y=Math.round(pos.y),z=Math.round(pos.z);
+        String dimension_lang=I18n.get(Configs.dimension_path+dimension);
+        String msg=I18n.get(Configs.event_path+event,name,dimension_lang,x,y,z);
+        Player player=mc.player;
+        if(player!=null) player.sendSystemMessage(Component.literal(msg));
     }
     public static int onLoad(CommandContext<CommandSourceStack> context){
         String path=StringArgumentType.getString(context,Configs.command_path);

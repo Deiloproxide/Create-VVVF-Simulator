@@ -2,13 +2,9 @@
   "required":true,
   "minVersion":"0.8",
   "package":"mixin",
-  "client":[
-    "NoCarriageEffects",
-    "ISyncAccessor",
-    "AddTrain",
-    "RemoveTrain",
-    "ISPRAccessor"
-  ],
+  "mixins":["TrainEvents"],
+  "client":["NoCarriageEffects","ISyncAccessor",
+    "AddTrain","RemoveTrain","ISPRAccessor"],
   "injectors":{
     "defaultRequire":1
   }

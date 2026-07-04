@@ -18,8 +18,11 @@ public class TrainStatus implements Reloadable{
     private static volatile double main_amp;
     private static volatile double gas_amp;
     private static volatile double switch_amp;
-    public static final Object speed_lock=new Object(),train_lock=new Object();
+    public static final Object speed_lock=new Object();
+    public static final Object event_lock=new Object();
+    public static final Object train_lock=new Object();
     public static final Map<UUID,Double> cached_speeds=new HashMap<>();
+    public static final List<UUID> cached_events=new ArrayList<>();
     private static final List<TrainData> all_trains=new ArrayList<>();
     private static List<TrainData> eval_trains=new ArrayList<>();
     public static void addTrain(Train train){
@@ -40,12 +43,23 @@ public class TrainStatus implements Reloadable{
             cached_speeds.put(id,speed);
         }
     }
+    public static void getServerEvent(UUID id){
+        synchronized(speed_lock){
+            cached_speeds.put(id,0.0);
+        }
+        synchronized(event_lock){
+            cached_events.add(id);
+        }
+    }
     public static void clearDataCache(){
         synchronized(train_lock){
             all_trains.clear();
         }
         synchronized(speed_lock){
             cached_speeds.clear();
+        }
+        synchronized(event_lock){
+            cached_events.clear();
         }
     }
     public static List<TrainData> getTrainData(){
@@ -97,13 +111,22 @@ public class TrainStatus implements Reloadable{
             double speed;
             boolean is_valid=carriage_count!=0;
             if(train_data.use_server){
+                UUID id=train_data.train.id;
                 synchronized(speed_lock){
-                    speed=cached_speeds.get(train_data.train.id);
+                    speed=cached_speeds.get(id);
                 }
                 if(!train_data.server_reloaded){
                     train_data.f_smoother.reloadF(speed);
                     train_data.server_reloaded=true;
                 }
+                synchronized(event_lock){
+                    if(cached_events.contains(id)){
+                        speed=0.0;
+                        train_data.f_smoother.reloadF(0.0);
+                        cached_events.remove(id);
+                    }
+                }
+
             }
             else{
                 speed=is_valid?avg_speed/carriage_count:0.0;
@@ -113,10 +136,10 @@ public class TrainStatus implements Reloadable{
                     train_data.reload_timer--;
                     if(train_data.reload_timer==0) train_data.f_smoother.reloadF(speed);
                 }
-            }
-            if(train_data.train.derailed){
-                speed=0.0;
-                train_data.f_smoother.reloadF(0.0);
+                if(train_data.train.derailed){
+                    speed=0.0;
+                    train_data.f_smoother.reloadF(0.0);
+                }
             }
             boolean is_move=speed>1e-2;
             if(is_move && !train_data.is_last_move && near_factor>1e-2){

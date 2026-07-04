@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.network.PacketDistributor;
+import org.joml.Vector3f;
 import utils.Reloadable;
 @Mod.EventBusSubscriber(modid=Configs.mod_id)
 public class ServerEvents implements Reloadable{
@@ -22,7 +23,7 @@ public class ServerEvents implements Reloadable{
     @SubscribeEvent
     public static void onJoin(PlayerEvent.PlayerLoggedInEvent event){
         ServerPlayer player=(ServerPlayer)(event.getEntity());
-        if(TrainSyncModel.channel.isRemotePresent(player.connection.connection))
+        if(CommonEvents.channel.isRemotePresent(player.connection.connection))
             synchronized(player_lock){
                 all_players.add(player);
             }
@@ -49,6 +50,15 @@ public class ServerEvents implements Reloadable{
             }
         }
     }
+    public static void onTrainEvent(Train train,String type,String dimension,Vector3f pos){
+        List<ServerPlayer> players;
+        synchronized(player_lock){
+            players=new ArrayList<>(all_players);
+        }
+        TrainEventModel model=new TrainEventModel(train.id,train.name.getString(),type,dimension,pos);
+        for(ServerPlayer player:players)
+            CommonEvents.channel.send(PacketDistributor.PLAYER.with(()->player),model);
+    }
     @SubscribeEvent
     public static void tick(TickEvent.ServerTickEvent event){
         if(event.phase!=TickEvent.Phase.END) return;
@@ -61,7 +71,7 @@ public class ServerEvents implements Reloadable{
             for(Train train:Create.RAILWAYS.trains.values()){
                 TrainSyncModel model=new TrainSyncModel(train.id,Math.abs(train.speed)*20.0);
                 for(ServerPlayer player:players)
-                    TrainSyncModel.channel.send(PacketDistributor.PLAYER.with(()->player),model);
+                    CommonEvents.channel.send(PacketDistributor.PLAYER.with(()->player),model);
             }
         }
         sync_current++;

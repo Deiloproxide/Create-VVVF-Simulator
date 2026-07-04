@@ -14,6 +14,6 @@ public class CreateVVVFSim{
             ClientEvents.registerScreen(container);
             context.getModEventBus().addListener(ClientEvents::onInit);
         }
-        TrainSyncModel.register();
+        CommonEvents.registerModel();
     }
 }
