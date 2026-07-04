@@ -3,20 +3,17 @@ import createvvvfsim.Configs;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import net.minecraft.util.Tuple;
 public final class AudioResourceManager{
     public static final String SAMPLE_IR_PATH=Configs.filter_wav;
-    public static double[] readResourceAudioFileSample(String path,int[] sampleRateOut){
+    public static Tuple<Integer,double[]> readResourceAudioFileSample(String path){
         try(InputStream in=AudioResourceManager.class.getResourceAsStream(path)){
-            if(in==null){
-                sampleRateOut[0]=-1;
-                return new double[0];
-            }
+            if(in==null) return new Tuple<>(-1,new double[0]);
             byte[] bytes=readAllBytes(in);
-            return decodePcm16WavMono(bytes,sampleRateOut);
+            return decodePcm16WavMono(bytes);
         }
         catch(IOException e){
-            sampleRateOut[0]=-1;
-            return new double[0];
+            return new Tuple<>(-1,new double[0]);
         }
     }
     public static double[] resampleLinear(double[] input,int inputSampleRate,int outputSampleRate){
@@ -37,19 +34,15 @@ public final class AudioResourceManager{
         }
         return output;
     }
-    private static double[] decodePcm16WavMono(byte[] bytes,int[] sampleRateOut){
-        if(bytes.length<44 || bytes[0]!='R' || bytes[1]!='I' || bytes[2]!='F' || bytes[3]!='F'){
-            sampleRateOut[0]=-1;
-            return new double[0];
-        }
+    private static Tuple<Integer,double[]> decodePcm16WavMono(byte[] bytes){
+        if(bytes.length<44 || bytes[0]!='R' || bytes[1]!='I' || bytes[2]!='F' || bytes[3]!='F')
+            return new Tuple<>(-1,new double[0]);
         int channels=((bytes[23]&0xFF)<<8)|(bytes[22]&0xFF);
         int sampleRate=(bytes[24]&0xFF)|((bytes[25]&0xFF)<<8)|((bytes[26]&0xFF)<<16)|((bytes[27]&0xFF)<<24);
         int bitsPerSample=((bytes[35]&0xFF)<<8)|(bytes[34]&0xFF);
         int dataSize=(bytes[40]&0xFF)|((bytes[41]&0xFF)<<8)|((bytes[42]&0xFF)<<16)|((bytes[43]&0xFF)<<24);
-        if(bitsPerSample!=16 || channels==0 || dataSize<=0 || bytes.length<44+dataSize){
-            sampleRateOut[0]=-1;
-            return new double[0];
-        }
+        if(bitsPerSample!=16 || channels==0 || dataSize<=0 || bytes.length<44+dataSize)
+            return new Tuple<>(-1,new double[0]);
         int frames=dataSize/(channels*2);
         double[] out=new double[frames];
         int cursor=44;
@@ -63,8 +56,7 @@ public final class AudioResourceManager{
             }
             out[i]=(sum/(double)channels)/Short.MAX_VALUE;
         }
-        sampleRateOut[0]=sampleRate;
-        return out;
+        return new Tuple<>(sampleRate,out);
     }
     private static byte[] readAllBytes(InputStream in) throws IOException{
         ByteArrayOutputStream out=new ByteArrayOutputStream();

@@ -21,6 +21,9 @@ public record TrainEventModel(UUID train_id,String name,String event,String dime
             ByteBufCodecs.STRING_UTF8,TrainEventModel::dimension,
             ByteBufCodecs.VECTOR3F,TrainEventModel::pos,
             TrainEventModel::new);
+    static{
+        CommonEvents.types.add(model_type);
+    }
     @Override
     public Type<TrainEventModel> type(){
         return model_type;

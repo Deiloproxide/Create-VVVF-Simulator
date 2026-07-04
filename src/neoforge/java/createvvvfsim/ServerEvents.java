@@ -3,7 +3,6 @@ import com.simibubi.create.Create;
 import com.simibubi.create.content.trains.entity.Train;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -12,12 +11,10 @@ import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.registration.NetworkRegistry;
 import org.joml.Vector3f;
 import utils.Reloadable;
 @EventBusSubscriber(modid=Configs.mod_id)
 public class ServerEvents implements Reloadable{
-    private static final ResourceLocation sync_id=TrainSyncModel.model_type.id();
     private static final List<ServerPlayer> all_players=new ArrayList<>();
     private static final Object player_lock=new Object();
     private static final Reloadable reloadable=new ServerEvents();
@@ -26,7 +23,7 @@ public class ServerEvents implements Reloadable{
     @SubscribeEvent
     public static void onJoin(PlayerEvent.PlayerLoggedInEvent event){
         ServerPlayer player=(ServerPlayer)(event.getEntity());
-        if(NetworkRegistry.hasChannel(player.connection,sync_id))
+        if(CommonEvents.types.stream().allMatch(player.connection::hasChannel))
             synchronized(player_lock){
                 all_players.add(player);
             }

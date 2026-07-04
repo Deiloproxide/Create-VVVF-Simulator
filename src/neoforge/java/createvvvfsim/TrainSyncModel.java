@@ -16,6 +16,9 @@ public record TrainSyncModel(UUID train_id,double speed) implements CustomPacket
             UUIDUtil.STREAM_CODEC,TrainSyncModel::train_id,
             ByteBufCodecs.DOUBLE,TrainSyncModel::speed,
             TrainSyncModel::new);
+    static{
+        CommonEvents.types.add(model_type);
+    }
     @Override
     public Type<TrainSyncModel> type(){
         return model_type;

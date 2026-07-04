@@ -1,10 +1,14 @@
 package createvvvfsim;
+import java.util.ArrayList;
+import java.util.List;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 @EventBusSubscriber(modid=Configs.mod_id)
 public class CommonEvents{
+    public static final List<Type<?>> types=new ArrayList<>();
     @SubscribeEvent
     public static void registerModel(RegisterPayloadHandlersEvent event){
         PayloadRegistrar registrar=event.registrar(Configs.version).optional();

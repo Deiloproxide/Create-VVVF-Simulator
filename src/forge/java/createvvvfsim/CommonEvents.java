@@ -6,8 +6,11 @@ import net.minecraftforge.network.simple.SimpleChannel;
 public class CommonEvents{
     public static final SimpleChannel channel=NetworkRegistry.newSimpleChannel(
             ResourceLocation.tryBuild(Configs.mod_id,Configs.group_id),
-            ()->Configs.version,Configs.version::equals,Configs.version::equals);
+            ()->Configs.version,CommonEvents::check,CommonEvents::check);
     public static int id=0;
+    private static boolean check(String version){
+        return Configs.version.equals(version) || NetworkRegistry.ABSENT.version().equals(version);
+    }
     public static void registerModel(){
         channel.messageBuilder(TrainSyncModel.class,id++,NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(TrainSyncModel::encode).decoder(TrainSyncModel::decode)

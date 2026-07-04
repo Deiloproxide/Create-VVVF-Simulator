@@ -1,5 +1,6 @@
 package genengine;
 import createvvvfsim.Configs;
+import net.minecraft.util.Tuple;
 import vvvfsimulator.data.vvvf.Analyze;
 import vvvfsimulator.data.vvvf.Manager;
 import vvvfsimulator.data.vvvf.Struct;
@@ -21,25 +22,22 @@ public class VVVFSoundGen extends SoundGen{
     private static volatile double dry_wet_ratio;
     private static volatile double line_train_ratio;
     private static volatile Struct vvvf_config;
-    private volatile double target_f=0.0;
-    private double current_f=0.0;
-    private final vvvfsimulator.data.trainaudio.Struct train_config=new vvvfsimulator.data.trainaudio.Struct();
-    private final CppConvolutionFilter conv_filter;
+    private static final vvvfsimulator.data.trainaudio.Struct train_config;
     private final Domain domain=new Domain(train_config.motorSpec);
+    private final CppConvolutionFilter conv_filter;
     private final double[] dry_buffer=new double[buffer_size];
     private final double[] wet_buffer=new double[buffer_size];
-    public VVVFSoundGen(){
-        int[] ir_sample_rate={-1};
-        double[] ir=AudioResourceManager.readResourceAudioFileSample(AudioResourceManager.SAMPLE_IR_PATH,ir_sample_rate);
+    private volatile double target_f=0.0;
+    private double current_f=0.0;
+    static{
+        Tuple<Integer,double[]> ir=AudioResourceManager.readResourceAudioFileSample(
+                AudioResourceManager.SAMPLE_IR_PATH);
+        train_config=new vvvfsimulator.data.trainaudio.Struct();
         train_config.impulseResponseSampleRate=sample_rate;
-        train_config.impulseResponse=AudioResourceManager.resampleLinear(ir,ir_sample_rate[0],sample_rate);
-        train_config.setCalculatedGearHarmonic(first_gear,second_gear);
-        train_config.motorVolumeDb=motor_db-gear_harmonic_db;
-        train_config.totalVolumeDb=gear_harmonic_db;
-        conv_filter=new CppConvolutionFilter(conv_size,train_config.impulseResponse);
+        train_config.impulseResponse=AudioResourceManager.resampleLinear(ir.getB(),ir.getA(),sample_rate);
     }
-    public static void reloadYamlData(){
-        vvvf_config=Manager.deepClone(Manager.current);
+    public VVVFSoundGen(){
+        conv_filter=new CppConvolutionFilter(conv_size,train_config.impulseResponse);
     }
     public void setF(double speed){
         target_f=speed*max_speed_f;
@@ -75,6 +73,9 @@ public class VVVFSoundGen extends SoundGen{
             mix_buffer[i]+=mix*vvvf_amp*current_amp;
         }
     }
+    public static void reloadYamlData(){
+        vvvf_config=Manager.deepClone(Manager.current);
+    }
     @Override
     public void reload(){
         first_gear=Configs.first_gear.get();
@@ -85,6 +86,9 @@ public class VVVFSoundGen extends SoundGen{
         gear_harmonic_db=Configs.gear_harmonic_db.get();
         dry_wet_ratio=Configs.dry_wet_ratio.get();
         line_train_ratio=Configs.line_train_ratio.get();
+        train_config.setCalculatedGearHarmonic(first_gear,second_gear);
+        train_config.motorVolumeDb=motor_db-gear_harmonic_db;
+        train_config.totalVolumeDb=gear_harmonic_db;
         reloadYamlData();
     }
 }
