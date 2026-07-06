@@ -102,7 +102,7 @@ public class ClientEvents implements Reloadable{
         if(event.phase!=TickEvent.Phase.END) return;
         SoundEngine.setAmp(mc.isPaused()?0.0:mc.options.getSoundSourceVolume(SoundSource.MASTER));
         TrainStatus.tick(mc.level,mc.player);
-        if(eval_current==eval_period) eval_current=0;
+        if(eval_current>=eval_period) eval_current=0;
         TrainStatus.evalTrains(mc.level,mc.player,eval_current,eval_period);
         eval_current++;
     }

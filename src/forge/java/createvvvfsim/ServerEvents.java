@@ -62,7 +62,7 @@ public class ServerEvents implements Reloadable{
     @SubscribeEvent
     public static void tick(TickEvent.ServerTickEvent event){
         if(event.phase!=TickEvent.Phase.END) return;
-        if(sync_current==sync_period){
+        if(sync_current>=sync_period){
             sync_current=0;
             List<ServerPlayer> players;
             synchronized(player_lock){

@@ -1686,7 +1686,7 @@ BrakingPattern:
     PulseHarmonics:
     - Harmonic: 3
       IsHarmonicProportional: true
-      Amplitude: 0.2
+      Amplitude: 0.166
       IsAmplitudeProportional: true
       InitialPhase: 0
       Type: Sine
