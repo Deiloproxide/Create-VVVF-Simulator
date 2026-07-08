@@ -20,7 +20,7 @@ import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.joml.Vector3f;
@@ -47,7 +47,7 @@ public class ClientEvents implements Reloadable{
         event.getDispatcher().register(vvvf.then(load.then(path.executes(ClientEvents::onLoad))));
         event.getDispatcher().register(vvvf.then(reload.executes(ClientEvents::onReload)));
     }
-    public static void registerScreen(ModContainer container){
+    public static void registerScreen(ModLoadingContext container){
         container.registerExtensionPoint(ConfigScreenFactory.class,
                 ()->new ConfigScreenFactory(ConfigScreen::new));
     }
