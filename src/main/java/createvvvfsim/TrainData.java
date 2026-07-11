@@ -21,6 +21,7 @@ public class TrainData{
     public final Lowpass[] filters=new Lowpass[5];
     public boolean use_server=false,server_reloaded=false;
     public boolean is_last_valid=false,is_last_move=false;
+    public boolean is_mute=true;
     public int reload_timer=0;
     static{
         if(RemasteredHandler.register()) handler=new RemasteredHandler();
@@ -40,6 +41,7 @@ public class TrainData{
         wind_gen.setF(smoothed);
         is_last_valid=valid;
         is_last_move=move;
+        is_mute=far_factor<1e-2;
     }
     public void setStep(int buffer_size){
         EnvData from=current_env,to=target_env;
@@ -60,6 +62,16 @@ public class TrainData{
         for(int i=0;i<4;i++){
             current_env.gains[i]+=env_step.gains[i];
             current_env.cutoffs[i]+=env_step.cutoffs[i];
+        }
+    }
+    public void jumpStep(){
+        current_env.gain=target_env.gain;
+        current_env.cutoff=target_env.cutoff;
+        current_env.occlusion=target_env.occlusion;
+        current_env.shared_space=target_env.shared_space;
+        for(int i=0;i<4;i++){
+            current_env.gains[i]=target_env.gains[i];
+            current_env.cutoffs[i]=target_env.cutoffs[i];
         }
     }
 }

@@ -68,6 +68,7 @@ public class VVVFSoundGen extends SoundGen{
             dry_buffer[i]=line*line_train_ratio+dry*(1-line_train_ratio);
         }
         conv_filter.process(dry_buffer,0,wet_buffer,0,buffer_size);
+        if(target_amp<1e-2 && current_amp<1e-2) return;
         for(int i=0;i<buffer_size;i++){
             double mix=dry_buffer[i]*4*dry_wet_ratio+wet_buffer[i]*(1-dry_wet_ratio);
             mix_buffer[i]+=mix*vvvf_amp*current_amp;

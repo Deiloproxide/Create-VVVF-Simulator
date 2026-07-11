@@ -100,6 +100,10 @@ public class PerfectedHandler extends Handler{
             train_data.base_gen.mixTo(train_buffer);
             train_data.vvvf_gen.mixTo(train_buffer);
             train_data.wind_gen.mixTo(train_buffer);
+            if(train_data.is_mute){
+                train_data.jumpStep();
+                continue;
+            }
             train_data.setStep(buffer_size);
             EnvData current_env=train_data.current_env;
             for(int i=0;i<buffer_size;i++){

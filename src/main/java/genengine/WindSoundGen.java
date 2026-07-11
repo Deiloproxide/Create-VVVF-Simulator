@@ -48,11 +48,18 @@ public class WindSoundGen extends SoundGen{
         tlr=ThreadLocalRandom.current();
         double f_step=(target_f-current_f)/buffer_size;
         double amp_step=(target_amp-current_amp)/buffer_size;
+        if(target_amp<1e-2 && current_amp<1e-2){
+            current_f=target_f;
+            return;
+        }
+        if(target_f<1e-2 && current_f<1e-2){
+            current_amp=target_amp;
+            return;
+        }
         for(int i=0;i<buffer_size;i++){
             current_f+=f_step;
             current_amp+=amp_step;
             current_f=Math.max(current_f,0);
-            if(current_amp<1e-2 || current_f<1e-2) continue;
             double bg_shear_value=bg_shear.step(bg_shear_sigma,bg_shear_range);
             double lowpass_alpha=1.0-Math.exp(-2.0*Math.PI*(bg_shear_base+bg_shear_value)/sample_rate);
             double bg_lfo=0.5+0.5*Math.sin(2.0*Math.PI*wind_mod_f*total_t);

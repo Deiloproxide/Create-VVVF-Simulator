@@ -18,9 +18,9 @@ public class BaseSoundGen extends SoundGen{
     @Override
     public void mixTo(double[] mix_buffer){
         double amp_step=(target_amp-current_amp)/buffer_size;
+        if(target_amp<1e-2 && current_amp<1e-2) return;
         for(int i=0;i<buffer_size;i++){
             current_amp+=amp_step;
-            if(current_amp<1e-2) continue;
             double base=baseHarmonics(Math.PI*phase);
             double brown_value=brown.step(brown_sigma,brown_range);
             mix_buffer[i]+=(base*base_amp+brown_value*brown_amp)*current_amp;

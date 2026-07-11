@@ -149,6 +149,7 @@ public final class Manager{
     private static Yaml createYaml(){
         LoaderOptions loaderOptions=new LoaderOptions();
         loaderOptions.setAllowDuplicateKeys(false);
+        loaderOptions.setMaxAliasesForCollections(1024);
         Constructor constructor=new Constructor(YamlStruct.class,loaderOptions);
         DumperOptions dumperOptions=new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
