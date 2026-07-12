@@ -1,4 +1,4 @@
-package utils;
+package signal;
 import java.util.concurrent.ThreadLocalRandom;
 public class RandomWalk{
     private double value=0.0;

@@ -9,6 +9,11 @@ import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseAlternative;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataKey;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseTypeName;
 public final class Config{
+    private static final PulseDataKey[] NO_PULSE_DATA_KEYS={};
+    private static final PulseDataKey[] PHASE_KEY={PulseDataKey.Phase};
+    private static final PulseDataKey[] PULSE_WIDTH_KEY={PulseDataKey.PulseWidth};
+    private static final PulseDataKey[] UPDATE_FREQUENCY_KEY={PulseDataKey.UpdateFrequency};
+    private static final PulseDataKey[] DIPOLAR_KEY={PulseDataKey.Dipolar};
     public static PulseTypeName[] getAvailablePulseType(int level){
         return switch(level){
             case 2->new PulseTypeName[]{PulseTypeName.ASYNC,PulseTypeName.SYNC,PulseTypeName.SHE,
@@ -181,30 +186,30 @@ public final class Config{
             return switch(pulseMode.pulseType){
                 case SYNC->switch(pulseMode.pulseCount){
                     case 3->pulseMode.alternative==PulseAlternative.Alt1?
-                            new PulseDataKey[]{PulseDataKey.Phase}:new PulseDataKey[0];
+                            PHASE_KEY:NO_PULSE_DATA_KEYS;
                     case 6,8->pulseMode.alternative==PulseAlternative.Alt1?
-                            new PulseDataKey[]{PulseDataKey.PulseWidth}:new PulseDataKey[0];
-                    default->new PulseDataKey[0];
+                            PULSE_WIDTH_KEY:NO_PULSE_DATA_KEYS;
+                    default->NO_PULSE_DATA_KEYS;
                 };
-                case DELTA_SIGMA->new PulseDataKey[]{PulseDataKey.UpdateFrequency};
-                default->new PulseDataKey[0];
+                case DELTA_SIGMA->UPDATE_FREQUENCY_KEY;
+                default->NO_PULSE_DATA_KEYS;
             };
         }
         if(level==3){
             return switch(pulseMode.pulseType){
                 case SYNC->switch(pulseMode.pulseCount){
-                    case 1->new PulseDataKey[0];
+                    case 1->NO_PULSE_DATA_KEYS;
                     case 5->switch(pulseMode.alternative){
-                        case Alt1,Alt2->new PulseDataKey[]{PulseDataKey.PulseWidth};
-                        default->new PulseDataKey[]{PulseDataKey.Dipolar};
+                        case Alt1,Alt2->PULSE_WIDTH_KEY;
+                        default->DIPOLAR_KEY;
                     };
-                    default->new PulseDataKey[]{PulseDataKey.Dipolar};
+                    default->DIPOLAR_KEY;
                 };
-                case ASYNC->new PulseDataKey[]{PulseDataKey.Dipolar};
-                default->new PulseDataKey[0];
+                case ASYNC->DIPOLAR_KEY;
+                default->NO_PULSE_DATA_KEYS;
             };
         }
-        return new PulseDataKey[0];
+        return NO_PULSE_DATA_KEYS;
     }
     public static double getPulseDataKeyDefaultConstant(PulseDataKey key){
         return switch(key){

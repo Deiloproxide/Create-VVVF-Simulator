@@ -3,10 +3,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 import java.util.Objects;
 import vvvfsimulator.vvvf.MyMath;
+import vvvfsimulator.vvvf.modulation.CustomPwm;
 import vvvfsimulator.vvvf.modulation.Carrier;
 import vvvfsimulator.vvvf.modulation.DeltaSigma;
+import vvvfsimulator.vvvf.modulation.SVM;
 public final class Struct{
     public static class Domain{
         public Motor motor;
@@ -24,6 +27,17 @@ public final class Struct{
         private DeltaSigma[] deltaSigmaInstances=new DeltaSigma[]{
                 new DeltaSigma(),new DeltaSigma(),new DeltaSigma()};
         private Carrier carrierInstance=new Carrier();
+        private final double[] baseWaveParameterScratch=new double[2];
+        private final CustomPwm.SwitchEntry[] switchEntryScratch=new CustomPwm.SwitchEntry[]{
+                new CustomPwm.SwitchEntry(0,(byte)0),
+                new CustomPwm.SwitchEntry(0,(byte)0),
+                new CustomPwm.SwitchEntry(0,(byte)0),
+                new CustomPwm.SwitchEntry(0,(byte)0),
+                new CustomPwm.SwitchEntry(0,(byte)0)};
+        private final SVM.Vabc svmVabcScratch=new SVM.Vabc();
+        private final SVM.Vabc svmVsvScratch=new SVM.Vabc();
+        private final SVM.Valbe svmValbeScratch=new SVM.Valbe();
+        private final SVM.FunctionTime svmFunctionTimeScratch=new SVM.FunctionTime();
         public Domain(Motor.MotorSpecification motorSpec){
             this.motor=new Motor(motorSpec);
         }
@@ -187,6 +201,24 @@ public final class Struct{
         public Carrier getCarrierInstance(){
             return carrierInstance;
         }
+        public double[] getBaseWaveParameterScratch(){
+            return baseWaveParameterScratch;
+        }
+        public CustomPwm.SwitchEntry[] getSwitchEntryScratch(){
+            return switchEntryScratch;
+        }
+        public SVM.Vabc getSvmVabcScratch(){
+            return svmVabcScratch;
+        }
+        public SVM.Vabc getSvmVsvScratch(){
+            return svmVsvScratch;
+        }
+        public SVM.Valbe getSvmValbeScratch(){
+            return svmValbeScratch;
+        }
+        public SVM.FunctionTime getSvmFunctionTimeScratch(){
+            return svmFunctionTimeScratch;
+        }
     }
     public static class ElectricalParameter{
         public boolean isNone=true;
@@ -194,14 +226,22 @@ public final class Struct{
         public int pwmLevel;
         public PulseControl pulsePattern;
         public CarrierParameter carrierFrequency;
-        public Map<PulseControl.Pulse.PulseDataKey,Double> pulseData;
+        public double[] pulseData;
         public double baseWaveFrequency;
-        public Double baseWaveAmplitude;
+        public boolean hasBaseWaveAmplitude;
+        public double baseWaveAmplitude;
+        public final CarrierParameter carrierParameterCache=new CarrierParameter(
+                new CarrierParameter.RandomFrequency(0,0),new CarrierParameter.ConstantFrequency(0));
+        public final CarrierParameter.ConstantFrequency constantFrequencyCache=
+                new CarrierParameter.ConstantFrequency(0);
+        public final CarrierParameter.VibratoFrequency vibratoFrequencyCache=
+                new CarrierParameter.VibratoFrequency(0,0,0);
+        public final double[] pulseDataCache=new double[PulseControl.Pulse.PulseDataKey.values().length];
         public ElectricalParameter(int pwmLevel,double baseWaveFrequency){
             this.pwmLevel=pwmLevel;
             this.baseWaveFrequency=baseWaveFrequency;
         }
-        public ElectricalParameter(boolean isNone,boolean isZeroOutput,int pwmLevel,PulseControl pulsePattern,CarrierParameter carrierFrequency,Map<PulseControl.Pulse.PulseDataKey,Double> pulseData,double baseWaveFrequency,Double baseWaveAmplitude){
+        public ElectricalParameter(boolean isNone,boolean isZeroOutput,int pwmLevel,PulseControl pulsePattern,CarrierParameter carrierFrequency,double[] pulseData,double baseWaveFrequency,Double baseWaveAmplitude){
             this.isNone=isNone;
             this.isZeroOutput=isZeroOutput;
             this.pwmLevel=pwmLevel;
@@ -209,13 +249,33 @@ public final class Struct{
             this.carrierFrequency=carrierFrequency;
             this.pulseData=pulseData;
             this.baseWaveFrequency=baseWaveFrequency;
-            this.baseWaveAmplitude=baseWaveAmplitude;
+            this.hasBaseWaveAmplitude=baseWaveAmplitude!=null;
+            this.baseWaveAmplitude=baseWaveAmplitude==null?0:baseWaveAmplitude;
         }
         public double getBaseWaveAngleFrequency(){
             return MyMath.M_2PI*baseWaveFrequency;
         }
+        public void setNone(int pwmLevel,double baseWaveFrequency){
+            isNone=true;
+            isZeroOutput=true;
+            this.pwmLevel=pwmLevel;
+            pulsePattern=null;
+            carrierFrequency=null;
+            pulseData=null;
+            this.baseWaveFrequency=baseWaveFrequency;
+            hasBaseWaveAmplitude=false;
+            baseWaveAmplitude=0;
+        }
         public ElectricalParameter copy(){
-            return new ElectricalParameter(isNone,isZeroOutput,pwmLevel,pulsePattern==null?null:pulsePattern.copy(),carrierFrequency==null?null:carrierFrequency.copy(),pulseData==null?null:new HashMap<>(pulseData),baseWaveFrequency,baseWaveAmplitude);
+            ElectricalParameter copy=new ElectricalParameter(pwmLevel,baseWaveFrequency);
+            copy.isNone=isNone;
+            copy.isZeroOutput=isZeroOutput;
+            copy.pulsePattern=pulsePattern==null?null:pulsePattern.copy();
+            copy.carrierFrequency=carrierFrequency==null?null:carrierFrequency.copy();
+            copy.pulseData=pulseData==null?null:Arrays.copyOf(pulseData,pulseData.length);
+            copy.hasBaseWaveAmplitude=hasBaseWaveAmplitude;
+            copy.baseWaveAmplitude=baseWaveAmplitude;
+            return copy;
         }
         public static class CarrierParameter{
             public RandomFrequency randomRange;
@@ -270,6 +330,11 @@ public final class Struct{
         public int v;
         public int w;
         public PhaseState(int u,int v,int w){
+            this.u=u;
+            this.v=v;
+            this.w=w;
+        }
+        public void set(int u,int v,int w){
             this.u=u;
             this.v=v;
             this.w=w;

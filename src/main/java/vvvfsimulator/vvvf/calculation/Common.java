@@ -1,5 +1,4 @@
 package vvvfsimulator.vvvf.calculation;
-import java.util.Map;
 import vvvfsimulator.vvvf.MyMath;
 import vvvfsimulator.vvvf.modulation.SVM;
 import vvvfsimulator.vvvf.model.Config;
@@ -13,16 +12,16 @@ import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseHarmonic;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseTypeName;
 public final class Common{
     public interface PhaseStateCalculator{
-        PhaseState calculate(Domain control,double initialPhase);
+        void calculate(Domain control,double initialPhase,PhaseState out);
     }
-    public record BaseWaveParameter(double x,double rawX){
-    }
+    public static final int BASE_WAVE_X=0;
+    public static final int BASE_WAVE_RAW_X=1;
     public static int modulateSignal(double signal,double carrier){
         return signal>carrier?1:0;
     }
-    public static double getPulseDataValue(Map<PulseDataKey,Double> pulseData,PulseDataKey key){
+    public static double getPulseDataValue(double[] pulseData,PulseDataKey key){
         if(pulseData==null) return Config.getPulseDataKeyDefaultConstant(key);
-        return pulseData.getOrDefault(key,Config.getPulseDataKeyDefaultConstant(key));
+        return pulseData[key.ordinal()];
     }
     public static double discreteTimeLine(double x,int level,DiscreteTimeMode mode){
         double seed=(x%MyMath.M_2PI)*level/MyMath.M_2PI;
@@ -33,8 +32,12 @@ public final class Common{
         };
         return time*MyMath.M_2PI/level;
     }
-    public static BaseWaveParameter getBaseWaveParameter(Domain control,int phase,double initialPhase){
-        if(control.electricalState.isNone) return new BaseWaveParameter(0,0);
+    public static void getBaseWaveParameter(Domain control,int phase,double initialPhase,double[] out){
+        if(control.electricalState.isNone){
+            out[BASE_WAVE_X]=0;
+            out[BASE_WAVE_RAW_X]=0;
+            return;
+        }
         double sineTime=control.getBaseWaveTime();
         double rawX=control.electricalState.getBaseWaveAngleFrequency()*sineTime+MyMath.M_2PI_3*phase+initialPhase;
         double sineX;
@@ -44,21 +47,30 @@ public final class Common{
                     control.electricalState.pulsePattern.pulseMode.discreteTime.mode);
         }
         else sineX=rawX;
-        return new BaseWaveParameter(sineX,rawX);
+        out[BASE_WAVE_X]=sineX;
+        out[BASE_WAVE_RAW_X]=rawX;
+    }
+    private static double getBaseWaveX(Domain control,int phase,double initialPhase,double[] out){
+        getBaseWaveParameter(control,phase,initialPhase,out);
+        return out[BASE_WAVE_X];
     }
     public static double getBaseWaveform(Domain control,int phase,double initialPhase){
-        if(control.electricalState.isNone || control.electricalState.baseWaveAmplitude==null) return 0;
+        if(control.electricalState.isNone || !control.electricalState.hasBaseWaveAmplitude) return 0;
         double amp=control.electricalState.baseWaveAmplitude;
         BaseWaveType baseWaveType=control.electricalState.pulsePattern.pulseMode.baseWave;
+        double[] baseWaveParameter=control.getBaseWaveParameterScratch();
         if(baseWaveType==BaseWaveType.SV){
-            SVM.Vabc vabc=new SVM.Vabc();
-            vabc.u=amp*MyMath.Functions.sine(getBaseWaveParameter(control,0,initialPhase).x());
-            vabc.v=amp*MyMath.Functions.sine(getBaseWaveParameter(control,1,initialPhase).x());
-            vabc.w=amp*MyMath.Functions.sine(getBaseWaveParameter(control,2,initialPhase).x());
-            SVM.Valbe valbe=vabc.clark();
+            SVM.Vabc vabc=control.getSvmVabcScratch();
+            vabc.u=amp*MyMath.Functions.sine(getBaseWaveX(control,0,initialPhase,baseWaveParameter));
+            vabc.v=amp*MyMath.Functions.sine(getBaseWaveX(control,1,initialPhase,baseWaveParameter));
+            vabc.w=amp*MyMath.Functions.sine(getBaseWaveX(control,2,initialPhase,baseWaveParameter));
+            SVM.Valbe valbe=control.getSvmValbeScratch();
+            vabc.clark(valbe);
             int sector=valbe.estimateSector();
-            SVM.FunctionTime ft=valbe.getFunctionTime(sector);
-            SVM.Vabc vsv=ft.getVabc(sector);
+            SVM.FunctionTime ft=control.getSvmFunctionTimeScratch();
+            valbe.getFunctionTime(sector,ft);
+            SVM.Vabc vsv=control.getSvmVsvScratch();
+            ft.getVabc(sector,vsv);
             double ret=switch(phase){
                 case 0->vsv.u;
                 case 1->vsv.v;
@@ -66,8 +78,8 @@ public final class Common{
             };
             return ret*2-1;
         }
-        BaseWaveParameter p=getBaseWaveParameter(control,phase,initialPhase);
-        double x=p.x();
+        getBaseWaveParameter(control,phase,initialPhase,baseWaveParameter);
+        double x=baseWaveParameter[BASE_WAVE_X];
         if(baseWaveType==BaseWaveType.DPWM30 || baseWaveType==BaseWaveType.DPWM60C ||
                 baseWaveType==BaseWaveType.DPWM60P || baseWaveType==BaseWaveType.DPWM60N ||
                 baseWaveType==BaseWaveType.DPWM120P || baseWaveType==BaseWaveType.DPWM120N){
@@ -76,65 +88,65 @@ public final class Common{
             return switch(baseWaveType){
                 case DPWM30->switch(sector6){
                     case 0,9->amp*MyMath.Functions.sine(x)+(1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase+MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase+MyMath.M_2PI_3,baseWaveParameter)));
                     case 1,4->1;
                     case 2,11->amp*MyMath.Functions.sine(x)+(-1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase-MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase-MyMath.M_2PI_3,baseWaveParameter)));
                     case 3,6->amp*MyMath.Functions.sine(x)+(-1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase+MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase+MyMath.M_2PI_3,baseWaveParameter)));
                     case 5,8->amp*MyMath.Functions.sine(x)+(1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase-MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase-MyMath.M_2PI_3,baseWaveParameter)));
                     default->-1;
                 };
                 case DPWM60C->switch(sector3){
                     case 0->amp*MyMath.Functions.sine(x)+(-1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase-MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase-MyMath.M_2PI_3,baseWaveParameter)));
                     case 1->1;
                     case 2->amp*MyMath.Functions.sine(x)+(-1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase+MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase+MyMath.M_2PI_3,baseWaveParameter)));
                     case 3->amp*MyMath.Functions.sine(x)+(1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase-MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase-MyMath.M_2PI_3,baseWaveParameter)));
                     case 4->-1;
                     default->amp*MyMath.Functions.sine(x)+(1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase+MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase+MyMath.M_2PI_3,baseWaveParameter)));
                 };
                 case DPWM60P->switch(sector6){
                     case 1,2->amp*MyMath.Functions.sine(x)+(-1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase-MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase-MyMath.M_2PI_3,baseWaveParameter)));
                     case 3,4->1;
                     case 5,6->amp*MyMath.Functions.sine(x)+(-1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase+MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase+MyMath.M_2PI_3,baseWaveParameter)));
                     case 7,8->amp*MyMath.Functions.sine(x)+(1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase-MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase-MyMath.M_2PI_3,baseWaveParameter)));
                     case 9,10->-1;
                     default->amp*MyMath.Functions.sine(x)+(1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase+MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase+MyMath.M_2PI_3,baseWaveParameter)));
                 };
                 case DPWM60N->switch(sector6){
                     case 1,2->1;
                     case 3,4->amp*MyMath.Functions.sine(x)+(-1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase+MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase+MyMath.M_2PI_3,baseWaveParameter)));
                     case 5,6->amp*MyMath.Functions.sine(x)+(1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase-MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase-MyMath.M_2PI_3,baseWaveParameter)));
                     case 7,8->-1;
                     case 9,10->amp*MyMath.Functions.sine(x)+(1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase+MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase+MyMath.M_2PI_3,baseWaveParameter)));
                     default->amp*MyMath.Functions.sine(x)+(-1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase-MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase-MyMath.M_2PI_3,baseWaveParameter)));
                 };
                 case DPWM120P->switch(sector6){
                     case 1,2,3,4->1;
                     case 5,6,7,8->amp*MyMath.Functions.sine(x)+(1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase-MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase-MyMath.M_2PI_3,baseWaveParameter)));
                     default->amp*MyMath.Functions.sine(x)+(1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase+MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase+MyMath.M_2PI_3,baseWaveParameter)));
                 };
                 case DPWM120N->switch(sector6){
                     case 3,4,5,6->amp*MyMath.Functions.sine(x)+(-1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase+MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase+MyMath.M_2PI_3,baseWaveParameter)));
                     case 7,8,9,10->-1;
                     default->amp*MyMath.Functions.sine(x)+(-1-amp*MyMath.Functions.sine(
-                            getBaseWaveParameter(control,phase,initialPhase-MyMath.M_2PI_3).x()));
+                            getBaseWaveX(control,phase,initialPhase-MyMath.M_2PI_3,baseWaveParameter)));
                 };
                 default->0;
             };
@@ -197,10 +209,10 @@ public final class Common{
         return pwmLevel==2?L2.getCalculator(pulseType):L3.getCalculator(pulseType);
     }
     public static PhaseState calculatePhaseState(Domain control,double initialPhase){
-        PhaseState state=PhaseState.zero();
+        PhaseState state=new PhaseState(0,0,0);
         if(!control.electricalState.isNone && !control.electricalState.isZeroOutput)
-            state=getCalculator(control.electricalState.pwmLevel,
-                    control.electricalState.pulsePattern.pulseMode.pulseType).calculate(control,initialPhase);
+            getCalculator(control.electricalState.pwmLevel,
+                    control.electricalState.pulsePattern.pulseMode.pulseType).calculate(control,initialPhase,state);
         control.motor.process(control.getDeltaTime(),control.electricalState.getBaseWaveAngleFrequency(),state);
         return state;
     }

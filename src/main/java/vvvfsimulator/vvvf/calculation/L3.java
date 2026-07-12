@@ -7,14 +7,16 @@ import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataKey;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseTypeName;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
 public final class L3{
-    private static PhaseState async(Domain domain,double initialPhase){
-        if(domain.electricalState.isNone) return PhaseState.zero();
+    private static void async(Domain domain,double initialPhase,PhaseState out){
+        if(domain.electricalState.isNone){
+            out.set(0,0,0);
+            return;
+        }
         domain.getCarrierInstance().processCarrierFrequency(domain.getTime(),domain.electricalState);
         double carrierVal=Common.getCarrierWaveform(domain,domain.getCarrierInstance().getPhase());
         double dipolar=Common.getPulseDataValue(domain.electricalState.pulseData,PulseDataKey.Dipolar);
         carrierVal*=(dipolar!=-1?dipolar:0.5);
-        return new PhaseState(
-                modulate(Common.getBaseWaveform(domain,0,initialPhase),carrierVal),
+        out.set(modulate(Common.getBaseWaveform(domain,0,initialPhase),carrierVal),
                 modulate(Common.getBaseWaveform(domain,1,initialPhase),carrierVal),
                 modulate(Common.getBaseWaveform(domain,2,initialPhase),carrierVal));
     }
@@ -23,9 +25,10 @@ public final class L3{
     }
     private static int sync(Domain domain,double initialPhase,int phase){
         if(domain.electricalState.isNone) return 0;
-        Common.BaseWaveParameter p=Common.getBaseWaveParameter(domain,phase,initialPhase);
-        double x=p.x();
-        double rawX=p.rawX();
+        double[] baseWaveParameter=domain.getBaseWaveParameterScratch();
+        Common.getBaseWaveParameter(domain,phase,initialPhase,baseWaveParameter);
+        double x=baseWaveParameter[Common.BASE_WAVE_X];
+        double rawX=baseWaveParameter[Common.BASE_WAVE_RAW_X];
         var pulseMode=domain.electricalState.pulsePattern.pulseMode;
         if(pulseMode.pulseCount==1 && pulseMode.alternative==PulseAlternative.Alt1){
             double sineVal=MyMath.Functions.sine(x);
@@ -82,27 +85,36 @@ public final class L3{
         if(beta<=x && x<MyMath.M_PI_2) return -1/(MyMath.M_PI_2-beta)*(x-MyMath.M_PI_2);
         return 0;
     }
-    private static PhaseState sync(Domain domain,double initialPhase){
-        return new PhaseState(
-                sync(domain,initialPhase,0),
+    private static void sync(Domain domain,double initialPhase,PhaseState out){
+        out.set(sync(domain,initialPhase,0),
                 sync(domain,initialPhase,1),
                 sync(domain,initialPhase,2));
     }
-    private static PhaseState fromCustomPwm(Domain domain,double initialPhase){
-        if(domain.electricalState.isNone) return PhaseState.zero();
+    private static void fromCustomPwm(Domain domain,double initialPhase,PhaseState out){
+        if(domain.electricalState.isNone){
+            out.set(0,0,0);
+            return;
+        }
         CustomPwm preset=CustomPwm.CustomPwmPresets.getCustomPwm(
                 domain.electricalState.pwmLevel,
                 domain.electricalState.pulsePattern.pulseMode.pulseType,
                 domain.electricalState.pulsePattern.pulseMode.pulseCount,
                 domain.electricalState.pulsePattern.pulseMode.alternative);
-        if(preset==null) return PhaseState.zero();
-        return new PhaseState(preset.getPwm(
-                domain.electricalState.baseWaveAmplitude,
-                Common.getBaseWaveParameter(domain,0,initialPhase).x()),
-                preset.getPwm(domain.electricalState.baseWaveAmplitude,
-                        Common.getBaseWaveParameter(domain,1,initialPhase).x()),
-                preset.getPwm(domain.electricalState.baseWaveAmplitude,
-                        Common.getBaseWaveParameter(domain,2,initialPhase).x()));
+        if(preset==null){
+            out.set(0,0,0);
+            return;
+        }
+        double[] baseWaveParameter=domain.getBaseWaveParameterScratch();
+        Common.getBaseWaveParameter(domain,0,initialPhase,baseWaveParameter);
+        int u=preset.getPwm(domain.electricalState.baseWaveAmplitude,
+                baseWaveParameter[Common.BASE_WAVE_X]);
+        Common.getBaseWaveParameter(domain,1,initialPhase,baseWaveParameter);
+        int v=preset.getPwm(domain.electricalState.baseWaveAmplitude,
+                baseWaveParameter[Common.BASE_WAVE_X]);
+        Common.getBaseWaveParameter(domain,2,initialPhase,baseWaveParameter);
+        int w=preset.getPwm(domain.electricalState.baseWaveAmplitude,
+                baseWaveParameter[Common.BASE_WAVE_X]);
+        out.set(u,v,w);
     }
     public static Common.PhaseStateCalculator getCalculator(PulseTypeName pulseType){
         return switch(pulseType){

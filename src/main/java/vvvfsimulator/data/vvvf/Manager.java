@@ -21,8 +21,6 @@ import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.scanner.ScannerException;
-import utils.LoadContext;
-import utils.LoadException;
 import vvvfsimulator.data.vvvf.Struct.AmplitudeValue;
 import vvvfsimulator.data.vvvf.Struct.AsyncControlEx;
 import vvvfsimulator.data.vvvf.Struct.AsyncControlEx.CarrierFrequencyEx.TableValue.Parameter;
@@ -45,6 +43,8 @@ import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataKey;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataValue;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseHarmonic;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseTypeName;
+import yamlloader.LoadContext;
+import yamlloader.LoadException;
 public final class Manager{
     private static final Struct TEMPLATE=new Struct();
     public static volatile Struct loadData;
@@ -126,6 +126,7 @@ public final class Manager{
         copy.minimumFrequency.braking=source.minimumFrequency.braking;
         for(PulseControlEx ex: source.acceleratePattern) copy.acceleratePattern.add(ex.copyEx());
         for(PulseControlEx ex: source.brakingPattern) copy.brakingPattern.add(ex.copyEx());
+        copy.sortForRuntime();
         return copy;
     }
     public static Struct getTemplate(){
@@ -181,6 +182,7 @@ public final class Manager{
             result.acceleratePattern.add(fromYaml(control,result.level));
         for(YamlPulseControl control:nonNull(yaml.BrakingPattern))
             result.brakingPattern.add(fromYaml(control,result.level));
+        result.sortForRuntime();
         return result;
     }
     private static JerkSettings fromYaml(YamlJerkSettings yaml){

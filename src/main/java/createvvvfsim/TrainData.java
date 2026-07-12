@@ -4,12 +4,12 @@ import genengine.BaseSoundGen;
 import genengine.VVVFSoundGen;
 import genengine.WindSoundGen;
 import java.util.Arrays;
-import soundphysics.Handler;
-import soundphysics.PerfectedHandler;
-import soundphysics.RemasteredHandler;
-import utils.Lowpass;
+import mixer.Mixer;
+import mixer.PerfectedMixer;
+import mixer.RemasteredMixer;
+import signal.Lowpass;
 public class TrainData{
-    public static final Handler handler;
+    public static final Mixer mixer;
     public final Train train;
     public final BaseSoundGen base_gen=new BaseSoundGen();
     public final VVVFSoundGen vvvf_gen=new VVVFSoundGen();
@@ -24,9 +24,9 @@ public class TrainData{
     public boolean is_mute=true;
     public int reload_timer=0;
     static{
-        if(RemasteredHandler.register()) handler=new RemasteredHandler();
-        else if(PerfectedHandler.register()) handler=new PerfectedHandler();
-        else handler=new Handler();
+        if(RemasteredMixer.register()) mixer=new RemasteredMixer();
+        else if(PerfectedMixer.register()) mixer=new PerfectedMixer();
+        else mixer=new Mixer();
     }
     public TrainData(Train train){
         Arrays.setAll(filters,i->new Lowpass());

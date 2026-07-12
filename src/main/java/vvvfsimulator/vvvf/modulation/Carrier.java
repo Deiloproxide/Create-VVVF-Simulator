@@ -1,7 +1,6 @@
 package vvvfsimulator.vvvf.modulation;
 import java.util.Random;
 import vvvfsimulator.vvvf.MyMath;
-import vvvfsimulator.vvvf.model.Struct;
 import vvvfsimulator.vvvf.model.Struct.ElectricalParameter;
 import vvvfsimulator.vvvf.model.Struct.ElectricalParameter.CarrierParameter;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.AsyncControl.CarrierFrequency.VibratoValue.BaseWaveType;

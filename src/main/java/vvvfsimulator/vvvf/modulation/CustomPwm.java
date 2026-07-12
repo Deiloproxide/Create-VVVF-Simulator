@@ -43,18 +43,21 @@ public class CustomPwm{
     }
     public int getPwm(double m,double x){
         int index=Math.min(Math.max((int)((m-minimumModulationIndex)/modulationIndexDivision),0),(int)blockCount-1);
-        SwitchEntry[] alpha=new SwitchEntry[switchCount];
         byte startLevel=startLevelTable[index];
-        System.arraycopy(switchAngleTable,index*switchCount,alpha,0,switchCount);
-        return getPwm(alpha,x,startLevel);
+        return getPwm(switchAngleTable,index*switchCount,switchCount,x,startLevel);
     }
     public static int getPwm(SwitchEntry[] alpha,double x,byte startLevel){
+        return getPwm(alpha,0,alpha.length,x,startLevel);
+    }
+    public static int getPwm(SwitchEntry[] alpha,int offset,int count,double x,byte startLevel){
         x%=MyMath.M_2PI;
         int orthant=(int)(x/MyMath.M_PI_2);
         double angle=x%MyMath.M_PI_2;
         if((orthant&1)==1) angle=MyMath.M_PI_2-angle;
         int pwm=startLevel;
-        for(SwitchEntry switchEntry: alpha){
+        int end=offset+count;
+        for(int i=offset;i<end;i++){
+            SwitchEntry switchEntry=alpha[i];
             if(switchEntry.switchAngle<=angle) pwm=switchEntry.output;
             else break;
         }
@@ -78,6 +81,7 @@ public class CustomPwm{
     public static final class CustomPwmPresets{
         private static final Map<Key,CustomPwm> PRESETS=new HashMap<>();
         private static final AtomicBoolean LOADED=new AtomicBoolean(false);
+        private static final Key LOOKUP_KEY=new Key(0,null,0,null);
         private static final String BASE_PATH=Configs.table;
         public static void register(int level,PulseTypeName pulseType,
                                     int pulseCount,PulseAlternative alternative,CustomPwm pwm){
@@ -89,7 +93,8 @@ public class CustomPwm{
         public static CustomPwm getCustomPwm(int level,PulseTypeName pulseType,
                                              int pulseCount,PulseAlternative alternative){
             ensureLoaded();
-            return PRESETS.get(new Key(level,pulseType,pulseCount,alternative));
+            LOOKUP_KEY.set(level,pulseType,pulseCount,alternative);
+            return PRESETS.get(LOOKUP_KEY);
         }
         private static void ensureLoaded(){
             if(LOADED.get()) return;
@@ -134,6 +139,34 @@ public class CustomPwm{
                 throw new RuntimeException("Failed to load custom PWM preset: "+resourcePath,e);
             }
         }
-        private record Key(int level,PulseTypeName pulseType,int pulseCount,PulseAlternative alternative){}
+        private static final class Key{
+            private int level;
+            private PulseTypeName pulseType;
+            private int pulseCount;
+            private PulseAlternative alternative;
+            private Key(int level,PulseTypeName pulseType,int pulseCount,PulseAlternative alternative){
+                set(level,pulseType,pulseCount,alternative);
+            }
+            private void set(int level,PulseTypeName pulseType,int pulseCount,PulseAlternative alternative){
+                this.level=level;
+                this.pulseType=pulseType;
+                this.pulseCount=pulseCount;
+                this.alternative=alternative;
+            }
+            @Override
+            public boolean equals(Object obj){
+                if(!(obj instanceof Key other)) return false;
+                return level==other.level && pulseType==other.pulseType &&
+                        pulseCount==other.pulseCount && alternative==other.alternative;
+            }
+            @Override
+            public int hashCode(){
+                int result=level;
+                result=31*result+(pulseType==null?0:pulseType.hashCode());
+                result=31*result+pulseCount;
+                result=31*result+(alternative==null?0:alternative.hashCode());
+                return result;
+            }
+        }
     }
 }

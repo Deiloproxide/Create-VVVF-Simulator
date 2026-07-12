@@ -1,4 +1,4 @@
-package utils;
+package yamlloader;
 import createvvvfsim.Configs;
 import java.io.IOException;
 import java.io.Reader;
@@ -14,7 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.world.level.storage.LevelResource;
-public final class AutoLoad{
+public class AutoLoad{
     private static final HexFormat hex=HexFormat.of();
     private static final MessageDigest hash;
     static{

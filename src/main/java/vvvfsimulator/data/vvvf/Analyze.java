@@ -1,9 +1,5 @@
 package vvvfsimulator.data.vvvf;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import vvvfsimulator.data.vvvf.Struct.AmplitudeValue.Parameter;
 import vvvfsimulator.data.vvvf.Struct.AmplitudeValue.Parameter.ValueMode;
 import vvvfsimulator.data.vvvf.Struct.AsyncControlEx.CarrierFrequencyEx.TableValue;
@@ -16,13 +12,13 @@ import vvvfsimulator.vvvf.model.Config;
 import vvvfsimulator.vvvf.model.Struct.Domain;
 import vvvfsimulator.vvvf.model.Struct.ElectricalParameter;
 import vvvfsimulator.vvvf.model.Struct.ElectricalParameter.CarrierParameter;
-import vvvfsimulator.vvvf.model.Struct.ElectricalParameter.CarrierParameter.RandomFrequency;
 import vvvfsimulator.vvvf.model.Struct.JerkSettings.Jerk;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.AsyncControl.CarrierFrequency;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.AsyncControl.RandomModulation;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataKey;
 public final class Analyze{
+    private static final PulseDataKey[] PULSE_DATA_KEYS=PulseDataKey.values();
     private static double getChangingValue(double x1,double y1,double x2,double y2,double x){
         return y1+(y2-y1)/(x2-x1)*(x-x1);
     }
@@ -49,6 +45,11 @@ public final class Analyze{
         };
     }
     private static double getAmplitude(Parameter param,double current){
+        return getAmplitude(param,current,param.startFrequency,param.startAmplitude,
+                param.endFrequency,param.endAmplitude);
+    }
+    private static double getAmplitude(Parameter param,double current,double startFrequency,double startAmplitude,
+                                       double endFrequency,double endAmplitude){
         if(param.mode==ValueMode.Table){
             if(param.amplitudeTable.length==0) return 0;
             int target=0;
@@ -64,42 +65,42 @@ public final class Analyze{
             return param.amplitudeTable[target].amplitude;
         }
         double amplitude;
-        if(param.endAmplitude==param.startAmplitude) amplitude=param.startAmplitude;
+        if(endAmplitude==startAmplitude) amplitude=startAmplitude;
         else if(param.mode==ValueMode.Linear){
             if(!param.disableRangeLimit){
-                current=Math.max(current,param.startFrequency);
-                current=Math.min(current,param.endFrequency);
+                current=Math.max(current,startFrequency);
+                current=Math.min(current,endFrequency);
             }
-            amplitude=(param.endAmplitude-param.startAmplitude)/(param.endFrequency-param.startFrequency)*
-                    (current-param.startFrequency)+param.startAmplitude;
+            amplitude=(endAmplitude-startAmplitude)/(endFrequency-startFrequency)*
+                    (current-startFrequency)+startAmplitude;
         }
         else if(param.mode==ValueMode.InverseProportional){
             if(!param.disableRangeLimit){
-                current=Math.max(current,param.startFrequency);
-                current=Math.min(current,param.endFrequency);
+                current=Math.max(current,startFrequency);
+                current=Math.min(current,endFrequency);
             }
-            double x=(1.0/param.endAmplitude-1.0/param.startAmplitude)/(param.endFrequency-param.startFrequency)*
-                    (current-param.startFrequency)+1.0/param.startAmplitude;
+            double x=(1.0/endAmplitude-1.0/startAmplitude)/(endFrequency-startFrequency)*
+                    (current-startFrequency)+1.0/startAmplitude;
             double c=-param.curveChangeRate;
-            double k=param.endAmplitude;
-            double l=param.startAmplitude;
+            double k=endAmplitude;
+            double l=startAmplitude;
             double a=1.0/(1.0/l-1.0/k)*(1.0/(l-c)-1.0/(k-c));
             double b=1.0/(1.0-1.0/l*k)*(1.0/(l-c)-1.0/l*k/(k-c));
             amplitude=1.0/(a*x+b)+c;
         }
         else if(param.mode==ValueMode.Exponential){
-            if(!param.disableRangeLimit) current=Math.min(current,param.endFrequency);
-            double t=1.0/param.endFrequency*Math.log(param.endAmplitude+1);
+            if(!param.disableRangeLimit) current=Math.min(current,endFrequency);
+            double t=1.0/endFrequency*Math.log(endAmplitude+1);
             amplitude=Math.exp(t*current)-1;
         }
         else if(param.mode==ValueMode.LinearPolynomial){
-            if(!param.disableRangeLimit) current=Math.min(current,param.endFrequency);
-            amplitude=Math.pow(current,param.polynomial)/Math.pow(param.endFrequency,param.polynomial)*
-                    param.endAmplitude;
+            if(!param.disableRangeLimit) current=Math.min(current,endFrequency);
+            amplitude=Math.pow(current,param.polynomial)/Math.pow(endFrequency,param.polynomial)*
+                    endAmplitude;
         }
         else{
-            if(!param.disableRangeLimit) current=Math.min(current,param.endFrequency);
-            amplitude=Math.sin(Math.PI*current/(2.0*param.endFrequency))*param.endAmplitude;
+            if(!param.disableRangeLimit) current=Math.min(current,endFrequency);
+            amplitude=Math.sin(Math.PI*current/(2.0*endFrequency))*endAmplitude;
         }
         if(param.cutOffAmplitude>amplitude) amplitude=0;
         if(param.maxAmplitude!=-1 && param.maxAmplitude<amplitude) amplitude=param.maxAmplitude;
@@ -121,6 +122,7 @@ public final class Analyze{
         return false;
     }
     public static void calculate(Domain domain,Struct config){
+        ElectricalParameter electricalState=domain.electricalState;
         double minBaseFrequency=domain.isBraking()?config.minimumFrequency.braking:
                 config.minimumFrequency.accelerating;
         if(0<domain.getControlFrequency() && domain.getControlFrequency()<minBaseFrequency && !domain.isFreeRun())
@@ -129,9 +131,7 @@ public final class Analyze{
                 domain.getControlFrequency()>0));
         double solvedBaseWaveFrequency=domain.isBaseWaveTimeChangeAllowed()?domain.getBaseWaveFrequency():
                 minBaseFrequency;
-        List<PulseControlEx> source=new ArrayList<>(domain.isBraking()?config.brakingPattern:
-                config.acceleratePattern);
-        source.sort(Comparator.comparingDouble((PulseControlEx p)->p.controlFrequencyFrom).reversed());
+        List<PulseControlEx> source=domain.isBraking()?config.brakingPattern:config.acceleratePattern;
         int solveIndex=-1;
         for(int i=0;i<source.size();i++){
             if(isMatching(domain,source.get(i))){
@@ -144,7 +144,7 @@ public final class Analyze{
                 if(domain.isPowerOff()) domain.setControlFrequency(0);
                 else domain.setControlFrequency(domain.getBaseWaveFrequency());
             }
-            domain.electricalState=new ElectricalParameter(config.level,solvedBaseWaveFrequency);
+            electricalState.setNone(config.level,solvedBaseWaveFrequency);
             return;
         }
         PulseControlEx solvePattern=source.get(solveIndex);
@@ -152,27 +152,28 @@ public final class Analyze{
         CarrierParameter solvedCarrierFrequency=null;
         if(solvePulse.pulseType==Pulse.PulseTypeName.ASYNC){
             var randomData=solvePattern.asyncModulationDataEx.randomData;
-            RandomFrequency randomFrequency=new RandomFrequency(
-                    randomData.range.mode==RandomModulation.Parameter.ValueMode.Moving?
+            CarrierParameter carrierParameter=electricalState.carrierParameterCache;
+            carrierParameter.randomRange.range=randomData.range.mode==RandomModulation.Parameter.ValueMode.Moving?
                     getMovingValue(randomData.range.movingValue,domain.getControlFrequency()):
-                    randomData.range.constant,randomData.interval.mode==RandomModulation.Parameter.ValueMode.Moving?
+                    randomData.range.constant;
+            carrierParameter.randomRange.interval=randomData.interval.mode==RandomModulation.Parameter.ValueMode.Moving?
                     getMovingValue(randomData.interval.movingValue,domain.getControlFrequency()):
-                    randomData.interval.constant);
+                    randomData.interval.constant;
             Object baseFrequency;
             if(solvePattern.asyncModulationDataEx.carrierWaveData.mode==CarrierFrequency.ValueMode.Vibrato){
                 VibratoValueEx vib=solvePattern.asyncModulationDataEx.carrierWaveData.vibratoData;
-                double highest=vib.highest.mode==VibratoValueEx.ParameterEx.ValueMode.Moving?
+                CarrierParameter.VibratoFrequency vibrato=electricalState.vibratoFrequencyCache;
+                vibrato.highest=vib.highest.mode==VibratoValueEx.ParameterEx.ValueMode.Moving?
                         getMovingValue(vib.highest.movingValue,domain.getControlFrequency()):vib.highest.constant;
-                double lowest=vib.lowest.mode==VibratoValueEx.ParameterEx.ValueMode.Moving?
+                vibrato.lowest=vib.lowest.mode==VibratoValueEx.ParameterEx.ValueMode.Moving?
                         getMovingValue(vib.lowest.movingValue,domain.getControlFrequency()):vib.lowest.constant;
-                double interval=vib.interval.mode==VibratoValueEx.ParameterEx.ValueMode.Moving?
+                vibrato.interval=vib.interval.mode==VibratoValueEx.ParameterEx.ValueMode.Moving?
                         getMovingValue(vib.interval.movingValue,domain.getControlFrequency()):vib.interval.constant;
-                baseFrequency=new CarrierParameter.VibratoFrequency(highest,lowest,interval);
+                baseFrequency=vibrato;
             }
             else if(solvePattern.asyncModulationDataEx.carrierWaveData.mode==CarrierFrequency.ValueMode.Table){
-                List<TableValue.Parameter> table=new ArrayList<>(
-                        solvePattern.asyncModulationDataEx.carrierWaveData.carrierFrequencyTable.table);
-                table.sort(Comparator.comparingDouble((TableValue.Parameter p)->p.controlFrequencyFrom).reversed());
+                List<TableValue.Parameter> table=
+                        solvePattern.asyncModulationDataEx.carrierWaveData.carrierFrequencyTable.table;
                 TableValue.Parameter target=table.isEmpty()?null:table.get(0);
                 for(TableValue.Parameter p:table){
                     boolean flag1=p.freeRunStuckAtHere && domain.getBaseWaveFrequency()>=p.controlFrequencyFrom &&
@@ -183,50 +184,70 @@ public final class Analyze{
                         break;
                     }
                 }
-                baseFrequency=new CarrierParameter.ConstantFrequency(target==null?0:target.carrierFrequency);
+                CarrierParameter.ConstantFrequency constant=electricalState.constantFrequencyCache;
+                constant.value=target==null?0:target.carrierFrequency;
+                baseFrequency=constant;
             }
             else if(solvePattern.asyncModulationDataEx.carrierWaveData.mode==CarrierFrequency.ValueMode.Moving){
-                baseFrequency=new CarrierParameter.ConstantFrequency(
-                        getMovingValue(solvePattern.asyncModulationDataEx.carrierWaveData.movingValue,
-                                domain.getControlFrequency()));
+                CarrierParameter.ConstantFrequency constant=electricalState.constantFrequencyCache;
+                constant.value=getMovingValue(solvePattern.asyncModulationDataEx.carrierWaveData.movingValue,
+                        domain.getControlFrequency());
+                baseFrequency=constant;
             }
-            else baseFrequency=new CarrierParameter.ConstantFrequency(
-                    solvePattern.asyncModulationDataEx.carrierWaveData.constant);
-            solvedCarrierFrequency=new CarrierParameter(randomFrequency,baseFrequency);
+            else{
+                CarrierParameter.ConstantFrequency constant=electricalState.constantFrequencyCache;
+                constant.value=solvePattern.asyncModulationDataEx.carrierWaveData.constant;
+                baseFrequency=constant;
+            }
+            carrierParameter.baseFrequency=baseFrequency;
+            solvedCarrierFrequency=carrierParameter;
         }
         double solvedAmplitude;
         if(domain.isFreeRun()){
             Jerk baseJerk=domain.isBraking()?config.jerkSetting.braking:config.jerkSetting.accelerating;
-            Parameter param=(domain.isPowerOff()?
-                    solvePattern.amplitude.powerOff:solvePattern.amplitude.powerOn).copy();
+            Parameter param=domain.isPowerOff()?solvePattern.amplitude.powerOff:solvePattern.amplitude.powerOn;
+            double startFrequency=param.startFrequency;
+            double startAmplitude=param.startAmplitude;
+            double endFrequency=param.endFrequency;
+            double endAmplitude=param.endAmplitude;
             double maxControlFrequency=!domain.isPowerOff()?
                     baseJerk.on.maxControlFrequency:baseJerk.off.maxControlFrequency;
-            if(param.endFrequency==-1){
+            if(endFrequency==-1){
                 if(solvePattern.amplitude.defaultValue.disableRangeLimit)
-                    param.endFrequency=domain.getBaseWaveFrequency();
+                    endFrequency=domain.getBaseWaveFrequency();
                 else{
-                    param.endFrequency=Math.min(domain.getBaseWaveFrequency(),maxControlFrequency);
-                    param.endFrequency=Math.min(param.endFrequency,solvePattern.amplitude.defaultValue.endFrequency);
+                    endFrequency=Math.min(domain.getBaseWaveFrequency(),maxControlFrequency);
+                    endFrequency=Math.min(endFrequency,solvePattern.amplitude.defaultValue.endFrequency);
                 }
             }
-            if(param.endAmplitude==-1)
-                param.endAmplitude=getAmplitude(solvePattern.amplitude.defaultValue,domain.getBaseWaveFrequency());
-            if(param.startAmplitude==-1)
-                param.startAmplitude=getAmplitude(solvePattern.amplitude.defaultValue,domain.getBaseWaveFrequency());
-            solvedAmplitude=getAmplitude(param,domain.getControlFrequency());
+            if(endAmplitude==-1)
+                endAmplitude=getAmplitude(solvePattern.amplitude.defaultValue,domain.getBaseWaveFrequency());
+            if(startAmplitude==-1)
+                startAmplitude=getAmplitude(solvePattern.amplitude.defaultValue,domain.getBaseWaveFrequency());
+            solvedAmplitude=getAmplitude(param,domain.getControlFrequency(),
+                    startFrequency,startAmplitude,endFrequency,endAmplitude);
         }
         else solvedAmplitude=getAmplitude(solvePattern.amplitude.defaultValue,domain.getControlFrequency());
-        Map<PulseDataKey,Double> solvedPulseData=new HashMap<>();
+        double[] solvedPulseData=electricalState.pulseDataCache;
+        for(PulseDataKey key:PULSE_DATA_KEYS)
+            solvedPulseData[key.ordinal()]=Config.getPulseDataKeyDefaultConstant(key);
         PulseDataKey[] keys=Config.getAvailablePulseDataKey(solvePulse,config.level);
         for(PulseDataKey key:keys){
-            Double value=solvePulse.pulseData!=null && solvePulse.pulseData.containsKey(key)?
+            double value=solvePulse.pulseData!=null && solvePulse.pulseData.containsKey(key)?
                     solvePulse.pulseData.get(key).constant:Config.getPulseDataKeyDefaultConstant(key);
-            solvedPulseData.put(key,value);
+            solvedPulseData[key.ordinal()]=value;
         }
         if(domain.isPowerOff() && solvedAmplitude==0) domain.setControlFrequency(0);
-        domain.electricalState=new ElectricalParameter(false,domain.electricalState.baseWaveAmplitude!=null &&
-                        (domain.electricalState.baseWaveAmplitude==0 || domain.getControlFrequency()==0),
-                config.level,solvePattern.copy(),solvedCarrierFrequency,
-                solvedPulseData,solvedBaseWaveFrequency,solvedAmplitude);
+        boolean isZeroOutput=electricalState.hasBaseWaveAmplitude &&
+                (electricalState.baseWaveAmplitude==0 || domain.getControlFrequency()==0);
+        electricalState.isNone=false;
+        electricalState.isZeroOutput=isZeroOutput;
+        electricalState.pwmLevel=config.level;
+        electricalState.pulsePattern=solvePattern;
+        electricalState.carrierFrequency=solvedCarrierFrequency;
+        electricalState.pulseData=solvedPulseData;
+        electricalState.baseWaveFrequency=solvedBaseWaveFrequency;
+        electricalState.hasBaseWaveAmplitude=true;
+        electricalState.baseWaveAmplitude=solvedAmplitude;
     }
 }

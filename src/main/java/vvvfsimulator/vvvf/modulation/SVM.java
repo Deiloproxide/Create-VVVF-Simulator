@@ -14,6 +14,13 @@ public final class SVM{
         }
         public Vabc getVabc(int sector){
             Vabc res=new Vabc();
+            getVabc(sector,res);
+            return res;
+        }
+        public void getVabc(int sector,Vabc res){
+            res.u=0;
+            res.v=0;
+            res.w=0;
             switch(sector){
                 case 1->{
                     res.u=t1+t2+0.5*t0;
@@ -46,7 +53,6 @@ public final class SVM{
                     res.w=t1+0.5*t0;
                 }
             }
-            return res;
         }
     }
     public static class Vabc{
@@ -55,9 +61,12 @@ public final class SVM{
         public double w;
         public Valbe clark(){
             Valbe result=new Valbe();
+            clark(result);
+            return result;
+        }
+        public void clark(Valbe result){
             result.alpha=(2.0*u-v-w)/3.0;
             result.beta=(v-w)/MyMath.M_SQRT3;
-            return result;
         }
     }
     public static class Valbe{
@@ -65,6 +74,13 @@ public final class SVM{
         public double beta;
         public FunctionTime getFunctionTime(int sector){
             FunctionTime ft=new FunctionTime();
+            getFunctionTime(sector,ft);
+            return ft;
+        }
+        public void getFunctionTime(int sector,FunctionTime ft){
+            ft.t0=0;
+            ft.t1=0;
+            ft.t2=0;
             switch(sector){
                 case 1->{
                     ft.t1=MyMath.M_SQRT3_2*alpha-0.5*beta;
@@ -92,7 +108,6 @@ public final class SVM{
                 }
             }
             ft.t0=1.0-ft.t1-ft.t2;
-            return ft;
         }
         public int estimateSector(){
             int a=beta>0.0?0:1;

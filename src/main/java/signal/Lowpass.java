@@ -1,4 +1,4 @@
-package utils;
+package signal;
 public class Lowpass{
     private double value=0.0;
     public double process(double alpha,double num){

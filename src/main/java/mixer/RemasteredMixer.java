@@ -1,4 +1,4 @@
-package soundphysics;
+package mixer;
 import createvvvfsim.Configs;
 import createvvvfsim.EnvData;
 import createvvvfsim.TrainData;
@@ -16,9 +16,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import signal.Lowpass;
 import utils.Instance;
-import utils.Lowpass;
-public class RemasteredHandler extends Handler{
+public class RemasteredMixer extends Mixer{
     private static final int buffer_size=Configs.buffer_size.get();
     private static final int tail_size=Configs.tail_size.get();
     private static final float angle=(float)(Math.PI*(Math.sqrt(5f)+1f));

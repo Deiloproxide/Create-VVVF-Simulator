@@ -165,7 +165,7 @@ public class TrainStatus implements Reloadable{
                 CarriageContraptionEntity entity=dce.entity.get();
                 if(entity==null) continue;
                 if(entity.isRemoved()) continue;
-                envs.add(TrainData.handler.getEnv(level,player,entity.position()));
+                envs.add(TrainData.mixer.getEnv(level,player,entity.position()));
             }
             train_data.target_env=EnvData.avg(envs);
         }

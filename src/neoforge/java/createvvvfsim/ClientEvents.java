@@ -26,9 +26,9 @@ import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import org.joml.Vector3f;
-import utils.AutoLoad;
 import utils.Reloadable;
-import utils.YamlLoader;
+import yamlloader.AutoLoad;
+import yamlloader.YamlLoader;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
 @EventBusSubscriber(modid=Configs.mod_id,value=Dist.CLIENT)
 public class ClientEvents implements Reloadable{
@@ -56,7 +56,7 @@ public class ClientEvents implements Reloadable{
     public static void onInit(FMLClientSetupEvent event){
         reloadables=new Reloadable[]{
                 new BaseSoundGen(),new VVVFSoundGen(),new WindSoundGen(),new SoundEngine(),
-                TrainData.handler,new ClientEvents(),new FSmoother(),new TrainStatus()};
+                TrainData.mixer,new ClientEvents(),new FSmoother(),new TrainStatus()};
         YamlLoader.loadYaml(Configs.default_yaml);
         for(Reloadable reloadable:reloadables) reloadable.reload();
     }

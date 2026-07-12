@@ -34,6 +34,17 @@ public class Struct{
                 Double.compare(inverse?a.controlFrequencyFrom:b.controlFrequencyFrom,
                         inverse?b.controlFrequencyFrom:a.controlFrequencyFrom));
     }
+    public void sortForRuntime(){
+        sortAcceleratePattern(false);
+        sortBrakingPattern(false);
+        sortCarrierFrequencyTables(acceleratePattern);
+        sortCarrierFrequencyTables(brakingPattern);
+    }
+    private static void sortCarrierFrequencyTables(List<PulseControlEx> patterns){
+        for(PulseControlEx control:patterns)
+            control.asyncModulationDataEx.carrierWaveData.carrierFrequencyTable.table.sort((a,b)->
+                    Double.compare(b.controlFrequencyFrom,a.controlFrequencyFrom));
+    }
     public boolean hasCustomPwm(){
         List<PulseControlEx> all=new ArrayList<>(acceleratePattern);
         all.addAll(brakingPattern);

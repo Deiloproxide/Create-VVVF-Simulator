@@ -3,6 +3,14 @@ import vvvfsimulator.vvvf.MyMath;
 public class Motor{
     public final MotorSpecification specification;
     public Status parameter=new Status();
+    private final double[] k1=new double[5];
+    private final double[] k2=new double[5];
+    private final double[] k3=new double[5];
+    private final double[] k4=new double[5];
+    private final double[] flux=new double[4];
+    private final double[] derivativeFlux=new double[4];
+    private final double[] solD=new double[2];
+    private final double[] solQ=new double[2];
     public Motor(MotorSpecification specification){
         this.specification=specification;
     }
@@ -27,23 +35,23 @@ public class Motor{
         double irq0=parameter.ir[1];
         double vds=parameter.vdq0[0];
         double vqs=parameter.vdq0[1];
-        double[] k1=derivatives(ids0,iqs0,ird0,irq0,wr0,ws,vds,vqs);
-        double[] k2=derivatives(ids0+0.5*k1[0]*dt,iqs0+0.5*k1[1]*dt,
-                ird0+0.5*k1[2]*dt,irq0+0.5*k1[3]*dt,wr0+0.5*k1[4]*dt,ws,vds,vqs);
-        double[] k3=derivatives(ids0+0.5*k2[0]*dt,iqs0+0.5*k2[1]*dt,
-                ird0+0.5*k2[2]*dt,irq0+0.5*k2[3]*dt,wr0+0.5*k2[4]*dt,ws,vds,vqs);
-        double[] k4=derivatives(ids0+k3[0]*dt,iqs0+k3[1]*dt,
-                ird0+k3[2]*dt,irq0+k3[3]*dt,wr0+k3[4]*dt,ws,vds,vqs);
+        derivatives(ids0,iqs0,ird0,irq0,wr0,ws,vds,vqs,k1);
+        derivatives(ids0+0.5*k1[0]*dt,iqs0+0.5*k1[1]*dt,
+                ird0+0.5*k1[2]*dt,irq0+0.5*k1[3]*dt,wr0+0.5*k1[4]*dt,ws,vds,vqs,k2);
+        derivatives(ids0+0.5*k2[0]*dt,iqs0+0.5*k2[1]*dt,
+                ird0+0.5*k2[2]*dt,irq0+0.5*k2[3]*dt,wr0+0.5*k2[4]*dt,ws,vds,vqs,k3);
+        derivatives(ids0+k3[0]*dt,iqs0+k3[1]*dt,
+                ird0+k3[2]*dt,irq0+k3[3]*dt,wr0+k3[4]*dt,ws,vds,vqs,k4);
         double idsNew=ids0+dt/6.0*(k1[0]+2*k2[0]+2*k3[0]+k4[0]);
         double iqsNew=iqs0+dt/6.0*(k1[1]+2*k2[1]+2*k3[1]+k4[1]);
         double irdNew=ird0+dt/6.0*(k1[2]+2*k2[2]+2*k3[2]+k4[2]);
         double irqNew=irq0+dt/6.0*(k1[3]+2*k2[3]+2*k3[3]+k4[3]);
         double wrNew=wr0+dt/6.0*(k1[4]+2*k2[4]+2*k3[4]+k4[4]);
-        double[] psi=computeFlux(idsNew,iqsNew,irdNew,irqNew);
-        double psiSd=psi[0];
-        double psiSq=psi[1];
-        double psiRd=psi[2];
-        double psiRq=psi[3];
+        computeFlux(idsNew,iqsNew,irdNew,irqNew,flux);
+        double psiSd=flux[0];
+        double psiSq=flux[1];
+        double psiRd=flux[2];
+        double psiRq=flux[3];
         parameter.fluxS[0]=psiSd;
         parameter.fluxS[1]=psiSq;
         parameter.fluxR[0]=psiRd;
@@ -72,39 +80,41 @@ public class Motor{
     public void reset(){
         parameter=new Status();
     }
-    private double[] derivatives(double ids,double iqs,double ird,double irq,
-                                 double wr,double ws,double vds,double vqs){
-        double[] psi=computeFlux(ids,iqs,ird,irq);
-        double psiSd=psi[0];
-        double psiSq=psi[1];
-        double psiRd=psi[2];
-        double psiRq=psi[3];
-        double[] solD=solve2x2(specification.ls,specification.lm,specification.lm,specification.lr,
-                vds-specification.rs*ids+ws*psiSq,-specification.rr*ird+(ws-wr)*psiRq);
+    private void derivatives(double ids,double iqs,double ird,double irq,
+                             double wr,double ws,double vds,double vqs,double[] out){
+        computeFlux(ids,iqs,ird,irq,derivativeFlux);
+        double psiSd=derivativeFlux[0];
+        double psiSq=derivativeFlux[1];
+        double psiRd=derivativeFlux[2];
+        double psiRq=derivativeFlux[3];
+        solve2x2(specification.ls,specification.lm,specification.lm,specification.lr,
+                vds-specification.rs*ids+ws*psiSq,-specification.rr*ird+(ws-wr)*psiRq,solD);
         double dids=solD[0];
         double dird=solD[1];
-        double[] solQ=solve2x2(specification.ls,specification.lm,specification.lm,specification.lr,
-                vqs-specification.rs*iqs-ws*psiSd,-specification.rr*irq-(ws-wr)*psiRd);
+        solve2x2(specification.ls,specification.lm,specification.lm,specification.lr,
+                vqs-specification.rs*iqs-ws*psiSd,-specification.rr*irq-(ws-wr)*psiRd,solQ);
         double diqs=solQ[0];
         double dirq=solQ[1];
         double te=1.5*specification.np*(psiSd*iqs-psiSq*ids);
         double tFric=frictionTorque(wr,te-parameter.tl);
         double dwr=specification.np*(te-parameter.tl-tFric)/specification.inertia;
-        return new double[]{dids,diqs,dird,dirq,dwr};
+        out[0]=dids;
+        out[1]=diqs;
+        out[2]=dird;
+        out[3]=dirq;
+        out[4]=dwr;
     }
-    private double[] computeFlux(double ids,double iqs,double ird,double irq){
-        double psiSd=specification.ls*ids+specification.lm*ird;
-        double psiSq=specification.ls*iqs+specification.lm*irq;
-        double psiRd=specification.lm*ids+specification.lr*ird;
-        double psiRq=specification.lm*iqs+specification.lr*irq;
-        return new double[]{psiSd,psiSq,psiRd,psiRq};
+    private void computeFlux(double ids,double iqs,double ird,double irq,double[] out){
+        out[0]=specification.ls*ids+specification.lm*ird;
+        out[1]=specification.ls*iqs+specification.lm*irq;
+        out[2]=specification.lm*ids+specification.lr*ird;
+        out[3]=specification.lm*iqs+specification.lr*irq;
     }
-    private double[] solve2x2(double a11,double a12,double a21,double a22,double b1,double b2){
+    private void solve2x2(double a11,double a12,double a21,double a22,double b1,double b2,double[] out){
         double det=a11*a22-a12*a21;
         if(Math.abs(det)<1e-12) det=Math.signum(det)*1e-12+1e-12;
-        double x1=(b1*a22-b2*a12)/det;
-        double x2=(a11*b2-a21*b1)/det;
-        return new double[]{x1,x2};
+        out[0]=(b1*a22-b2*a12)/det;
+        out[1]=(a11*b2-a21*b1)/det;
     }
     private double frictionTorque(double wr,double teMinusTl){
         double absWr=Math.abs(wr);

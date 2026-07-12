@@ -1,6 +1,6 @@
 package genengine;
 import createvvvfsim.Configs;
-import utils.RandomWalk;
+import signal.RandomWalk;
 public class BaseSoundGen extends SoundGen{
     private static volatile double base_amp;
     private static volatile double brown_amp;

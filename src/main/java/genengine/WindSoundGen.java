@@ -2,9 +2,9 @@ package genengine;
 import createvvvfsim.Configs;
 import java.util.concurrent.ThreadLocalRandom;
 import org.jtransforms.fft.DoubleFFT_1D;
-import utils.Highpass;
-import utils.Lowpass;
-import utils.RandomWalk;
+import signal.Highpass;
+import signal.Lowpass;
+import signal.RandomWalk;
 public class WindSoundGen extends SoundGen{
     private static final int table_size=Configs.table_size.get();
     private static volatile double wind_base_amp;

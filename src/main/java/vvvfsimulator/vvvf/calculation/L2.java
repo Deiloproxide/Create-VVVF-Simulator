@@ -8,19 +8,28 @@ import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseAlternative;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataKey;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseTypeName;
 public final class L2{
-    private static PhaseState async(Domain domain,double initialPhase){
+    private static final int[] HO_KEYS_5={9,2,13,2,17,2,21,2,25,2,29,2,33,2,37,2};
+    private static final int[] HO_KEYS_7={15,4,15,3,7,1,11,2,19,4,23,4,27,4,31,4,35,4,39,4};
+    private static final int[] HO_KEYS_9={21,6,13,3,17,4,25,6,29,6,33,6,37,6};
+    private static final int[] HO_KEYS_11={27,8,19,5,23,6,31,8,35,8,39,8};
+    private static final int[] HO_KEYS_13={25,7,29,8,33,10,37,10};
+    private static final int[] HO_KEYS_15={31,9,35,10,39,12};
+    private static final int[] HO_KEYS_17={37,11};
+    private static final int[] HO_KEYS_DEFAULT={0};
+    private static void async(Domain domain,double initialPhase,PhaseState out){
         domain.getCarrierInstance().processCarrierFrequency(domain.getTime(),domain.electricalState);
         double carrierVal=Common.getCarrierWaveform(domain,domain.getCarrierInstance().getPhase());
-        return new PhaseState(Common.modulateSignal(
+        out.set(Common.modulateSignal(
                 Common.getBaseWaveform(domain,0,initialPhase),carrierVal)*2,
                 Common.modulateSignal(Common.getBaseWaveform(domain,1,initialPhase),carrierVal)*2,
                 Common.modulateSignal(Common.getBaseWaveform(domain,2,initialPhase),carrierVal)*2);
     }
     private static int sync(Domain domain,double initialPhase,int phase){
         if(domain.electricalState.isNone) return 0;
-        Common.BaseWaveParameter p=Common.getBaseWaveParameter(domain,phase,initialPhase);
-        double x=p.x();
-        double rawX=p.rawX();
+        double[] baseWaveParameter=domain.getBaseWaveParameterScratch();
+        Common.getBaseWaveParameter(domain,phase,initialPhase,baseWaveParameter);
+        double x=baseWaveParameter[Common.BASE_WAVE_X];
+        double rawX=baseWaveParameter[Common.BASE_WAVE_RAW_X];
         var pulseMode=domain.electricalState.pulsePattern.pulseMode;
         if(pulseMode.pulseCount==1 &&
                 (pulseMode.alternative==PulseAlternative.Alt1 || pulseMode.alternative==PulseAlternative.Alt2)){
@@ -52,13 +61,14 @@ public final class L2{
         }
         if(pulseMode.pulseCount==11 && pulseMode.alternative==PulseAlternative.Alt1){
             double amplitude=domain.electricalState.baseWaveAmplitude;
-            CustomPwm.SwitchEntry[] alpha=getSwitchEntries(amplitude);
-            if(amplitude>=0.9927) alpha[0]=new CustomPwm.SwitchEntry(0.0,(byte)2);
+            CustomPwm.SwitchEntry[] alpha=domain.getSwitchEntryScratch();
+            getSwitchEntries(amplitude,alpha);
+            if(amplitude>=0.9927) setSwitchEntry(alpha[0],0.0,(byte)2);
             if(amplitude>=0.9203069589){
-                alpha[1]=new CustomPwm.SwitchEntry(0.417331,(byte)0);
-                alpha[2]=new CustomPwm.SwitchEntry(0.417331,(byte)2);
-                alpha[3]=new CustomPwm.SwitchEntry(1.23442104526+0.278769982056*(amplitude-0.9203069589),(byte)0);
-                alpha[4]=new CustomPwm.SwitchEntry(1.32231416347-0.824126360283*(amplitude-0.9203069589),(byte)2);
+                setSwitchEntry(alpha[1],0.417331,(byte)0);
+                setSwitchEntry(alpha[2],0.417331,(byte)2);
+                setSwitchEntry(alpha[3],1.23442104526+0.278769982056*(amplitude-0.9203069589),(byte)0);
+                setSwitchEntry(alpha[4],1.32231416347-0.824126360283*(amplitude-0.9203069589),(byte)2);
             }
             return CustomPwm.getPwm(alpha,x,(byte)0);
         }
@@ -103,27 +113,31 @@ public final class L2{
         if(orthant!=1) sawVal=0;
         return sawVal;
     }
-    private static CustomPwm.SwitchEntry[] getSwitchEntries(double amplitude){
+    private static void getSwitchEntries(double amplitude,CustomPwm.SwitchEntry[] out){
         double sqrt5=Math.sqrt(5.0);
         double sqrt3=Math.sqrt(3.0);
-        return new CustomPwm.SwitchEntry[]{
-                new CustomPwm.SwitchEntry(MyMath.M_PI/15.0-(1.0+sqrt5)/(10.0*sqrt3)*amplitude-
-                        2.0*MyMath.Functions.sine(MyMath.M_PI/30.0)/(5.0*sqrt3)*amplitude,(byte)2),
-                new CustomPwm.SwitchEntry(MyMath.M_PI/15.0+(sqrt5-1.0)/(10.0*sqrt3)*amplitude+
-                        2.0*MyMath.Functions.sine(MyMath.M_PI*7.0/30.0)/(5.0*sqrt3)*amplitude,(byte)0),
-                new CustomPwm.SwitchEntry(MyMath.M_PI/6.0-1.0/(5.0*sqrt3)*amplitude,(byte)2),
-                new CustomPwm.SwitchEntry(MyMath.M_PI*2.0/5.0-2.0*MyMath.Functions.sine(
-                        MyMath.M_PI/30.0)/(5.0*sqrt3)*amplitude,(byte)0),
-                new CustomPwm.SwitchEntry(MyMath.M_PI*2.0/5.0+(sqrt5-1.0)/(10.0*sqrt3)*amplitude,(byte)2)};
+        setSwitchEntry(out[0],MyMath.M_PI/15.0-(1.0+sqrt5)/(10.0*sqrt3)*amplitude-
+                2.0*MyMath.Functions.sine(MyMath.M_PI/30.0)/(5.0*sqrt3)*amplitude,(byte)2);
+        setSwitchEntry(out[1],MyMath.M_PI/15.0+(sqrt5-1.0)/(10.0*sqrt3)*amplitude+
+                2.0*MyMath.Functions.sine(MyMath.M_PI*7.0/30.0)/(5.0*sqrt3)*amplitude,(byte)0);
+        setSwitchEntry(out[2],MyMath.M_PI/6.0-1.0/(5.0*sqrt3)*amplitude,(byte)2);
+        setSwitchEntry(out[3],MyMath.M_PI*2.0/5.0-2.0*MyMath.Functions.sine(
+                MyMath.M_PI/30.0)/(5.0*sqrt3)*amplitude,(byte)0);
+        setSwitchEntry(out[4],MyMath.M_PI*2.0/5.0+(sqrt5-1.0)/(10.0*sqrt3)*amplitude,(byte)2);
     }
-    private static PhaseState sync(Domain domain,double initialPhase){
-        return new PhaseState(sync(domain,initialPhase,0),
+    private static void setSwitchEntry(CustomPwm.SwitchEntry entry,double switchAngle,byte output){
+        entry.switchAngle=switchAngle;
+        entry.output=output;
+    }
+    private static void sync(Domain domain,double initialPhase,PhaseState out){
+        out.set(sync(domain,initialPhase,0),
                 sync(domain,initialPhase,1),sync(domain,initialPhase,2));
     }
     private static int ho(Domain domain,double initialPhase,int phase){
         if(domain.electricalState.isNone) return 0;
-        Common.BaseWaveParameter p=Common.getBaseWaveParameter(domain,phase,initialPhase);
-        double sineX=p.x();
+        double[] baseWaveParameter=domain.getBaseWaveParameterScratch();
+        Common.getBaseWaveParameter(domain,phase,initialPhase,baseWaveParameter);
+        double sineX=baseWaveParameter[Common.BASE_WAVE_X];
         int[] keys=getKeys(domain);
         int index;
         var pulseMode=domain.electricalState.pulsePattern.pulseMode;
@@ -137,18 +151,16 @@ public final class L2{
         return getHo(sineX,domain.electricalState.baseWaveAmplitude,carrier,width)*2;
     }
     private static int[] getKeys(Domain domain){
-        int[] keys;
-        switch(domain.electricalState.pulsePattern.pulseMode.pulseCount){
-            case 5->keys=new int[]{9,2,13,2,17,2,21,2,25,2,29,2,33,2,37,2};
-            case 7->keys=new int[]{15,4,15,3,7,1,11,2,19,4,23,4,27,4,31,4,35,4,39,4};
-            case 9->keys=new int[]{21,6,13,3,17,4,25,6,29,6,33,6,37,6};
-            case 11->keys=new int[]{27,8,19,5,23,6,31,8,35,8,39,8};
-            case 13->keys=new int[]{25,7,29,8,33,10,37,10};
-            case 15->keys=new int[]{31,9,35,10,39,12};
-            case 17->keys=new int[]{37,11};
-            default->keys=new int[]{0};
-        }
-        return keys;
+        return switch(domain.electricalState.pulsePattern.pulseMode.pulseCount){
+            case 5->HO_KEYS_5;
+            case 7->HO_KEYS_7;
+            case 9->HO_KEYS_9;
+            case 11->HO_KEYS_11;
+            case 13->HO_KEYS_13;
+            case 15->HO_KEYS_15;
+            case 17->HO_KEYS_17;
+            default->HO_KEYS_DEFAULT;
+        };
     }
     private static int getHo(double x,double amplitude,int carrier,int width){
         int totalSteps=carrier*2;
@@ -163,25 +175,35 @@ public final class L2{
         if(x%MyMath.M_2PI>MyMath.M_PI) modulated=-modulated;
         return Common.modulateSignal(modulated,sawValue);
     }
-    private static PhaseState ho(Domain domain,double initialPhase){
-        return new PhaseState(ho(domain,initialPhase,0),
+    private static void ho(Domain domain,double initialPhase,PhaseState out){
+        out.set(ho(domain,initialPhase,0),
                 ho(domain,initialPhase,1),ho(domain,initialPhase,2));
     }
-    private static PhaseState fromCustomPwm(Domain domain,double initialPhase){
-        if(domain.electricalState.isNone) return PhaseState.zero();
+    private static void fromCustomPwm(Domain domain,double initialPhase,PhaseState out){
+        if(domain.electricalState.isNone){
+            out.set(0,0,0);
+            return;
+        }
         CustomPwm preset=CustomPwm.CustomPwmPresets.getCustomPwm(
                 domain.electricalState.pwmLevel,
                 domain.electricalState.pulsePattern.pulseMode.pulseType,
                 domain.electricalState.pulsePattern.pulseMode.pulseCount,
                 domain.electricalState.pulsePattern.pulseMode.alternative);
-        if(preset==null) return PhaseState.zero();
-        return new PhaseState(preset.getPwm(
-                domain.electricalState.baseWaveAmplitude,
-                Common.getBaseWaveParameter(domain,0,initialPhase).x()),
-                preset.getPwm(domain.electricalState.baseWaveAmplitude,
-                        Common.getBaseWaveParameter(domain,1,initialPhase).x()),
-                preset.getPwm(domain.electricalState.baseWaveAmplitude,
-                        Common.getBaseWaveParameter(domain,2,initialPhase).x()));
+        if(preset==null){
+            out.set(0,0,0);
+            return;
+        }
+        double[] baseWaveParameter=domain.getBaseWaveParameterScratch();
+        Common.getBaseWaveParameter(domain,0,initialPhase,baseWaveParameter);
+        int u=preset.getPwm(domain.electricalState.baseWaveAmplitude,
+                baseWaveParameter[Common.BASE_WAVE_X]);
+        Common.getBaseWaveParameter(domain,1,initialPhase,baseWaveParameter);
+        int v=preset.getPwm(domain.electricalState.baseWaveAmplitude,
+                baseWaveParameter[Common.BASE_WAVE_X]);
+        Common.getBaseWaveParameter(domain,2,initialPhase,baseWaveParameter);
+        int w=preset.getPwm(domain.electricalState.baseWaveAmplitude,
+                baseWaveParameter[Common.BASE_WAVE_X]);
+        out.set(u,v,w);
     }
     private static int deltaSigma(Domain domain,double initialPhase,int phase){
         if(domain.electricalState.isNone) return 0;
@@ -191,8 +213,8 @@ public final class L2{
                 domain.electricalState.pulseData,PulseDataKey.UpdateFrequency);
         return deltaSigma.process(Common.getBaseWaveform(domain,phase,initialPhase),domain.getTime())*2;
     }
-    private static PhaseState deltaSigma(Domain domain,double initialPhase){
-        return new PhaseState(deltaSigma(domain,initialPhase,0),
+    private static void deltaSigma(Domain domain,double initialPhase,PhaseState out){
+        out.set(deltaSigma(domain,initialPhase,0),
                 deltaSigma(domain,initialPhase,1),deltaSigma(domain,initialPhase,2));
     }
     public static Common.PhaseStateCalculator getCalculator(PulseTypeName pulseType){

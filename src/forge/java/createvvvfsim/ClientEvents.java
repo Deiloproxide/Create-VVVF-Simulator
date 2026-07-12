@@ -24,10 +24,10 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.joml.Vector3f;
-import utils.AutoLoad;
 import utils.Reloadable;
-import utils.YamlLoader;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
+import yamlloader.AutoLoad;
+import yamlloader.YamlLoader;
 @Mod.EventBusSubscriber(modid=Configs.mod_id,value=Dist.CLIENT)
 public class ClientEvents implements Reloadable{
     private static final Minecraft mc=Minecraft.getInstance();
@@ -55,7 +55,7 @@ public class ClientEvents implements Reloadable{
     public static void onInit(FMLClientSetupEvent event){
         reloadables=new Reloadable[]{
                 new BaseSoundGen(),new VVVFSoundGen(),new WindSoundGen(),new SoundEngine(),
-                TrainData.handler,new ClientEvents(),new FSmoother(),new TrainStatus()};
+                TrainData.mixer,new ClientEvents(),new FSmoother(),new TrainStatus()};
         YamlLoader.loadYaml(Configs.default_yaml);
         for(Reloadable reloadable:reloadables) reloadable.reload();
     }

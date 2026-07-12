@@ -1,4 +1,4 @@
-package utils;
+package yamlloader;
 public class LoadContext{
     public final LoadException exception;
     public final int row;

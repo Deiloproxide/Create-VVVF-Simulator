@@ -1,4 +1,4 @@
-package soundphysics;
+package mixer;
 import createvvvfsim.Configs;
 import createvvvfsim.EnvData;
 import createvvvfsim.TrainData;
@@ -8,9 +8,9 @@ import java.util.List;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import signal.Lowpass;
 import utils.Instance;
-import utils.Lowpass;
-public class PerfectedHandler extends Handler{
+public class PerfectedMixer extends Mixer{
     private static final int buffer_size=Configs.buffer_size.get();
     private static final int tail_size=Configs.tail_size.get();
     private static final double filters_alpha=0.78,filter_alpha=0.88;
@@ -56,11 +56,11 @@ public class PerfectedHandler extends Handler{
             env_data.gain=direct_gain*Math.pow(direct_cutoff,0.08);
             env_data.cutoff=direct_cutoff;
             env_data.occlusion=occlusion;
-            double reverb_strength=Instance.invokeStatic(Double.class,PerfectedHandler.reverb_strength)/
+            double reverb_strength=Instance.invokeStatic(Double.class,PerfectedMixer.reverb_strength)/
                     Instance.invokeStatic(Double.class,reverb_denom);
             double weighted_reverb=Instance.invokeStatic(Double.class,weighted_strength)/
                     Instance.invokeStatic(Double.class,reverb_denom);
-            double outdoor_leak=Instance.invokeStatic(Double.class,PerfectedHandler.outdoor_leak)/
+            double outdoor_leak=Instance.invokeStatic(Double.class,PerfectedMixer.outdoor_leak)/
                     Instance.invokeStatic(Double.class,leak_denom);
             double early_ratio=Math.min(Math.max(Instance.invokeStatic(Double.class,early_reflection),0.0),1.0);
             Instance reverb=Instance.invokeStatic(enhanced_reverb);
