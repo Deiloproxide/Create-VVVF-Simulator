@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import utils.PosHandler;
 import utils.Reloadable;
 public class TrainStatus implements Reloadable{
     private static volatile double near_distance;
@@ -85,7 +86,7 @@ public class TrainStatus implements Reloadable{
                 CarriageContraptionEntity entity=dce.entity.get();
                 if(entity==null) continue;
                 if(entity.isRemoved()) continue;
-                Vec3 train_pos=entity.position();
+                Vec3 train_pos=PosHandler.convert(entity.position(),level);
                 double distance=train_pos.distanceTo(player_pos);
                 near_factor+=Math.max(0.0,1.0-distance/near_distance);
                 far_factor+=Math.max(0.0,1.0-distance/far_distance);
@@ -165,7 +166,8 @@ public class TrainStatus implements Reloadable{
                 CarriageContraptionEntity entity=dce.entity.get();
                 if(entity==null) continue;
                 if(entity.isRemoved()) continue;
-                envs.add(TrainData.mixer.getEnv(level,player,entity.position()));
+                Vec3 train_pos=PosHandler.convert(entity.position(),level);
+                envs.add(TrainData.mixer.getEnv(level,player,train_pos));
             }
             train_data.target_env=EnvData.avg(envs);
         }

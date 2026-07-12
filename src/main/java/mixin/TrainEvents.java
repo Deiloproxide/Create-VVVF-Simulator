@@ -1,20 +1,22 @@
 package mixin;
+import com.simibubi.create.content.trains.entity.Carriage;
+import com.simibubi.create.content.trains.entity.Carriage.DimensionalCarriageEntity;
+import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.content.trains.entity.Train;
 import com.simibubi.create.content.trains.entity.TrainStatus;
 import createvvvfsim.Configs;
 import createvvvfsim.ServerEvents;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import org.joml.Vector3f;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import utils.PosHandler;
 import utils.TrainEventType;
 @Mixin(value=TrainStatus.class,remap=false,priority=Configs.mixin_priority)
 public class TrainEvents{
@@ -29,12 +31,18 @@ public class TrainEvents{
     private void sendEvent(TrainEventType type){
         train.speed=0.0;
         for(ResourceKey<Level> dimension:train.getPresentDimensions()){
-            Optional<BlockPos> pos=train.getPositionInDimension(dimension);
-            if(pos.isPresent()){
-                BlockPos block_pos=pos.get();
-                Vector3f train_pos=new Vector3f(block_pos.getX(),block_pos.getY(),block_pos.getZ());
-                ServerEvents.onTrainEvent(train,type.name(),name.get(dimension),train_pos);
+            Vec3 train_pos=null;
+            for(Carriage carriage:train.carriages){
+                DimensionalCarriageEntity dce=carriage.getDimensionalIfPresent(dimension);
+                if(dce==null) continue;
+                CarriageContraptionEntity entity=dce.entity.get();
+                if(entity==null) continue;
+                if(entity.isRemoved()) continue;
+                train_pos=PosHandler.convert(dce.positionAnchor,entity.level());
+                break;
             }
+            if(train_pos!=null)
+                ServerEvents.onTrainEvent(train,type.name(),name.get(dimension),train_pos.toVector3f());
         }
     }
     @Inject(method="failedMigration",at=@At(value="INVOKE",
