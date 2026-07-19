@@ -720,7 +720,7 @@ AcceleratePattern:
     Default:
       Mode: Linear
       StartFrequency: 18
-      StartAmplitude: 0.386
+      StartAmplitude: 0.339
       EndFrequency: 44
       EndAmplitude: 0.828
       CurveChangeRate: 0
@@ -733,7 +733,7 @@ AcceleratePattern:
     PowerOn:
       Mode: Linear
       StartFrequency: 18
-      StartAmplitude: 0.386
+      StartAmplitude: 0.339
       EndFrequency: 44
       EndAmplitude: 0.762
       CurveChangeRate: 0
@@ -746,7 +746,7 @@ AcceleratePattern:
     PowerOff:
       Mode: Linear
       StartFrequency: 18
-      StartAmplitude: 0.386
+      StartAmplitude: 0.339
       EndFrequency: 44
       EndAmplitude: 0.762
       CurveChangeRate: 0
@@ -887,9 +887,9 @@ AcceleratePattern:
     Default:
       Mode: Linear
       StartFrequency: 0
-      StartAmplitude: 0.08
+      StartAmplitude: 0
       EndFrequency: 18
-      EndAmplitude: 0.386
+      EndAmplitude: 0.339
       CurveChangeRate: 0
       CutOffAmplitude: 0
       MaxAmplitude: -1
@@ -900,9 +900,9 @@ AcceleratePattern:
     PowerOn:
       Mode: Linear
       StartFrequency: 0
-      StartAmplitude: 0.08
+      StartAmplitude: 0
       EndFrequency: 18
-      EndAmplitude: 0.386
+      EndAmplitude: 0.339
       CurveChangeRate: 0
       CutOffAmplitude: 0
       MaxAmplitude: -1
@@ -913,9 +913,9 @@ AcceleratePattern:
     PowerOff:
       Mode: Linear
       StartFrequency: 0
-      StartAmplitude: 0.08
+      StartAmplitude: 0
       EndFrequency: 18
-      EndAmplitude: 0.386
+      EndAmplitude: 0.339
       CurveChangeRate: 0
       CutOffAmplitude: 0
       MaxAmplitude: -1
@@ -1698,7 +1698,7 @@ BrakingPattern:
     Default:
       Mode: Linear
       StartFrequency: 18
-      StartAmplitude: 0.386
+      StartAmplitude: 0.339
       EndFrequency: 44
       EndAmplitude: 0.828
       CurveChangeRate: 0
@@ -1711,7 +1711,7 @@ BrakingPattern:
     PowerOn:
       Mode: Linear
       StartFrequency: 18
-      StartAmplitude: 0.386
+      StartAmplitude: 0.339
       EndFrequency: 44
       EndAmplitude: 0.762
       CurveChangeRate: 0
@@ -1724,7 +1724,7 @@ BrakingPattern:
     PowerOff:
       Mode: Linear
       StartFrequency: 18
-      StartAmplitude: 0.386
+      StartAmplitude: 0.339
       EndFrequency: 44
       EndAmplitude: 0.762
       CurveChangeRate: 0
@@ -1838,9 +1838,9 @@ BrakingPattern:
     Default:
       Mode: Linear
       StartFrequency: 0
-      StartAmplitude: 0.08
+      StartAmplitude: 0
       EndFrequency: 18
-      EndAmplitude: 0.386
+      EndAmplitude: 0.339
       CurveChangeRate: 0
       CutOffAmplitude: -1
       MaxAmplitude: -1
@@ -1851,9 +1851,9 @@ BrakingPattern:
     PowerOn:
       Mode: Linear
       StartFrequency: 0
-      StartAmplitude: 0.08
+      StartAmplitude: 0
       EndFrequency: 18
-      EndAmplitude: 0.386
+      EndAmplitude: 0.339
       CurveChangeRate: 0
       CutOffAmplitude: -1
       MaxAmplitude: -1
@@ -1864,9 +1864,9 @@ BrakingPattern:
     PowerOff:
       Mode: Linear
       StartFrequency: 0
-      StartAmplitude: 0.08
+      StartAmplitude: 0
       EndFrequency: 18
-      EndAmplitude: 0.386
+      EndAmplitude: 0.339
       CurveChangeRate: 0
       CutOffAmplitude: -1
       MaxAmplitude: -1

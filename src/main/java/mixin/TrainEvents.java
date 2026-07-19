@@ -1,13 +1,12 @@
 package mixin;
-import com.simibubi.create.content.trains.entity.Carriage;
-import com.simibubi.create.content.trains.entity.Carriage.DimensionalCarriageEntity;
-import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.content.trains.entity.Train;
 import com.simibubi.create.content.trains.entity.TrainStatus;
 import createvvvfsim.Configs;
 import createvvvfsim.ServerEvents;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -31,18 +30,12 @@ public class TrainEvents{
     private void sendEvent(TrainEventType type){
         train.speed=0.0;
         for(ResourceKey<Level> dimension:train.getPresentDimensions()){
-            Vec3 train_pos=null;
-            for(Carriage carriage:train.carriages){
-                DimensionalCarriageEntity dce=carriage.getDimensionalIfPresent(dimension);
-                if(dce==null) continue;
-                CarriageContraptionEntity entity=dce.entity.get();
-                if(entity==null) continue;
-                if(entity.isRemoved()) continue;
-                train_pos=PosHandler.convert(dce.positionAnchor,entity.level());
-                break;
-            }
-            if(train_pos!=null)
+            Level level=ServerEvents.server.getLevel(dimension);
+            Optional<BlockPos> block_pos=train.getPositionInDimension(dimension);
+            if(block_pos.isPresent()){
+                Vec3 train_pos=PosHandler.convert(block_pos.get().getCenter(),level);
                 ServerEvents.onTrainEvent(train,type.name(),name.get(dimension),train_pos.toVector3f());
+            }
         }
     }
     @Inject(method="failedMigration",at=@At(value="INVOKE",

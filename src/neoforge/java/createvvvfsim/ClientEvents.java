@@ -12,7 +12,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -23,16 +22,19 @@ import net.neoforged.neoforge.client.event.ClientPauseChangeEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.sound.SoundEngineLoadEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import org.joml.Vector3f;
+import utils.ALlib;
 import utils.Reloadable;
+import vvvfsimulator.vvvf.modulation.CustomPwm;
 import yamlloader.AutoLoad;
 import yamlloader.YamlLoader;
-import vvvfsimulator.vvvf.modulation.CustomPwm;
 @EventBusSubscriber(modid=Configs.mod_id,value=Dist.CLIENT)
 public class ClientEvents implements Reloadable{
     private static final Minecraft mc=Minecraft.getInstance();
+    private static boolean is_single=false,is_ready=false;
     private static Reloadable[] reloadables;
     private static volatile int eval_period;
     private static int eval_current;
@@ -53,16 +55,21 @@ public class ClientEvents implements Reloadable{
         container.registerExtensionPoint(IConfigScreenFactory.class,ConfigurationScreen::new);
     }
     @SubscribeEvent
+    public static void onSoundInit(SoundEngineLoadEvent event){
+        if(is_ready) SoundEngine.load();
+    }
+    @SubscribeEvent
     public static void onInit(FMLClientSetupEvent event){
         reloadables=new Reloadable[]{
                 new BaseSoundGen(),new VVVFSoundGen(),new WindSoundGen(),new SoundEngine(),
                 TrainData.mixer,new ClientEvents(),new FSmoother(),new TrainStatus()};
         YamlLoader.loadYaml(Configs.default_yaml);
         for(Reloadable reloadable:reloadables) reloadable.reload();
+        is_ready=true;
     }
     @SubscribeEvent
     public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event){
-        SoundEngine.setAmp(mc.options.getSoundSourceVolume(SoundSource.MASTER));
+        is_single=mc.isSingleplayer();
         FSmoother.reloadCreate();
         String path=AutoLoad.load(mc);
         Component msg=Component.literal(YamlLoader.loadYaml(path));
@@ -77,7 +84,8 @@ public class ClientEvents implements Reloadable{
     }
     @SubscribeEvent
     public static void onPauseChange(ClientPauseChangeEvent.Post event){
-        SoundEngine.setAmp(event.isPaused()?0.0:mc.options.getSoundSourceVolume(SoundSource.MASTER));
+        if(event.isPaused() && is_single) SoundEngine.setAmp(0.0);
+        else SoundEngine.setAmp(1.0);
     }
     public static void onGetTrainEvent(String name,String event,String dimension,Vector3f pos){
         int x=Math.round(pos.x),y=Math.round(pos.y),z=Math.round(pos.z);

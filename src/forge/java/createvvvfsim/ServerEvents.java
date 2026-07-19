@@ -3,9 +3,11 @@ import com.simibubi.create.Create;
 import com.simibubi.create.content.trains.entity.Train;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -15,11 +17,16 @@ import org.joml.Vector3f;
 import utils.Reloadable;
 @Mod.EventBusSubscriber(modid=Configs.mod_id)
 public class ServerEvents implements Reloadable{
+    public static MinecraftServer server;
     private static final List<ServerPlayer> all_players=new ArrayList<>();
     private static final Object player_lock=new Object();
     private static final Reloadable reloadable=new ServerEvents();
     private static volatile int sync_period;
     private static int sync_current;
+    @SubscribeEvent
+    public static void onInit(ServerStartingEvent event){
+        server=event.getServer();
+    }
     @SubscribeEvent
     public static void onJoin(PlayerEvent.PlayerLoggedInEvent event){
         ServerPlayer player=(ServerPlayer)(event.getEntity());

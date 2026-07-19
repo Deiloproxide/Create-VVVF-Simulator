@@ -2,33 +2,49 @@ package genengine;
 import createvvvfsim.Configs;
 import createvvvfsim.TrainData;
 import createvvvfsim.TrainStatus;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.List;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
+import utils.ALlib;
 import utils.Reloadable;
 public class SoundEngine implements Reloadable{
-    private static final int sample_rate=Configs.sample_rate.get();
     private static final int buffer_size=Configs.buffer_size.get();
-    private static final AudioFormat format=new AudioFormat(sample_rate,16,1,true,false);
+    private static final int buffer_cnt=4;
     private static final double[] mix_buffer=new double[buffer_size];
-    private static final byte[] out_buffer=new byte[buffer_size*2];
+    private static final ByteBuffer[] out_buffer=new ByteBuffer[buffer_cnt];
     private static final Thread thread=new Thread(SoundEngine::mixLoop);
-    private static volatile double main_amp;
-    private static volatile double settings_amp=0.0;
+    private static final Object mix_lock=new Object();
+    private static volatile boolean is_run=false;
+    private static volatile double main_amp,settings_amp=0.0;
     private static double current_amp=0.0;
-    private static SourceDataLine dataline;
+    private static int head_ptr=0,tail_ptr=0;
     static{
-        try{
-            dataline=AudioSystem.getSourceDataLine(format);
-            dataline.open(format,buffer_size*4);
-            dataline.start();
-        }
-        catch(LineUnavailableException ignored){}
+        Arrays.setAll(out_buffer,i->ByteBuffer.allocateDirect(buffer_size*4));
+        for(ByteBuffer buffer:out_buffer) buffer.order(ByteOrder.LITTLE_ENDIAN);
+        ALlib.init(new int[buffer_cnt],SoundEngine::mixTask);
         thread.setDaemon(true);
         thread.start();
+    }
+    public static void load(){
+        is_run=false;
+        ALlib.disable();
+        ALlib.load();
+        is_run=true;
+        ALlib.enable();
+        ALlib.clear();
+    }
+    private static void mixTask(){
+        if(!is_run) return;
+        try{
+            ALlib.feed(out_buffer[tail_ptr]);
+            tail_ptr++;
+            if(tail_ptr==buffer_cnt) tail_ptr=0;
+            synchronized(mix_lock){
+                mix_lock.notify();
+            }
+        }
+        catch(RuntimeException ignored){}
     }
     public static void setAmp(double volume){
         settings_amp=volume;
@@ -36,6 +52,7 @@ public class SoundEngine implements Reloadable{
     private static void mixLoop(){
         while(true){
             Arrays.fill(mix_buffer,0.0);
+            out_buffer[head_ptr].clear();
             List<TrainData> train_datas=TrainStatus.getTrainData();
             TrainData.mixer.handle(mix_buffer,train_datas);
             double amp_step=(settings_amp*main_amp-current_amp)/buffer_size;
@@ -43,10 +60,18 @@ public class SoundEngine implements Reloadable{
                 current_amp+=amp_step;
                 double clipped=Math.min(Math.max(mix_buffer[i],-1.0),1.0)*current_amp;
                 short sample=(short)(clipped*Short.MAX_VALUE);
-                out_buffer[i*2]=(byte)(sample&0xFF);
-                out_buffer[i*2+1]=(byte)((sample>>8)&0xFF);
+                out_buffer[head_ptr].putShort(sample);
+                out_buffer[head_ptr].putShort(sample);
             }
-            dataline.write(out_buffer,0,buffer_size*2);
+            out_buffer[head_ptr].flip();
+            head_ptr++;
+            if(head_ptr==buffer_cnt) head_ptr=0;
+            synchronized(mix_lock){
+                try{
+                    mix_lock.wait();
+                }
+                catch(InterruptedException ignored){}
+            }
         }
     }
     @Override

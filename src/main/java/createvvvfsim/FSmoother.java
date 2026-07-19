@@ -30,7 +30,7 @@ public class FSmoother implements Reloadable{
     }
     public static void reloadCreate(){
         try{
-            Instance ctrains=Instance.fromObject(train_config);
+            Instance ctrains=new Instance(train_config);
             Instance top_speed=ctrains.get("trainTopSpeed");
             Instance acc=ctrains.get("trainAcceleration");
             Method get_speed=top_speed.getMethod("getF");

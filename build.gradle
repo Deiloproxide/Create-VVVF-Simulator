@@ -33,11 +33,7 @@ repositories{
     maven{url="https://maven.createmod.net"}
     maven{url="https://maven.tterrag.com"}
     maven{url="https://maven.ithundxr.dev/snapshots"}
-    maven{url="https://maven.maxhenkel.de/repository/public"}
-    maven{url="https://maven.isxander.dev/releases"}
-    maven{url="https://maven.architectury.dev"}
-    maven{url="https://api.modrinth.com/maven"}
-    maven{url="https://thedarkcolour.github.io/KotlinForForge"}
+    maven{url="https://maven.wagyourtail.xyz/snapshots/"}
 }
 sourceSets{main{java{srcDir "src/${platform}/java"}}}
 if(platform=="forge"){
@@ -95,16 +91,14 @@ dependencies{
         implementation("io.github.llamalad7:mixinextras-forge:${deps.mixinextras}")
     }
     else if(platform=="neoforge"){
-        implementation("com.simibubi.create:create-${minecraft_version}:${deps.create}:slim"){
-            transitive=false
-        }
+        implementation("com.simibubi.create:create-${minecraft_version}:${deps.create}:slim"){transitive=false}
         implementation("net.createmod.ponder:ponder-${platform}:${deps.ponder}+mc${minecraft_version}")
         compileOnly("dev.engine-room.flywheel:flywheel-${platform}-api-${minecraft_version}:${deps.flywheel}")
         runtimeOnly("dev.engine-room.flywheel:flywheel-${platform}-${minecraft_version}:${deps.flywheel}")
         implementation("com.tterrag.registrate:Registrate:${deps.registrate}")
     }
-    shade("com.github.wendykierp:JTransforms:[3.1,)")
-    shade("org.visnow:JLargeArrays:[1.7,)")
+    shade("com.github.wendykierp:JTransforms:[3.1,)"){transitive=false}
+    shade("org.visnow:JLargeArrays:[1.7,)"){transitive=false}
     shade("org.apache.commons:commons-math3:[3.6,)")
     shade("org.yaml:snakeyaml:[2.6,)")
 }
