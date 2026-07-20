@@ -33,7 +33,6 @@ repositories{
     maven{url="https://maven.createmod.net"}
     maven{url="https://maven.tterrag.com"}
     maven{url="https://maven.ithundxr.dev/snapshots"}
-    maven{url="https://maven.wagyourtail.xyz/snapshots/"}
 }
 sourceSets{main{java{srcDir "src/${platform}/java"}}}
 if(platform=="forge"){

@@ -48,14 +48,19 @@ public final class ALlib{
         for(int al_buffer:al_buffers)
             AL10.alBufferData(al_buffer,AL10.AL_FORMAT_STEREO16,empty,sample_rate);
         AL10.alSourceQueueBuffers(source_id,al_buffers);
-        AL10.alSourcePlay(source_id);
+        resume();
     }
     public static void feed(ByteBuffer buffer){
         int al_buffer=AL10.alSourceUnqueueBuffers(source_id);
         AL10.alBufferData(al_buffer,AL10.AL_FORMAT_STEREO16,buffer,sample_rate);
         AL10.alSourceQueueBuffers(source_id,al_buffer);
-        if(AL10.alGetSourcei(source_id,AL10.AL_SOURCE_STATE)!=AL10.AL_PLAYING)
-            AL10.alSourcePlay(source_id);
+        if(AL10.alGetSourcei(source_id,AL10.AL_SOURCE_STATE)!=AL10.AL_PLAYING) resume();
+    }
+    public static void pause(){
+        AL10.alSourcePause(source_id);
+    }
+    public static void resume(){
+        AL10.alSourcePlay(source_id);
     }
     public static void enable(){
         try{

@@ -8,8 +8,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.fml.event.config.ModConfigEvent.Loading;
+import net.neoforged.fml.event.config.ModConfigEvent.Reloading;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -28,7 +30,7 @@ public class ServerEvents implements Reloadable{
         server=event.getServer();
     }
     @SubscribeEvent
-    public static void onJoin(PlayerEvent.PlayerLoggedInEvent event){
+    public static void onJoin(PlayerLoggedInEvent event){
         ServerPlayer player=(ServerPlayer)(event.getEntity());
         if(CommonEvents.types.stream().allMatch(player.connection::hasChannel))
             synchronized(player_lock){
@@ -36,13 +38,13 @@ public class ServerEvents implements Reloadable{
             }
     }
     @SubscribeEvent
-    public static void onExit(PlayerEvent.PlayerLoggedOutEvent event){
+    public static void onExit(PlayerLoggedOutEvent event){
         synchronized(player_lock){
             all_players.remove((ServerPlayer)(event.getEntity()));
         }
     }
     @SubscribeEvent
-    public static void onLoad(ModConfigEvent.Loading event){
+    public static void onLoad(Loading event){
         if(Configs.mod_id.equals(event.getConfig().getModId())){
             if(event.getConfig().getType()==ModConfig.Type.SERVER){
                 reloadable.reload();
@@ -50,7 +52,7 @@ public class ServerEvents implements Reloadable{
         }
     }
     @SubscribeEvent
-    public static void onReload(ModConfigEvent.Reloading event){
+    public static void onReload(Reloading event){
         if(Configs.mod_id.equals(event.getConfig().getModId())){
             if(event.getConfig().getType()==ModConfig.Type.SERVER){
                 reloadable.reload();

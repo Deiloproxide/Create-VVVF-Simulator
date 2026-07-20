@@ -15,8 +15,8 @@ public class SoundEngine implements Reloadable{
     private static final ByteBuffer[] out_buffer=new ByteBuffer[buffer_cnt];
     private static final Thread thread=new Thread(SoundEngine::mixLoop);
     private static final Object mix_lock=new Object();
-    private static volatile boolean is_run=false;
-    private static volatile double main_amp,settings_amp=0.0;
+    private static volatile boolean is_run=false,is_paused=false;
+    private static volatile double main_amp;
     private static double current_amp=0.0;
     private static int head_ptr=0,tail_ptr=0;
     static{
@@ -46,8 +46,10 @@ public class SoundEngine implements Reloadable{
         }
         catch(RuntimeException ignored){}
     }
-    public static void setAmp(double volume){
-        settings_amp=volume;
+    public static void setPause(boolean paused){
+        is_paused=paused;
+        if(is_paused) ALlib.pause();
+        else ALlib.resume();
     }
     private static void mixLoop(){
         while(true){
@@ -55,7 +57,7 @@ public class SoundEngine implements Reloadable{
             out_buffer[head_ptr].clear();
             List<TrainData> train_datas=TrainStatus.getTrainData();
             TrainData.mixer.handle(mix_buffer,train_datas);
-            double amp_step=(settings_amp*main_amp-current_amp)/buffer_size;
+            double amp_step=(main_amp-current_amp)/buffer_size;
             for(int i=0;i<buffer_size;i++){
                 current_amp+=amp_step;
                 double clipped=Math.min(Math.max(mix_buffer[i],-1.0),1.0)*current_amp;

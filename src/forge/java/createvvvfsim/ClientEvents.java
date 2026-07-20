@@ -15,16 +15,17 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingIn;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.sound.SoundEngineLoadEvent;
-import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.joml.Vector3f;
-import utils.ALlib;
 import utils.Reloadable;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
 import yamlloader.AutoLoad;
@@ -68,7 +69,8 @@ public class ClientEvents implements Reloadable{
         is_ready=true;
     }
     @SubscribeEvent
-    public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event){
+    public static void onJoin(LoggingIn event){
+        SoundEngine.load();
         is_single=mc.isSingleplayer();
         FSmoother.reloadCreate();
         String path=AutoLoad.load(mc);
@@ -79,7 +81,7 @@ public class ClientEvents implements Reloadable{
         player.sendSystemMessage(msg);
     }
     @SubscribeEvent
-    public static void onExit(ClientPlayerNetworkEvent.LoggingOut event){
+    public static void onExit(LoggingOut event){
         TrainStatus.clearDataCache();
     }
     public static void onGetTrainEvent(String name,String event,String dimension,Vector3f pos){
@@ -102,16 +104,16 @@ public class ClientEvents implements Reloadable{
         for(Reloadable reloadable:reloadables) reloadable.reload();
         FSmoother.reloadCreate();
         TrainStatus.reloadSpeed();
+        SoundEngine.load();
         context.getSource().sendSuccess(()->msg,false);
         return 1;
     }
     @SubscribeEvent
-    public static void tick(TickEvent.ClientTickEvent event){
-        if(event.phase!=TickEvent.Phase.END) return;
+    public static void tick(ClientTickEvent event){
+        if(event.phase!=Phase.END) return;
         is_paused=mc.isPaused();
         if(is_paused!=is_last_paused){
-            if(is_paused && is_single) SoundEngine.setAmp(0.0);
-            else SoundEngine.setAmp(1.0);
+            SoundEngine.setPause(mc.isPaused() && is_single);
             is_last_paused=is_paused;
         }
         TrainStatus.tick(mc.level,mc.player);

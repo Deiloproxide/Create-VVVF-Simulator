@@ -2,9 +2,7 @@ package createvvvfsim;
 import java.util.UUID;
 import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent.Context;
 import org.joml.Vector3f;
 public record TrainEventModel(UUID train_id,String name,String event,String dimension,Vector3f pos){
     public static void encode(TrainEventModel model,FriendlyByteBuf buf){
@@ -20,9 +18,8 @@ public record TrainEventModel(UUID train_id,String name,String event,String dime
         return new TrainEventModel(buf.readUUID(),buf.readUtf(),buf.readUtf(),buf.readUtf(),
                 new Vector3f(buf.readFloat(),buf.readFloat(),buf.readFloat()));
     }
-    @OnlyIn(Dist.CLIENT)
-    public void handle(Supplier<NetworkEvent.Context> context){
-        NetworkEvent.Context ctx=context.get();
+    public void handle(Supplier<Context> context){
+        Context ctx=context.get();
         ctx.enqueueWork(()->{
             ClientEvents.onGetTrainEvent(name(),event(),dimension(),pos());
             TrainStatus.getServerEvent(train_id());

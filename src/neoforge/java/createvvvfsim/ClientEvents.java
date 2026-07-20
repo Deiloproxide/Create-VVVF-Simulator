@@ -19,14 +19,14 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientPauseChangeEvent;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingIn;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.sound.SoundEngineLoadEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import org.joml.Vector3f;
-import utils.ALlib;
 import utils.Reloadable;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
 import yamlloader.AutoLoad;
@@ -68,7 +68,8 @@ public class ClientEvents implements Reloadable{
         is_ready=true;
     }
     @SubscribeEvent
-    public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event){
+    public static void onJoin(LoggingIn event){
+        SoundEngine.load();
         is_single=mc.isSingleplayer();
         FSmoother.reloadCreate();
         String path=AutoLoad.load(mc);
@@ -79,13 +80,12 @@ public class ClientEvents implements Reloadable{
         player.sendSystemMessage(msg);
     }
     @SubscribeEvent
-    public static void onExit(ClientPlayerNetworkEvent.LoggingOut event){
+    public static void onExit(LoggingOut event){
         TrainStatus.clearDataCache();
     }
     @SubscribeEvent
     public static void onPauseChange(ClientPauseChangeEvent.Post event){
-        if(event.isPaused() && is_single) SoundEngine.setAmp(0.0);
-        else SoundEngine.setAmp(1.0);
+        SoundEngine.setPause(event.isPaused() && is_single);
     }
     public static void onGetTrainEvent(String name,String event,String dimension,Vector3f pos){
         int x=Math.round(pos.x),y=Math.round(pos.y),z=Math.round(pos.z);
@@ -107,6 +107,7 @@ public class ClientEvents implements Reloadable{
         for(Reloadable reloadable:reloadables) reloadable.reload();
         FSmoother.reloadCreate();
         TrainStatus.reloadSpeed();
+        SoundEngine.load();
         context.getSource().sendSuccess(()->msg,false);
         return 1;
     }

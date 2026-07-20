@@ -5,13 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.event.TickEvent.ServerTickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraftforge.fml.event.config.ModConfigEvent.Loading;
+import net.minecraftforge.fml.event.config.ModConfigEvent.Reloading;
 import net.minecraftforge.network.PacketDistributor;
 import org.joml.Vector3f;
 import utils.Reloadable;
@@ -28,7 +31,7 @@ public class ServerEvents implements Reloadable{
         server=event.getServer();
     }
     @SubscribeEvent
-    public static void onJoin(PlayerEvent.PlayerLoggedInEvent event){
+    public static void onJoin(PlayerLoggedInEvent event){
         ServerPlayer player=(ServerPlayer)(event.getEntity());
         if(CommonEvents.channel.isRemotePresent(player.connection.connection))
             synchronized(player_lock){
@@ -36,13 +39,13 @@ public class ServerEvents implements Reloadable{
             }
     }
     @SubscribeEvent
-    public static void onExit(PlayerEvent.PlayerLoggedOutEvent event){
+    public static void onExit(PlayerLoggedOutEvent event){
         synchronized(player_lock){
             all_players.remove((ServerPlayer)(event.getEntity()));
         }
     }
     @SubscribeEvent
-    public static void onLoad(ModConfigEvent.Loading event){
+    public static void onLoad(Loading event){
         if(Configs.mod_id.equals(event.getConfig().getModId())){
             if(event.getConfig().getType()==ModConfig.Type.SERVER){
                 reloadable.reload();
@@ -50,7 +53,7 @@ public class ServerEvents implements Reloadable{
         }
     }
     @SubscribeEvent
-    public static void onReload(ModConfigEvent.Reloading event){
+    public static void onReload(Reloading event){
         if(Configs.mod_id.equals(event.getConfig().getModId())){
             if(event.getConfig().getType()==ModConfig.Type.SERVER){
                 reloadable.reload();
@@ -67,8 +70,8 @@ public class ServerEvents implements Reloadable{
             CommonEvents.channel.send(PacketDistributor.PLAYER.with(()->player),model);
     }
     @SubscribeEvent
-    public static void tick(TickEvent.ServerTickEvent event){
-        if(event.phase!=TickEvent.Phase.END) return;
+    public static void tick(ServerTickEvent event){
+        if(event.phase!=Phase.END) return;
         if(sync_current>=sync_period){
             sync_current=0;
             List<ServerPlayer> players;

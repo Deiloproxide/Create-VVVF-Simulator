@@ -6,8 +6,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.joml.Vector3f;
 public record TrainEventModel(UUID train_id,String name,String event,String dimension,
@@ -28,7 +26,6 @@ public record TrainEventModel(UUID train_id,String name,String event,String dime
     public Type<TrainEventModel> type(){
         return model_type;
     }
-    @OnlyIn(Dist.CLIENT)
     public void handle(IPayloadContext ignored){
         ClientEvents.onGetTrainEvent(name(),event(),dimension(),pos());
         TrainStatus.getServerEvent(train_id());
