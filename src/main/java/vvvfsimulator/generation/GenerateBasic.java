@@ -2,8 +2,8 @@ package vvvfsimulator.generation;
 import vvvfsimulator.vvvf.MyMath;
 import vvvfsimulator.vvvf.calculation.Common;
 import vvvfsimulator.vvvf.model.Struct;
-public final class GenerateBasic{
-    public static final class WaveForm{
+public class GenerateBasic{
+    public static class WaveForm{
         public static Struct.PhaseState[] getUVWCycle(Struct.Domain control,double initialPhase,
                                                       int division,boolean precise){
             double f=control.electricalState.baseWaveFrequency;
@@ -23,7 +23,7 @@ public final class GenerateBasic{
             return out;
         }
     }
-    public static final class Fourier{
+    public static class Fourier{
         public static final double VOLTAGE_CONVERT_FACTOR=1.102657791;
         public static double getFourierFast(Struct.PhaseState[] uvw,int n){
             double integral=0;

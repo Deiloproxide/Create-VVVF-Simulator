@@ -10,7 +10,7 @@ import vvvfsimulator.vvvf.modulation.CustomPwm;
 import vvvfsimulator.vvvf.modulation.Carrier;
 import vvvfsimulator.vvvf.modulation.DeltaSigma;
 import vvvfsimulator.vvvf.modulation.SVM;
-public final class Struct{
+public class Struct{
     public static class Domain{
         public Motor motor;
         public ElectricalParameter electricalState=new ElectricalParameter(2,0);

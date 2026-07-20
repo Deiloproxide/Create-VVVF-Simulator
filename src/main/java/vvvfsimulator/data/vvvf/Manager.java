@@ -45,7 +45,7 @@ import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseHarmonic;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseTypeName;
 import yamlloader.LoadContext;
 import yamlloader.LoadException;
-public final class Manager{
+public class Manager{
     private static final Struct TEMPLATE=new Struct();
     public static volatile Struct loadData;
     public static volatile Struct current=deepClone(TEMPLATE);

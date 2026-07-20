@@ -1,7 +1,7 @@
 package vvvfsimulator.generation.audio;
 import vvvfsimulator.data.trainaudio.Struct;
 import vvvfsimulator.vvvf.model.Struct.Domain;
-public final class RealTime{
+public class RealTime{
     public static class Parameter{
         public double frequencyChangeRate=0;
         public boolean isBraking=false;

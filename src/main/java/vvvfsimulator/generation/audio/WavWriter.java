@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-public final class WavWriter{
+public class WavWriter{
     public static void writeHeader(BufferedOutputStream out,int sampleRate,
                                    int bitsPerSample,int channels,int dataSize) throws IOException{
         int byteRate=sampleRate*channels*bitsPerSample/8;

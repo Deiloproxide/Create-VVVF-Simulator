@@ -1,7 +1,7 @@
 package vvvfsimulator.generation;
 import vvvfsimulator.data.basefrequency.StructCompiled;
 import vvvfsimulator.data.trainaudio.Struct;
-public final class GenerateCommon{
+public class GenerateCommon{
     public static class GenerationParameter{
         public StructCompiled baseFrequencyData;
         public vvvfsimulator.data.vvvf.Struct vvvfData;

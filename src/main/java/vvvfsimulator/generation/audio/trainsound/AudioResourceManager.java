@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import net.minecraft.util.Tuple;
-public final class AudioResourceManager{
+public class AudioResourceManager{
     public static final String SAMPLE_IR_PATH=Configs.filter_wav;
     public static Tuple<Integer,double[]> readResourceAudioFileSample(String path){
         try(InputStream in=AudioResourceManager.class.getResourceAsStream(path)){

@@ -7,7 +7,7 @@ import vvvfsimulator.vvvf.model.Struct.PhaseState;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseAlternative;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataKey;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseTypeName;
-public final class L2{
+public class L2{
     private static final int[] HO_KEYS_5={9,2,13,2,17,2,21,2,25,2,29,2,33,2,37,2};
     private static final int[] HO_KEYS_7={15,4,15,3,7,1,11,2,19,4,23,4,27,4,31,4,35,4,39,4};
     private static final int[] HO_KEYS_9={21,6,13,3,17,4,25,6,29,6,33,6,37,6};

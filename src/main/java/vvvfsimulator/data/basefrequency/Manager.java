@@ -1,5 +1,5 @@
 package vvvfsimulator.data.basefrequency;
-public final class Manager{
+public class Manager{
     private static final Struct TEMPLATE=createTemplate();
     public static Struct loadData;
     public static Struct current=deepClone(TEMPLATE);

@@ -1,5 +1,5 @@
 package vvvfsimulator.data.vvvf;
-public final class Util{
+public class Util{
     public static boolean setFreeRunModulationIndexToZero(Struct data){
         for(Struct.PulseControlEx pulse:data.acceleratePattern){
             pulse.amplitude.powerOff.startAmplitude=0;

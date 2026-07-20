@@ -3,7 +3,7 @@ import vvvfsimulator.data.vvvf.Analyze;
 import vvvfsimulator.generation.audio.RealTime.VvvfSoundParameter;
 import vvvfsimulator.vvvf.calculation.Common;
 import vvvfsimulator.vvvf.model.Struct.PhaseState;
-public final class RealTime{
+public class RealTime{
     public static void calculate(VvvfSoundParameter parameter){
         while(!parameter.quit){
             int flag=vvvfsimulator.generation.audio.RealTime.realTimeFrequencyControl(

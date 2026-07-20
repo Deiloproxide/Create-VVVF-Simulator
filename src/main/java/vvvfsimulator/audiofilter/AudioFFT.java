@@ -1,6 +1,6 @@
 package vvvfsimulator.audiofilter;
 import org.jtransforms.fft.DoubleFFT_1D;
-public final class AudioFFT{
+public class AudioFFT{
     private int size;
     private int halfSize;
     private DoubleFFT_1D fft;

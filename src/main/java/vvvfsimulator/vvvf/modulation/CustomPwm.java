@@ -78,7 +78,7 @@ public class CustomPwm{
         for(int i=0;i<8;i++) value|=((long)readU8(stream))<<(8*i);
         return Double.longBitsToDouble(value);
     }
-    public static final class CustomPwmPresets{
+    public static class CustomPwmPresets{
         private static final Map<Key,CustomPwm> PRESETS=new HashMap<>();
         private static final AtomicBoolean LOADED=new AtomicBoolean(false);
         private static final Key LOOKUP_KEY=new Key(0,null,0,null);
@@ -139,7 +139,7 @@ public class CustomPwm{
                 throw new RuntimeException("Failed to load custom PWM preset: "+resourcePath,e);
             }
         }
-        private static final class Key{
+        private static class Key{
             private int level;
             private PulseTypeName pulseType;
             private int pulseCount;

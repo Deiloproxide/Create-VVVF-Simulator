@@ -1,6 +1,6 @@
 package vvvfsimulator.generation.audio.trainsound;
 import vvvfsimulator.audiofilter.FFTConvolver;
-public final class AudioFilter{
+public class AudioFilter{
     public interface SampleFilter{
         double apply(double input);
     }
@@ -10,7 +10,7 @@ public final class AudioFilter{
             return input;
         }
     }
-    public static final class CppConvolutionFilter{
+    public static class CppConvolutionFilter{
         private final FFTConvolver convolver=new FFTConvolver();
         private final double[] input;
         private final double[] output;

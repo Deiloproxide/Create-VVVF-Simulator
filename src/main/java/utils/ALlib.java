@@ -19,7 +19,7 @@ import static org.lwjgl.system.libffi.LibFFI.ffi_type_pointer;
 import static org.lwjgl.system.libffi.LibFFI.ffi_type_sint32;
 import static org.lwjgl.system.libffi.LibFFI.ffi_type_uint32;
 import static org.lwjgl.system.libffi.LibFFI.ffi_type_void;
-public final class ALlib{
+public class ALlib{
     private static final int sample_rate=Configs.sample_rate.get();
     private static final int buffer_size=Configs.buffer_size.get();
     private static final int buffer_complete=0x19A4;
@@ -100,7 +100,7 @@ public final class ALlib{
             invokePPV(1L,memAddress(types),enable,control_addr);
         }
     }
-    private static final class EventCallback extends Callback implements CallbackI{
+    private static class EventCallback extends Callback implements CallbackI{
         private static final FFICIF cif=apiCreateCIF(FFI_DEFAULT_ABI,
                 ffi_type_void,ffi_type_sint32,ffi_type_uint32,ffi_type_uint32,
                 ffi_type_sint32,ffi_type_pointer,ffi_type_pointer);

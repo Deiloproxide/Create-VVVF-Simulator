@@ -1,6 +1,6 @@
 package vvvfsimulator.vvvf.modulation;
 import vvvfsimulator.vvvf.MyMath;
-public final class SVM{
+public class SVM{
     public static class FunctionTime{
         public double t0;
         public double t1;

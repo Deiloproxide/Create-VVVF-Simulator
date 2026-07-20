@@ -10,7 +10,7 @@ import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.DiscreteTimeConfigurat
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataKey;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseHarmonic;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseTypeName;
-public final class Common{
+public class Common{
     public interface PhaseStateCalculator{
         void calculate(Domain control,double initialPhase,PhaseState out);
     }

@@ -17,7 +17,7 @@ import vvvfsimulator.vvvf.model.Struct.PulseControl.AsyncControl.CarrierFrequenc
 import vvvfsimulator.vvvf.model.Struct.PulseControl.AsyncControl.RandomModulation;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataKey;
-public final class Analyze{
+public class Analyze{
     private static final PulseDataKey[] PULSE_DATA_KEYS=PulseDataKey.values();
     private static double getChangingValue(double x1,double y1,double x2,double y2,double x){
         return y1+(y2-y1)/(x2-x1)*(x-x1);

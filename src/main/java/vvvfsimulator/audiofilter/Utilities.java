@@ -1,6 +1,6 @@
 package vvvfsimulator.audiofilter;
 import java.util.Arrays;
-public final class Utilities{
+public class Utilities{
     public static boolean SSEEnabled(){
         return false;
     }

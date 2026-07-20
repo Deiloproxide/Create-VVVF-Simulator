@@ -1,5 +1,5 @@
 package vvvfsimulator.data.trainaudio;
-public final class Manager{
+public class Manager{
     private static final Struct TEMPLATE=new Struct();
     public static Struct loadData;
     public static Struct current=deepClone(TEMPLATE);

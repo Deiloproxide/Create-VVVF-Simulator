@@ -1,5 +1,5 @@
 package vvvfsimulator.vvvf;
-public final class MyMath{
+public class MyMath{
     public static final double M_2_PI=0.63661977236758134307553505349006;
     public static final double M_1_PI=0.31830988618379067153776752674503;
     public static final double M_1_2PI=0.15915494309189533576888376337251;
@@ -15,7 +15,7 @@ public final class MyMath{
     public static final double M_PI_180=0.01745329251994329576923690768489;
     public static final double M_SQRT3=1.7320508075688772935274463415059;
     public static final double M_SQRT3_2=0.86602540378443864676372317075294;
-    public static final class Functions{
+    public static class Functions{
         public static double triangle(double x){
             double phase=M_2_PI*x-4.0*Math.floor(x*M_1_2PI);
             if(1.0<=phase && phase<3.0) return 2.0-phase;

@@ -3,7 +3,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
-public final class Util{
+public class Util{
     public static String getPropertyValues(Object object){
         if(object==null) return "null";
         StringBuilder out=new StringBuilder();

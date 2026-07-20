@@ -8,7 +8,7 @@ import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.CarrierWaveConfigurati
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseAlternative;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataKey;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseTypeName;
-public final class Config{
+public class Config{
     private static final PulseDataKey[] NO_PULSE_DATA_KEYS={};
     private static final PulseDataKey[] PHASE_KEY={PulseDataKey.Phase};
     private static final PulseDataKey[] PULSE_WIDTH_KEY={PulseDataKey.PulseWidth};

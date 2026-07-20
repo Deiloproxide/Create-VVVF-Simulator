@@ -6,7 +6,7 @@ import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseAlternative;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataKey;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseTypeName;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
-public final class L3{
+public class L3{
     private static void async(Domain domain,double initialPhase,PhaseState out){
         if(domain.electricalState.isNone){
             out.set(0,0,0);

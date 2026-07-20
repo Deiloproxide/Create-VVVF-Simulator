@@ -9,7 +9,7 @@ import vvvfsimulator.vvvf.MyMath;
 import vvvfsimulator.vvvf.calculation.Common;
 import vvvfsimulator.vvvf.model.Struct;
 import vvvfsimulator.vvvf.model.Struct.Domain;
-public final class Audio{
+public class Audio{
     public static void exportWavLine(GenerationParameter param,
                                      int samplingFreq,String path) throws IOException{
         exportWavFile(param,samplingFreq,path,Mode.Line);

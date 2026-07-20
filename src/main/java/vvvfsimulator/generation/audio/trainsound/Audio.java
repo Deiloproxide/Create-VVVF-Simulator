@@ -4,7 +4,7 @@ import vvvfsimulator.data.trainaudio.Struct;
 import vvvfsimulator.data.trainaudio.Struct.HarmonicData;
 import vvvfsimulator.vvvf.calculation.Common;
 import vvvfsimulator.vvvf.model.Struct.Domain;
-public final class Audio{
+public class Audio{
     public static double calculateHarmonicSounds(Domain control,List<HarmonicData> harmonics){
         double sound=0;
         for(HarmonicData harmonic: harmonics){
