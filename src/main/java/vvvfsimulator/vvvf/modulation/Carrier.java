@@ -100,8 +100,14 @@ public class Carrier{
             if(parameter==null) return Double.NaN;
             if(simple) return baseFrequency;
             if(lastUpdateTime+parameter.interval<time){
-                double range=random.nextDouble()*parameter.range;
-                if(random.nextDouble()<0.5) range=-range;
+                double range;
+                if(parameter.range>=0){
+                    range=random.nextDouble()*parameter.range;
+                    if(random.nextDouble()<0.5) range=-range;
+                }
+                else{
+                    range=random.nextDouble()<0.5?parameter.range:-parameter.range;
+                }
                 lastRange=range;
                 lastUpdateTime=time;
             }

@@ -1,4 +1,4 @@
-package yamlloader;
+package loader;
 import createvvvfsim.Configs;
 import java.io.IOException;
 import java.io.Reader;
@@ -17,7 +17,10 @@ import net.minecraft.world.level.storage.LevelResource;
 public class AutoLoad{
     private static final HexFormat hex=HexFormat.of();
     private static final MessageDigest hash;
+    public static final Properties properties=new Properties();
     static{
+        properties.setProperty(Configs.loadyaml_key,Configs.default_yaml);
+        properties.setProperty(Configs.loadir_key,Configs.default_ir);
         try{
             hash=MessageDigest.getInstance("SHA-256");
         }
@@ -25,24 +28,25 @@ public class AutoLoad{
             throw new RuntimeException(e);
         }
     }
-    public static Path getFilePath(Minecraft mc){
+    private static Path getFilePath(Minecraft mc){
         IntegratedServer single_server=mc.getSingleplayerServer();
         if(single_server!=null) return single_server.getWorldPath(LevelResource.ROOT);
         ServerData data=mc.getCurrentServer();
         String hashed=hex.formatHex(hash.digest(data.ip.getBytes(StandardCharsets.UTF_8)));
         return mc.gameDirectory.toPath().resolve(Configs.autoload_dir).resolve(hashed);
     }
-    public static void save(Minecraft mc,String yaml_name){
-        if(yaml_name==null) return;
+    public static void save(Minecraft mc){
         Path path=getFilePath(mc).resolve(Configs.autoload_file),parent=path.getParent();
-        Properties properties=new Properties();
-        properties.setProperty(Configs.autoload_key,yaml_name);
         if(!Files.isDirectory(parent)){
             try{
                 Files.createDirectories(parent);
             }
             catch(IOException ignored){}
         }
+        if(YamlLoader.success_name!=null)
+            properties.setProperty(Configs.loadyaml_key,YamlLoader.success_name);
+        if(IRLoader.success_name!=null)
+            properties.setProperty(Configs.loadir_key,IRLoader.success_name);
         try(Writer writer=Files.newBufferedWriter(path,StandardCharsets.UTF_8)){
             properties.store(writer,"");
         }
@@ -50,14 +54,12 @@ public class AutoLoad{
     }
     public static String load(Minecraft mc){
         Path path=getFilePath(mc).resolve(Configs.autoload_file);
-        if(!Files.isRegularFile(path)) return Configs.default_yaml;
-        Properties properties=new Properties();
-        String yaml_name=Configs.default_yaml;
         try(Reader reader=Files.newBufferedReader(path,StandardCharsets.UTF_8)){
             properties.load(reader);
-            yaml_name=properties.getProperty(Configs.autoload_key,Configs.default_yaml);
         }
         catch(IOException ignored){}
-        return yaml_name;
+        String yaml_msg=YamlLoader.loadYaml(properties.getProperty(Configs.loadyaml_key));
+        String ir_msg=IRLoader.loadIR(properties.getProperty(Configs.loadir_key));
+        return String.join("\n",yaml_msg,ir_msg);
     }
 }

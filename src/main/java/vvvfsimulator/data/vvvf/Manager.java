@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import loader.LoadContext;
+import loader.LoadException;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.ComposerException;
@@ -43,8 +45,6 @@ import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataKey;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseDataValue;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseHarmonic;
 import vvvfsimulator.vvvf.model.Struct.PulseControl.Pulse.PulseTypeName;
-import yamlloader.LoadContext;
-import yamlloader.LoadException;
 public class Manager{
     private static final Struct TEMPLATE=new Struct();
     public static volatile Struct loadData;
@@ -527,6 +527,9 @@ public class Manager{
     private static <E extends Enum<E>> E enumValue(Class<E> type,String value,E fallback){
         if(value==null) return fallback;
         String fixed=value.trim();
+        if(type==Pulse.BaseWaveType.class && fixed.equals("Saw")) fixed="Triangle";
+        if(type==Pulse.BaseWaveType.class && fixed.equals("ModifiedSaw1")) fixed="ModifiedTriangle1";
+        if(type==Pulse.PulseHarmonic.PulseHarmonicType.class && fixed.equals("Saw")) fixed="Triangle";
         if(type==PulseTypeName.class && fixed.equals("ΔΣ")) fixed="DELTA_SIGMA";
         try{
             return Enum.valueOf(type,fixed);

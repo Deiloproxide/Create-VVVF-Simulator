@@ -554,7 +554,7 @@ AcceleratePattern:
         BaseWave: Triangle
       CarrierFrequencyTable:
         Table: []
-- ControlFrequencyFrom: 20
+- ControlFrequencyFrom: 10
   RotateFrequencyFrom: -1
   RotateFrequencyBelow: -1
   EnableFreeRunOn: true
@@ -575,12 +575,23 @@ AcceleratePattern:
     CarrierWave:
       Type: Triangle
       Option: RaiseStart
-    PulseData: {}
+    PulseData:
+      CarrierFolding:
+        Mode: Const
+        Constant: 1
+        MovingValue:
+          Type: Proportional
+          Start: 0
+          StartValue: 0
+          End: 1
+          EndValue: 100
+          Degree: 2
+          CurveRate: 0
   Amplitude:
     Default:
       Mode: Linear
-      StartFrequency: 20
-      StartAmplitude: 0.18
+      StartFrequency: 10
+      StartAmplitude: 0.09
       EndFrequency: 33
       EndAmplitude: 0.297
       CurveChangeRate: 0
@@ -592,8 +603,8 @@ AcceleratePattern:
       AmplitudeTable: *o0
     PowerOn:
       Mode: Linear
-      StartFrequency: 20
-      StartAmplitude: 0.18
+      StartFrequency: 10
+      StartAmplitude: 0.09
       EndFrequency: 33
       EndAmplitude: 0.297
       CurveChangeRate: 0
@@ -605,8 +616,8 @@ AcceleratePattern:
       AmplitudeTable: *o0
     PowerOff:
       Mode: Linear
-      StartFrequency: 20
-      StartAmplitude: 0.18
+      StartFrequency: 10
+      StartAmplitude: 0.09
       EndFrequency: 33
       EndAmplitude: 0.297
       CurveChangeRate: 0
@@ -644,8 +655,8 @@ AcceleratePattern:
       Mode: Moving
       Constant: -1
       MovingValue:
-        Type: Proportional
-        Start: 20
+        Type: Pow2_Exponential
+        Start: 10
         StartValue: 350
         End: 33
         EndValue: 420
@@ -706,23 +717,34 @@ AcceleratePattern:
       Mode: Middle
     BaseWave: Sine
     PulseHarmonics:
-    - Harmonic: 350
-      IsHarmonicProportional: false
-      Amplitude: 0.7
+    - Harmonic: 1
+      IsHarmonicProportional: true
+      Amplitude: 0.25
       IsAmplitudeProportional: false
       InitialPhase: 0
-      Type: Sine
+      Type: HFI
     CarrierWave:
       Type: Triangle
       Option: RaiseStart
-    PulseData: {}
+    PulseData:
+      CarrierFolding:
+        Mode: Const
+        Constant: 1
+        MovingValue:
+          Type: Proportional
+          Start: 0
+          StartValue: 0
+          End: 1
+          EndValue: 100
+          Degree: 2
+          CurveRate: 0
   Amplitude:
     Default:
       Mode: Linear
       StartFrequency: 0
       StartAmplitude: 0
-      EndFrequency: 20
-      EndAmplitude: 0.1
+      EndFrequency: 10
+      EndAmplitude: 0.09
       CurveChangeRate: 0
       CutOffAmplitude: 0
       MaxAmplitude: -1
@@ -734,8 +756,8 @@ AcceleratePattern:
       Mode: Linear
       StartFrequency: 0
       StartAmplitude: 0
-      EndFrequency: 20
-      EndAmplitude: 0.1
+      EndFrequency: 10
+      EndAmplitude: 0.09
       CurveChangeRate: 0
       CutOffAmplitude: 0
       MaxAmplitude: -1
@@ -747,8 +769,8 @@ AcceleratePattern:
       Mode: Linear
       StartFrequency: 0
       StartAmplitude: 0
-      EndFrequency: 20
-      EndAmplitude: 0.1
+      EndFrequency: 10
+      EndAmplitude: 0.09
       CurveChangeRate: 0
       CutOffAmplitude: 0
       MaxAmplitude: -1
@@ -1365,7 +1387,7 @@ BrakingPattern:
         BaseWave: Triangle
       CarrierFrequencyTable:
         Table: []
-- ControlFrequencyFrom: 20
+- ControlFrequencyFrom: 10
   RotateFrequencyFrom: -1
   RotateFrequencyBelow: -1
   EnableFreeRunOn: true
@@ -1386,12 +1408,23 @@ BrakingPattern:
     CarrierWave:
       Type: Triangle
       Option: RaiseStart
-    PulseData: {}
+    PulseData:
+      CarrierFolding:
+        Mode: Const
+        Constant: 1
+        MovingValue:
+          Type: Proportional
+          Start: 0
+          StartValue: 0
+          End: 1
+          EndValue: 100
+          Degree: 2
+          CurveRate: 0
   Amplitude:
     Default:
       Mode: Linear
-      StartFrequency: 20
-      StartAmplitude: 0.18
+      StartFrequency: 10
+      StartAmplitude: 0.09
       EndFrequency: 33
       EndAmplitude: 0.297
       CurveChangeRate: 0
@@ -1403,8 +1436,8 @@ BrakingPattern:
       AmplitudeTable: *o1
     PowerOn:
       Mode: Linear
-      StartFrequency: 20
-      StartAmplitude: 0.18
+      StartFrequency: 10
+      StartAmplitude: 0.09
       EndFrequency: 33
       EndAmplitude: 0.297
       CurveChangeRate: 0
@@ -1416,8 +1449,8 @@ BrakingPattern:
       AmplitudeTable: *o1
     PowerOff:
       Mode: Linear
-      StartFrequency: 20
-      StartAmplitude: 0.18
+      StartFrequency: 10
+      StartAmplitude: 0.09
       EndFrequency: 33
       EndAmplitude: 0.297
       CurveChangeRate: 0
@@ -1455,8 +1488,8 @@ BrakingPattern:
       Mode: Moving
       Constant: -1
       MovingValue:
-        Type: Proportional
-        Start: 20
+        Type: Pow2_Exponential
+        Start: 10
         StartValue: 350
         End: 33
         EndValue: 420
@@ -1517,23 +1550,34 @@ BrakingPattern:
       Mode: Middle
     BaseWave: Sine
     PulseHarmonics:
-    - Harmonic: 350
-      IsHarmonicProportional: false
-      Amplitude: 0.7
+    - Harmonic: 1
+      IsHarmonicProportional: true
+      Amplitude: 0.25
       IsAmplitudeProportional: false
       InitialPhase: 0
-      Type: Sine
+      Type: HFI
     CarrierWave:
       Type: Triangle
       Option: RaiseStart
-    PulseData: {}
+    PulseData:
+      CarrierFolding:
+        Mode: Const
+        Constant: 1
+        MovingValue:
+          Type: Proportional
+          Start: 0
+          StartValue: 0
+          End: 1
+          EndValue: 100
+          Degree: 2
+          CurveRate: 0
   Amplitude:
     Default:
       Mode: Linear
       StartFrequency: 0
       StartAmplitude: 0
-      EndFrequency: 20
-      EndAmplitude: 0.1
+      EndFrequency: 10
+      EndAmplitude: 0.09
       CurveChangeRate: 0
       CutOffAmplitude: 0
       MaxAmplitude: -1
@@ -1545,8 +1589,8 @@ BrakingPattern:
       Mode: Linear
       StartFrequency: 0
       StartAmplitude: 0
-      EndFrequency: 20
-      EndAmplitude: 0.1
+      EndFrequency: 10
+      EndAmplitude: 0.09
       CurveChangeRate: 0
       CutOffAmplitude: 0
       MaxAmplitude: -1
@@ -1558,8 +1602,8 @@ BrakingPattern:
       Mode: Linear
       StartFrequency: 0
       StartAmplitude: 0
-      EndFrequency: 20
-      EndAmplitude: 0.1
+      EndFrequency: 10
+      EndAmplitude: 0.09
       CurveChangeRate: 0
       CutOffAmplitude: 0
       MaxAmplitude: -1

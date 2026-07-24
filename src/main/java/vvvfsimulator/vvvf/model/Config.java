@@ -14,6 +14,7 @@ public class Config{
     private static final PulseDataKey[] PULSE_WIDTH_KEY={PulseDataKey.PulseWidth};
     private static final PulseDataKey[] UPDATE_FREQUENCY_KEY={PulseDataKey.UpdateFrequency};
     private static final PulseDataKey[] DIPOLAR_KEY={PulseDataKey.Dipolar};
+    private static final PulseDataKey[] CARRIER_FOLDING_KEY={PulseDataKey.CarrierFolding};
     public static PulseTypeName[] getAvailablePulseType(int level){
         return switch(level){
             case 2->new PulseTypeName[]{PulseTypeName.ASYNC,PulseTypeName.SYNC,PulseTypeName.SHE,
@@ -45,7 +46,7 @@ public class Config{
         if(level==3){
             if(pulseType==PulseTypeName.SYNC) return switch(pulseCount){
                 case 1->new PulseAlternative[]{PulseAlternative.Default,PulseAlternative.Alt1};
-                case 5->alternativesDefaultToX(2,new PulseAlternative[0]);
+                case 5->alternativesDefaultToX(3,new PulseAlternative[0]);
                 default->new PulseAlternative[]{PulseAlternative.Default};
             };
             if(pulseType==PulseTypeName.ASYNC) return new PulseAlternative[]{PulseAlternative.Default};
@@ -71,9 +72,17 @@ public class Config{
         if(level==2){
             if(pulseType==PulseTypeName.SYNC) return switch(pulseCount){
                 case 1->alternativesDefaultToX(2,new PulseAlternative[0]);
-                case 3,5,6,8,9,11,13,17->alternativesDefaultToX(1,
+                case 3->alternativesDefaultToX(3,
+                        new PulseAlternative[]{PulseAlternative.CP,PulseAlternative.ShiftedCP,PulseAlternative.Square});
+                case 5,6,8,9,13,17->alternativesDefaultToX(1,
                         new PulseAlternative[]{PulseAlternative.CP,PulseAlternative.Square});
-                default->new PulseAlternative[]{PulseAlternative.Default,PulseAlternative.CP,PulseAlternative.Square};
+                case 11->alternativesDefaultToX(1,
+                        new PulseAlternative[]{PulseAlternative.CP,PulseAlternative.ShiftedCP,PulseAlternative.Square});
+                default->(pulseCount+1)%4==0?
+                        new PulseAlternative[]{PulseAlternative.Default,PulseAlternative.CP,
+                                PulseAlternative.ShiftedCP,PulseAlternative.Square}:
+                        new PulseAlternative[]{PulseAlternative.Default,PulseAlternative.CP,
+                                PulseAlternative.Square};
             };
             if(pulseType==PulseTypeName.ASYNC) return new PulseAlternative[]{PulseAlternative.Default};
             if(pulseType==PulseTypeName.CHM) return switch(pulseCount){
@@ -113,6 +122,7 @@ public class Config{
             if(pulseMode.pulseType==PulseTypeName.DELTA_SIGMA) return true;
             if(pulseMode.baseWave.ordinal()>=BaseWaveType.SV.ordinal()) return false;
             if(pulseMode.alternative==PulseAlternative.CP) return true;
+            if(pulseMode.alternative==PulseAlternative.ShiftedCP) return false;
             if(pulseMode.alternative.ordinal()>PulseAlternative.Default.ordinal()) return false;
             if(pulseMode.pulseType==PulseTypeName.SYNC) return pulseMode.pulseCount!=1;
             return pulseMode.pulseType==PulseTypeName.ASYNC;
@@ -128,6 +138,7 @@ public class Config{
         if(level==2){
             if(pulseMode.pulseType==PulseTypeName.DELTA_SIGMA) return true;
             if(pulseMode.alternative==PulseAlternative.CP) return true;
+            if(pulseMode.alternative==PulseAlternative.ShiftedCP) return false;
             if(pulseMode.alternative.ordinal()>PulseAlternative.Default.ordinal()) return false;
             if(pulseMode.pulseType==PulseTypeName.SYNC) return pulseMode.pulseCount!=1;
             return pulseMode.pulseType==PulseTypeName.ASYNC;
@@ -163,6 +174,7 @@ public class Config{
                         pulseMode.alternative==PulseAlternative.Alt1)
                     return false;
                 return pulseMode.alternative!=PulseAlternative.CP &&
+                        pulseMode.alternative!=PulseAlternative.ShiftedCP &&
                         pulseMode.alternative!=PulseAlternative.Square;
             }
             return true;
@@ -184,12 +196,18 @@ public class Config{
     public static PulseDataKey[] getAvailablePulseDataKey(Pulse pulseMode,int level){
         if(level==2){
             return switch(pulseMode.pulseType){
+                case ASYNC->CARRIER_FOLDING_KEY;
                 case SYNC->switch(pulseMode.pulseCount){
-                    case 3->pulseMode.alternative==PulseAlternative.Alt1?
-                            PHASE_KEY:NO_PULSE_DATA_KEYS;
+                    case 3->switch(pulseMode.alternative){
+                        case Alt1->PHASE_KEY;
+                        case Alt2,Alt3->PULSE_WIDTH_KEY;
+                        default->CARRIER_FOLDING_KEY;
+                    };
+                    case 5,9,11,13,17->pulseMode.alternative==PulseAlternative.Alt1?
+                            NO_PULSE_DATA_KEYS:CARRIER_FOLDING_KEY;
                     case 6,8->pulseMode.alternative==PulseAlternative.Alt1?
-                            PULSE_WIDTH_KEY:NO_PULSE_DATA_KEYS;
-                    default->NO_PULSE_DATA_KEYS;
+                            PULSE_WIDTH_KEY:CARRIER_FOLDING_KEY;
+                    default->CARRIER_FOLDING_KEY;
                 };
                 case DELTA_SIGMA->UPDATE_FREQUENCY_KEY;
                 default->NO_PULSE_DATA_KEYS;
@@ -201,6 +219,7 @@ public class Config{
                     case 1->NO_PULSE_DATA_KEYS;
                     case 5->switch(pulseMode.alternative){
                         case Alt1,Alt2->PULSE_WIDTH_KEY;
+                        case Alt3->NO_PULSE_DATA_KEYS;
                         default->DIPOLAR_KEY;
                     };
                     default->DIPOLAR_KEY;
@@ -217,6 +236,7 @@ public class Config{
             case Phase->0;
             case PulseWidth->0.2;
             case UpdateFrequency->440;
+            case CarrierFolding->1;
         };
     }
     private static PulseAlternative[] alternativesDefaultToX(int x,PulseAlternative[] custom){

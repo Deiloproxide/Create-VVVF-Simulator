@@ -19,6 +19,8 @@ public class L2{
     private static void async(Domain domain,double initialPhase,PhaseState out){
         domain.getCarrierInstance().processCarrierFrequency(domain.getTime(),domain.electricalState);
         double carrierVal=Common.getCarrierWaveform(domain,domain.getCarrierInstance().getPhase());
+        carrierVal=MyMath.Functions.triangle(carrierVal*MyMath.M_PI_2*
+                Common.getPulseDataValue(domain.electricalState.pulseData,PulseDataKey.CarrierFolding));
         out.set(Common.modulateSignal(
                 Common.getBaseWaveform(domain,0,initialPhase),carrierVal)*2,
                 Common.modulateSignal(Common.getBaseWaveform(domain,1,initialPhase),carrierVal)*2,
@@ -31,6 +33,8 @@ public class L2{
         double x=baseWaveParameter[Common.BASE_WAVE_X];
         double rawX=baseWaveParameter[Common.BASE_WAVE_RAW_X];
         var pulseMode=domain.electricalState.pulsePattern.pulseMode;
+        domain.getCarrierInstance().angleFrequency=domain.electricalState.getBaseWaveAngleFrequency();
+        domain.getCarrierInstance().time=domain.getBaseWaveTime();
         if(pulseMode.pulseCount==1 &&
                 (pulseMode.alternative==PulseAlternative.Alt1 || pulseMode.alternative==PulseAlternative.Alt2)){
             int sign=pulseMode.alternative==PulseAlternative.Alt1?1:-1;
@@ -47,6 +51,23 @@ public class L2{
             double pwm=(sineVal>0?1:-1)*(domain.electricalState.baseWaveAmplitude*2.0/3.0+1.0/3.0);
             double negate=sawVal>0?sawVal-1:sawVal+1;
             return Common.modulateSignal(pwm,negate)*2;
+        }
+        if(pulseMode.pulseCount==3 &&
+                (pulseMode.alternative==PulseAlternative.Alt2 ||
+                        pulseMode.alternative==PulseAlternative.Alt3)){
+            double sineVal=domain.electricalState.baseWaveAmplitude*
+                    MyMath.Functions.square(MyMath.Functions.sine(rawX));
+            double s=1-Common.getPulseDataValue(domain.electricalState.pulseData,PulseDataKey.PulseWidth);
+            double cycle=rawX%MyMath.M_2PI;
+            int orthant=(int)(cycle/MyMath.M_PI_2)%4;
+            double sawVal=switch(orthant){
+                case 0->getCarrierAlt3(cycle,s);
+                case 1->getCarrierAlt3(MyMath.M_PI-cycle,s);
+                case 2->-getCarrierAlt3(cycle-MyMath.M_PI,s);
+                default->-getCarrierAlt3(MyMath.M_2PI-cycle,s);
+            };
+            if(pulseMode.alternative==PulseAlternative.Alt3) sawVal=-sawVal;
+            return Common.modulateSignal(sineVal,sawVal)*2;
         }
         if((pulseMode.pulseCount==5 || pulseMode.pulseCount==9 ||
                 pulseMode.pulseCount==13 || pulseMode.pulseCount==17) &&
@@ -85,33 +106,54 @@ public class L2{
         }
         if(pulseMode.alternative==PulseAlternative.CP){
             double sineVal=Common.getBaseWaveform(domain,phase,initialPhase);
-            double sawVal=getSawVal(domain,rawX);
+            double sawVal=-MyMath.Functions.triangle(
+                    3.0*(pulseMode.pulseCount-1)/2.0*rawX)*
+                    MyMath.Functions.square(MyMath.Functions.sine(
+                            3.0*(pulseMode.pulseCount-1)/2.0*rawX))*
+                    MyMath.Functions.square(MyMath.Functions.sine(3.0*rawX));
+            sawVal=MyMath.Functions.triangle(sawVal*MyMath.M_PI_2*
+                    Common.getPulseDataValue(domain.electricalState.pulseData,PulseDataKey.CarrierFolding));
+            return Common.modulateSignal(sineVal,sawVal)*2;
+        }
+        if(pulseMode.alternative==PulseAlternative.ShiftedCP){
+            double sineVal=Common.getBaseWaveform(domain,phase,initialPhase);
+            int n=(pulseMode.pulseCount+1)/4;
+            double p=MyMath.Functions.square(MyMath.Functions.sine(3*n*x))*
+                    MyMath.Functions.square(MyMath.Functions.sine(3*x));
+            double sawVal=MyMath.Functions.triangle(3*n*x)*p;
+            sawVal=MyMath.Functions.triangle(sawVal*MyMath.M_PI_2*
+                    Common.getPulseDataValue(domain.electricalState.pulseData,PulseDataKey.CarrierFolding));
             return Common.modulateSignal(sineVal,sawVal)*2;
         }
         if(pulseMode.alternative==PulseAlternative.Square){
-            int pulseCount=pulseMode.pulseCount;
-            pulseCount+=pulseCount%2==0?0:-1;
-            double carrierVal=0.5*((pulseMode.pulseCount%2==0?1:-1)*
-                    MyMath.Functions.triangle(3.0*pulseCount*rawX+MyMath.M_PI_2)+1);
-            return Common.modulateSignal((x%MyMath.M_2PI<MyMath.M_PI?
+            int pulseCount=pulseMode.pulseCount%2==0?
+                    (int)(pulseMode.pulseCount*1.5):
+                    (int)((pulseMode.pulseCount-1)*1.5);
+            double carrierPhase=pulseMode.pulseCount%2==0?MyMath.M_PI_2:0;
+            double carrierVal=-MyMath.Functions.triangle(pulseCount*rawX+carrierPhase);
+            carrierVal=MyMath.Functions.triangle(carrierVal*MyMath.M_PI_2*
+                    Common.getPulseDataValue(domain.electricalState.pulseData,PulseDataKey.CarrierFolding));
+            return Common.modulateSignal(MyMath.Functions.sine(rawX)>0?
                     domain.electricalState.baseWaveAmplitude:
-                    -domain.electricalState.baseWaveAmplitude),carrierVal)*2;
+                    -domain.electricalState.baseWaveAmplitude,carrierVal)*2;
         }
         double sineVal=Common.getBaseWaveform(domain,phase,initialPhase);
         double carrierVal=Common.getCarrierWaveform(domain,pulseMode.pulseCount*rawX);
-        domain.getCarrierInstance().angleFrequency=domain.electricalState.getBaseWaveAngleFrequency();
-        domain.getCarrierInstance().time=domain.getBaseWaveTime();
+        carrierVal=MyMath.Functions.triangle(carrierVal*MyMath.M_PI_2*
+                Common.getPulseDataValue(domain.electricalState.pulseData,PulseDataKey.CarrierFolding));
         return Common.modulateSignal(sineVal,carrierVal)*2;
     }
-    private static double getSawVal(Domain domain,double rawX){
-        int carrierFrequency=domain.electricalState.pulsePattern.pulseMode.pulseCount/2*6;
-        double sawVal=carrierFrequency==0?0:(-MyMath.Functions.triangle(carrierFrequency*rawX+MyMath.M_PI_2)*
-                 (domain.electricalState.pulsePattern.pulseMode.pulseCount%2==1?0.5:-0.5)+0.5);
-        double cycleX=rawX%MyMath.M_2PI;
-        int orthant=(int)((rawX%MyMath.M_PI)/MyMath.M_PI_3);
-        if(cycleX>=MyMath.M_PI) sawVal=-sawVal;
-        if(orthant!=1) sawVal=0;
-        return sawVal;
+    private static double getCarrierAlt3(double x,double s){
+        if(0<=x && x<s*MyMath.M_PI_6){
+            return -6/(s*MyMath.M_PI)*x;
+        }
+        if(s*MyMath.M_PI_6<=x && x<s*MyMath.M_PI_2){
+            return 6/(s*MyMath.M_PI)*(x-s*MyMath.M_PI_6)-1;
+        }
+        if(s*MyMath.M_PI_2<=x && x<MyMath.M_PI_2){
+            return 3/((s-1)*MyMath.M_PI)*(x-MyMath.M_PI_2)-0.5;
+        }
+        return 0;
     }
     private static void getSwitchEntries(double amplitude,CustomPwm.SwitchEntry[] out){
         double sqrt5=Math.sqrt(5.0);

@@ -30,6 +30,8 @@ public class L3{
         double x=baseWaveParameter[Common.BASE_WAVE_X];
         double rawX=baseWaveParameter[Common.BASE_WAVE_RAW_X];
         var pulseMode=domain.electricalState.pulsePattern.pulseMode;
+        domain.getCarrierInstance().angleFrequency=domain.electricalState.getBaseWaveAngleFrequency();
+        domain.getCarrierInstance().time=domain.getBaseWaveTime();
         if(pulseMode.pulseCount==1 && pulseMode.alternative==PulseAlternative.Alt1){
             double sineVal=MyMath.Functions.sine(x);
             int d=sineVal>0?1:-1;
@@ -62,8 +64,16 @@ public class L3{
             };
             return orthant<=1?Common.modulateSignal(sineVal,sawVal)+1:-Common.modulateSignal(sawVal,sineVal)+1;
         }
-        domain.getCarrierInstance().angleFrequency=domain.electricalState.getBaseWaveAngleFrequency();
-        domain.getCarrierInstance().time=domain.getBaseWaveTime();
+        if(pulseMode.pulseCount==5 && pulseMode.alternative==PulseAlternative.Alt3){
+            double cycle=x%MyMath.M_2PI;
+            int orthant=(int)(cycle/MyMath.M_PI_2)%4;
+            return 1+switch(orthant){
+                case 0->getAlt3Pwm(cycle,domain.electricalState.baseWaveAmplitude);
+                case 1->getAlt3Pwm(MyMath.M_PI-cycle,domain.electricalState.baseWaveAmplitude);
+                case 2->-getAlt3Pwm(cycle-MyMath.M_PI,domain.electricalState.baseWaveAmplitude);
+                default->-getAlt3Pwm(MyMath.M_2PI-cycle,domain.electricalState.baseWaveAmplitude);
+            };
+        }
         double sineVal=Common.getBaseWaveform(domain,phase,initialPhase);
         double carrierVal=Common.getCarrierWaveform(
                 domain,domain.electricalState.pulsePattern.pulseMode.pulseCount*rawX);
@@ -83,6 +93,11 @@ public class L3{
     private static double getCarrierAlt2(double x,double beta){
         if(0<=x && x<beta) return -(1/beta)*x+1;
         if(beta<=x && x<MyMath.M_PI_2) return -1/(MyMath.M_PI_2-beta)*(x-MyMath.M_PI_2);
+        return 0;
+    }
+    private static int getAlt3Pwm(double t,double a){
+        if(MyMath.M_PI_6*Math.abs(a-0.5)<=t && t<MyMath.M_PI_12) return 1;
+        if(MyMath.M_PI_2-5*MyMath.M_PI_12*a<=t && t<MyMath.M_PI_2) return 1;
         return 0;
     }
     private static void sync(Domain domain,double initialPhase,PhaseState out){

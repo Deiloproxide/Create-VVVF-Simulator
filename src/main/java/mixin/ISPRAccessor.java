@@ -1,4 +1,5 @@
 package mixin;
+import createvvvfsim.Configs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.resources.ResourceLocation;
@@ -8,7 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.gen.Invoker;
 @Pseudo
-@Mixin(targets="com.sonicether.soundphysics.SoundPhysics",remap=false)
+@Mixin(targets="com.sonicether.soundphysics.SoundPhysics",remap=false,priority=Configs.mixin_priority)
 public interface ISPRAccessor{
     @Invoker("calculateOcclusion")
     static double calculateOcclusion(Vec3 soundPos,Vec3 playerPos,SoundSource category,ResourceLocation sound){

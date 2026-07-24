@@ -1,6 +1,5 @@
 package genengine;
 import createvvvfsim.Configs;
-import net.minecraft.util.Tuple;
 import vvvfsimulator.data.vvvf.Analyze;
 import vvvfsimulator.data.vvvf.Manager;
 import vvvfsimulator.data.vvvf.Struct;
@@ -30,11 +29,8 @@ public class VVVFSoundGen extends SoundGen{
     private volatile double target_f=0.0;
     private double current_f=0.0;
     static{
-        Tuple<Integer,double[]> ir=AudioResourceManager.readResourceAudioFileSample(
-                AudioResourceManager.SAMPLE_IR_PATH);
         train_config=new vvvfsimulator.data.trainaudio.Struct();
         train_config.impulseResponseSampleRate=sample_rate;
-        train_config.impulseResponse=AudioResourceManager.resampleLinear(ir.getB(),ir.getA(),sample_rate);
     }
     public VVVFSoundGen(){
         conv_filter=new CppConvolutionFilter(conv_size,train_config.impulseResponse);
@@ -74,8 +70,10 @@ public class VVVFSoundGen extends SoundGen{
             mix_buffer[i]+=mix*vvvf_amp*current_amp;
         }
     }
-    public static void reloadYamlData(){
+    public static void reloadData(){
         vvvf_config=Manager.deepClone(Manager.current);
+        train_config.impulseResponse=AudioResourceManager.resampleLinear(sample_rate);
+        CppConvolutionFilter.updateSharedResponse(conv_size,train_config.impulseResponse);
     }
     @Override
     public void reload(){
@@ -90,6 +88,6 @@ public class VVVFSoundGen extends SoundGen{
         train_config.setCalculatedGearHarmonic(first_gear,second_gear);
         train_config.motorVolumeDb=motor_db-gear_harmonic_db;
         train_config.totalVolumeDb=gear_harmonic_db;
-        reloadYamlData();
+        reloadData();
     }
 }

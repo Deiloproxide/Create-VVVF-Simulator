@@ -436,7 +436,7 @@ AcceleratePattern:
       Enabled: false
       Steps: 2
       Mode: Middle
-    BaseWave: Saw
+    BaseWave: Sine
     PulseHarmonics: []
     CarrierWave:
       Type: Triangle

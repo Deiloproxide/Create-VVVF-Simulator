@@ -1,8 +1,9 @@
 package mixin;
 import com.simibubi.create.content.trains.entity.CarriageSyncData;
+import createvvvfsim.Configs;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-@Mixin(value=CarriageSyncData.class,remap=false)
+@Mixin(value=CarriageSyncData.class,remap=false,priority=Configs.mixin_priority)
 public interface ISyncAccessor{
     @Accessor("pointDistanceSnapshot")
     float[] pointDistanceSnapshot();

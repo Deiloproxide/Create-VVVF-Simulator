@@ -17,10 +17,14 @@ public class AudioFilter{
         public CppConvolutionFilter(int blockSize,double[] response){
             this.input=new double[blockSize];
             this.output=new double[blockSize];
-            convolver.init(blockSize,response,response.length);
+            FFTConvolver.ensureSharedKernel(blockSize,response,response.length);
+            if(!convolver.initShared(blockSize)) convolver.init(blockSize,response,response.length);
+        }
+        public static void updateSharedResponse(int blockSize,double[] response){
+            FFTConvolver.updateSharedKernel(blockSize,response,response.length);
         }
         public void reset(){
-            convolver.reset();
+            convolver.clearState();
         }
         public void process(double[] in,int inOffset,double[] out,int outOffset,int len){
             convolver.process(in,inOffset,out,outOffset,len);

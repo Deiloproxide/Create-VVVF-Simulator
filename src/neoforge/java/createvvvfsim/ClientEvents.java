@@ -7,6 +7,9 @@ import genengine.BaseSoundGen;
 import genengine.SoundEngine;
 import genengine.VVVFSoundGen;
 import genengine.WindSoundGen;
+import loader.AutoLoad;
+import loader.IRLoader;
+import loader.YamlLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSourceStack;
@@ -29,8 +32,6 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import org.joml.Vector3f;
 import utils.Reloadable;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
-import yamlloader.AutoLoad;
-import yamlloader.YamlLoader;
 @EventBusSubscriber(modid=Configs.mod_id,value=Dist.CLIENT)
 public class ClientEvents implements Reloadable{
     private static final Minecraft mc=Minecraft.getInstance();
@@ -44,11 +45,13 @@ public class ClientEvents implements Reloadable{
     @SubscribeEvent
     public static void registerCommand(RegisterClientCommandsEvent event){
         LiteralArgumentBuilder<CommandSourceStack> vvvf=Commands.literal(Configs.command_vvvf);
-        LiteralArgumentBuilder<CommandSourceStack> load=Commands.literal(Configs.command_load);
+        LiteralArgumentBuilder<CommandSourceStack> loadyaml=Commands.literal(Configs.command_loadyaml);
+        LiteralArgumentBuilder<CommandSourceStack> loadir=Commands.literal(Configs.command_loadir);
         LiteralArgumentBuilder<CommandSourceStack> reload=Commands.literal(Configs.command_reload);
         RequiredArgumentBuilder<CommandSourceStack,String> path=Commands.argument(Configs.command_path,
                 StringArgumentType.greedyString());
-        event.getDispatcher().register(vvvf.then(load.then(path.executes(ClientEvents::onLoad))));
+        event.getDispatcher().register(vvvf.then(loadyaml.then(path.executes(ClientEvents::onLoadYaml))));
+        event.getDispatcher().register(vvvf.then(loadir.then(path.executes(ClientEvents::onLoadIR))));
         event.getDispatcher().register(vvvf.then(reload.executes(ClientEvents::onReload)));
     }
     public static void registerScreen(ModContainer container){
@@ -72,10 +75,9 @@ public class ClientEvents implements Reloadable{
         SoundEngine.load();
         is_single=mc.isSingleplayer();
         FSmoother.reloadCreate();
-        String path=AutoLoad.load(mc);
-        Component msg=Component.literal(YamlLoader.loadYaml(path));
-        VVVFSoundGen.reloadYamlData();
-        AutoLoad.save(mc,YamlLoader.success_name);
+        Component msg=Component.literal(AutoLoad.load(mc));
+        VVVFSoundGen.reloadData();
+        AutoLoad.save(mc);
         Player player=event.getPlayer();
         player.sendSystemMessage(msg);
     }
@@ -94,11 +96,19 @@ public class ClientEvents implements Reloadable{
         Player player=mc.player;
         if(player!=null) player.sendSystemMessage(Component.literal(msg));
     }
-    public static int onLoad(CommandContext<CommandSourceStack> context){
+    public static int onLoadYaml(CommandContext<CommandSourceStack> context){
         String path=StringArgumentType.getString(context,Configs.command_path);
         Component msg=Component.literal(YamlLoader.loadYaml(path));
-        VVVFSoundGen.reloadYamlData();
-        AutoLoad.save(mc,YamlLoader.success_name);
+        VVVFSoundGen.reloadData();
+        AutoLoad.save(mc);
+        context.getSource().sendSuccess(()->msg,false);
+        return 1;
+    }
+    public static int onLoadIR(CommandContext<CommandSourceStack> context){
+        String path=StringArgumentType.getString(context,Configs.command_path);
+        Component msg=Component.literal(IRLoader.loadIR(path));
+        VVVFSoundGen.reloadData();
+        AutoLoad.save(mc);
         context.getSource().sendSuccess(()->msg,false);
         return 1;
     }

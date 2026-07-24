@@ -1,70 +1,73 @@
-package yamlloader;
+package loader;
 import createvvvfsim.Configs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import vvvfsimulator.data.vvvf.Manager;
-public class YamlLoader{
+import vvvfsimulator.generation.audio.trainsound.AudioResourceManager;
+public class IRLoader{
     private static final ResourceManager manager=Minecraft.getInstance().getResourceManager();
-    private static final List<LoadException> parse_errors=Arrays.asList(LoadException.lex,
-            LoadException.parse,LoadException.compose,LoadException.dump,LoadException.init);
     public static String success_name;
-    public static String loadYaml(String path){
+    public static String loadIR(String path){
         List<String> err_list=new ArrayList<>();
         String[] paths;
         LoadStatus[] statuses;
         int status_length,status_ptr;
-        if(path.endsWith(".yaml") || path.endsWith(".yml")){
+        if(path.endsWith(".ir") || path.endsWith(".wav")){
             status_length=2;
-            paths=new String[]{path,Configs.default_yaml};
+            paths=new String[]{path,Configs.default_ir};
             statuses=new LoadStatus[]{LoadStatus.ok,LoadStatus.fallback,LoadStatus.error};
+        }
+        else if(path.endsWith(".mp3") || path.endsWith(".flac") || path.endsWith(".ogg")){
+            status_length=1;
+            paths=new String[]{Configs.default_ir};
+            statuses=new LoadStatus[]{LoadStatus.fallback,LoadStatus.error};
+            String key=Configs.ir_exception_path+LoadException.unsupported.name();
+            err_list.add(I18n.get(key,path));
         }
         else{
             status_length=3;
-            paths=new String[]{path+".yaml",path+".yml",Configs.default_yaml};
+            paths=new String[]{path+".ir",path+".wav",Configs.default_ir};
             statuses=new LoadStatus[]{LoadStatus.ok,LoadStatus.ok,LoadStatus.fallback,LoadStatus.error};
         }
         for(status_ptr=0;status_ptr<status_length;status_ptr++){
             LoadContext context=load(paths[status_ptr]);
             LoadException exception=context.exception;
-            String key=Configs.exception_path+exception.name();
-            if(parse_errors.contains(exception))
-                err_list.add(I18n.get(key,paths[status_ptr],context.row,context.col));
-            else err_list.add(I18n.get(key,paths[status_ptr]));
+            String key=Configs.ir_exception_path+exception.name();
+            err_list.add(I18n.get(key,paths[status_ptr]));
             if(exception==LoadException.normal) break;
         }
         LoadStatus status=statuses[status_ptr];
         if(status==LoadStatus.error) success_name=null;
         else success_name=paths[status_ptr];
         StringBuilder msg=new StringBuilder(),err_msg=new StringBuilder();
+        String status_path=Configs.ir_status_path+status.name();
         switch(status){
             case ok:
-                msg.append(I18n.get(Configs.status_path+status.name(),paths[status_ptr]));
+                msg.append(I18n.get(status_path,paths[status_ptr]));
                 break;
             case fallback:
                 for(String err:err_list) err_msg.append("\n").append(err);
-                msg.append(I18n.get(Configs.status_path+status.name(),path,err_msg.toString()));
+                msg.append(I18n.get(status_path,path,err_msg.toString()));
                 break;
             case error:
                 for(String err:err_list) err_msg.append("\n").append(err);
-                msg.append(I18n.get(Configs.status_path+status.name(),path,path,err_msg.toString()));
+                msg.append(I18n.get(status_path,path,path,err_msg.toString()));
                 break;
         }
         return msg.toString();
     }
-    public static LoadContext load(String path){
-        ResourceLocation location=ResourceLocation.tryBuild(Configs.group_id,Configs.strategy+path);
+    private static LoadContext load(String path){
+        ResourceLocation location=ResourceLocation.tryBuild(Configs.group_id,Configs.irsound+path);
         if(location==null) return new LoadContext(LoadException.invalid,0,0);
         LoadContext context;
-        try(InputStream input=manager.getResource(location).orElseThrow().open()){
-            context=Manager.load(path,input);
+        try(InputStream stream=manager.getResource(location).orElseThrow().open()){
+            context=AudioResourceManager.load(stream,path.endsWith(".ir"));
         }
         catch(NoSuchElementException ignored){
             context=new LoadContext(LoadException.notfound,0,0);

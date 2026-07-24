@@ -159,13 +159,27 @@ public class Common{
                     MyMath.M_2PI*harmonicData.harmonic*(control.getTime()+initialPhase);
             double wave=switch(harmonicData.type){
                 case Sine->MyMath.Functions.sine(harmonicX);
-                case Saw->MyMath.Functions.triangle(harmonicX);
+                case Triangle->MyMath.Functions.triangle(harmonicX);
                 case Square->MyMath.Functions.square(harmonicX);
+                case HFI->{
+                    double harmonicPhase=getHarmonicPhase(control,harmonicData);
+                    yield MyMath.Functions.square(harmonicPhase)*MyMath.Functions.sine(x);
+                }
             };
             harmonicWave+=wave*harmonicData.amplitude*(harmonicData.isAmplitudeProportional?amp:1);
         }
         double wave=baseWave+harmonicWave;
         return Math.min(Math.max(wave,-1),1);
+    }
+    private static double getHarmonicPhase(Domain control,PulseHarmonic harmonicData){
+        double carrierPhase=control.getCarrierInstance().getPhase();
+        double carrierFrequency=control.getCarrierInstance().getFrequency();
+        double harmonicPhase=harmonicData.isHarmonicProportional?
+                (carrierPhase+MyMath.M_PI_2)/harmonicData.harmonic+harmonicData.initialPhase:
+                MyMath.M_2PI*harmonicData.harmonic*control.getTime()+
+                (carrierFrequency==0?0:MyMath.M_PI_2*(harmonicData.harmonic/carrierFrequency))+
+                harmonicData.initialPhase;
+        return harmonicPhase;
     }
     private static double getBaseWave(double x,double amp,BaseWaveType baseWaveType){
         double getModifiedSine=Math.round(MyMath.Functions.sine(x)*2.0)/2.0;
@@ -173,11 +187,11 @@ public class Common{
         if(Math.abs(y)>0.5) y=y>0?1:-1;
         return amp*switch(baseWaveType){
             case Sine->MyMath.Functions.sine(x);
-            case Saw->MyMath.Functions.triangle(x);
+            case Triangle->MyMath.Functions.triangle(x);
             case Square->MyMath.Functions.square(x);
             case ModifiedSine1->Math.round(MyMath.Functions.sine(x));
             case ModifiedSine2->getModifiedSine;
-            case ModifiedSaw1->y;
+            case ModifiedTriangle1->y;
             default -> 0;
         };
     }
