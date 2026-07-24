@@ -7,7 +7,7 @@ buildscript{
 }
 plugins{
     id "java-library"
-    id "net.minecraftforge.gradle" version "[6.0.16,6.2)" apply false
+    id "net.minecraftforge.gradle" version "6.0.54" apply false
     id "net.neoforged.moddev" version "2.0.141" apply false
     id "com.gradleup.shadow" version "8.3.6"
     id "maven-publish"

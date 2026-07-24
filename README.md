@@ -6,9 +6,9 @@ Simulates VVVF on Minecraft Create Train.
 </div>
 
 ## Features
-![mod-version](https://img.shields.io/github/v/tag/Deiloproxide/Create-VVVF-Simulator?label=latest)
-![game-version](https://img.shields.io/modrinth/game-versions/create_vvvf_simulator)
-![license](https://img.shields.io/github/license/Deiloproxide/Create-VVVF-Simulator?color=brightgreen)
+![mod-version](https://img.shields.io/github/v/tag/Deiloproxide/Create-VVVF-Simulator?color=brightgreen&label=latest)
+![license](https://img.shields.io/github/license/Deiloproxide/Create-VVVF-Simulator?color=red&logo=gplv3)
+![game-version](https://img.shields.io/curseforge/game-versions/1580570?color=orange&logo=curseforge)
 - Realtime VVVF wave simulation without premade audio.
 - Config delivery from server ensure remote or cross-dimension speed continuity.
 ## Dependencies
@@ -25,8 +25,8 @@ Simulates VVVF on Minecraft Create Train.
 ![java](icon/java.svg)
 ![gradle](icon/gradle.svg)
 ### Environments
-- Client necessary
-- Server optional
+- Client: optional
+- Server: optional
 
 | Behaviour          | Server available    | Server unavailable    |
 |--------------------|---------------------|-----------------------|
@@ -46,11 +46,7 @@ poweredTrainTopSpeed=32
 poweredTrainTurningTopSpeed=28
 poweredTrainAcceleration=1
 ```
-### Command
-If train speed not match with vvvf, you can type `/vvvf reload` to reload speed.
 ## Contributions
-For translators, you can run `langSampleGen.py` to auto generate sample file.
-
 Your contributions to our [project](https://github.com/Deiloproxide/Create-VVVF-Simulator) are well-welcome!
 Please feel free to feed back issues, make comments or submit a pull request.
 ## Thanks
