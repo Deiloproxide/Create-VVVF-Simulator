@@ -3,6 +3,7 @@ from io import TextIOWrapper
 class YamlUpdater:
     @staticmethod
     def update(load_path:str,save_path:str,size:int=32768)->None:
+        if not path.endswith(".yaml"): path+=".yaml"
         if not os.path.exists(load_path):
             print(f"File not found: {load_path}")
             return

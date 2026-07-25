@@ -3,17 +3,17 @@ JerkSetting:
   Braking:
     On:
       FrequencyChangeRate: 60
-      MaxControlFrequency: 60
+      MaxControlFrequency: 50
     Off:
       FrequencyChangeRate: 60
-      MaxControlFrequency: 60
+      MaxControlFrequency: 50
   Accelerating:
     On:
       FrequencyChangeRate: 60
-      MaxControlFrequency: 60
+      MaxControlFrequency: 50
     Off:
       FrequencyChangeRate: 60
-      MaxControlFrequency: 60
+      MaxControlFrequency: 50
 MinimumFrequency:
   Accelerating: -1
   Braking: -1
@@ -659,7 +659,7 @@ AcceleratePattern:
         Start: 10
         StartValue: 350
         End: 33
-        EndValue: 420
+        EndValue: 450
         Degree: 2
         CurveRate: 0
       VibratoData:
@@ -1492,7 +1492,7 @@ BrakingPattern:
         Start: 10
         StartValue: 350
         End: 33
-        EndValue: 420
+        EndValue: 450
         Degree: 2
         CurveRate: 0
       VibratoData:

@@ -96,10 +96,10 @@ dependencies{
         runtimeOnly("dev.engine-room.flywheel:flywheel-${platform}-${minecraft_version}:${deps.flywheel}")
         implementation("com.tterrag.registrate:Registrate:${deps.registrate}")
     }
-    shade("com.github.wendykierp:JTransforms:[3.1,)"){transitive=false}
-    shade("org.visnow:JLargeArrays:[1.7,)"){transitive=false}
-    shade("org.apache.commons:commons-math3:[3.6,)")
-    shade("org.yaml:snakeyaml:[2.6,)")
+    shade("com.github.wendykierp:JTransforms:3.2"){transitive=false}
+    shade("org.visnow:JLargeArrays:1.7"){transitive=false}
+    shade("org.apache.commons:commons-math3:3.6.1")
+    shade("org.yaml:snakeyaml:2.6")
 }
 tasks.named("shadowJar").configure{
     configurations=[project.configurations.shade]

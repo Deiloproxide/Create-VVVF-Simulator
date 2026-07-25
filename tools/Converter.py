@@ -2,9 +2,9 @@ import json,os,struct,subprocess
 from io import BufferedReader,BufferedWriter
 from subprocess import Popen
 class Converter:
-    sample_rate:int
-    ir_pcm:bytes
-    is_error:bool
+    sample_rate:int=-1
+    ir_pcm:bytes=b""
+    is_error:bool=True
     @staticmethod
     def convert(path:str)->None:
         if not os.path.exists(path):
@@ -42,8 +42,9 @@ class Converter:
             Converter.is_error=False
     @staticmethod
     def saveIR(path:str)->None:
+        if Converter.is_error: return
         if not path.endswith(".ir"): path+=".ir"
-        header:bytes=struct.pack("<4sI",b"IRCF",Converter.sample_rate)
+        header:bytes=struct.pack("<4sI",b"IR\0\0",Converter.sample_rate)
         ir_file:BufferedWriter=open(path,"wb")
         ir_file.write(header)
         ir_file.write(Converter.ir_pcm)
@@ -63,7 +64,7 @@ class Converter:
             Converter.is_error=True
             return
         data:tuple=struct.unpack("<4sI",header)
-        if data[0]!=b"IRCF" or data[1]<=0:
+        if data[0]!=b"IR\0\0" or data[1]<=0:
             print(f"Format error: {path}")
             ir_file.close()
             Converter.is_error=True
@@ -74,6 +75,7 @@ class Converter:
         Converter.is_error=False
     @staticmethod
     def saveWav(path:str)->None:
+        if Converter.is_error: return
         if not path.endswith(".wav"): path+=".wav"
         channel_num:int=1
         float_size:int=4

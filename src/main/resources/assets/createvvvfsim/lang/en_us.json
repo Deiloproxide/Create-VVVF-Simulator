@@ -11,6 +11,8 @@
   "create_vvvf_simulator.configuration.audio.tooltip":"Takes effect after restarting the game.",
   "create_vvvf_simulator.configuration.sample_rate":"Sample Rate",
   "create_vvvf_simulator.configuration.sample_rate.tooltip":"",
+  "create_vvvf_simulator.configuration.buffer_cnt":"Buffer Block Count",
+  "create_vvvf_simulator.configuration.buffer_cnt.tooltip":"Higher values make audio more stable, but increase audio delay.",
   "create_vvvf_simulator.configuration.buffer_size":"Buffer Size",
   "create_vvvf_simulator.configuration.buffer_size.tooltip":"A power of 2 is recommended.",
   "create_vvvf_simulator.configuration.conv_size":"Convolution Block Size",

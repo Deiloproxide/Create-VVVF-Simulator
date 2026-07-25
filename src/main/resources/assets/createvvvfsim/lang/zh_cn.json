@@ -11,6 +11,8 @@
   "create_vvvf_simulator.configuration.audio.tooltip":"重启游戏后生效",
   "create_vvvf_simulator.configuration.sample_rate":"采样率",
   "create_vvvf_simulator.configuration.sample_rate.tooltip":"",
+  "create_vvvf_simulator.configuration.buffer_cnt":"缓冲块数量",
+  "create_vvvf_simulator.configuration.buffer_cnt.tooltip":"值越大，音频稳定性越强，但音频延迟会增加",
   "create_vvvf_simulator.configuration.buffer_size":"缓冲区大小",
   "create_vvvf_simulator.configuration.buffer_size.tooltip":"推荐设置为2的幂大小",
   "create_vvvf_simulator.configuration.conv_size":"卷积块大小",

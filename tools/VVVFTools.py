@@ -22,11 +22,9 @@ class VVVFTools:
         if args.command=="convert":
             if args.direction=="ir":
                 Converter.convert(args.input)
-                if Converter.is_error: return
                 Converter.saveIR(args.output)
             elif args.direction=="wav":
                 Converter.loadIR(args.input)
-                if Converter.is_error: return
                 Converter.saveWav(args.output)
         elif args.command=="generate":
             I18n.genSample()

@@ -10,7 +10,7 @@ import utils.ALlib;
 import utils.Reloadable;
 public class SoundEngine implements Reloadable{
     private static final int buffer_size=Configs.buffer_size.get();
-    private static final int buffer_cnt=4;
+    private static final int buffer_cnt=Configs.buffer_cnt.get();
     private static final double[] mix_buffer=new double[buffer_size];
     private static final ByteBuffer[] out_buffer=new ByteBuffer[buffer_cnt];
     private static final Thread thread=new Thread(SoundEngine::mixLoop);
@@ -22,7 +22,6 @@ public class SoundEngine implements Reloadable{
     static{
         Arrays.setAll(out_buffer,i->ByteBuffer.allocateDirect(buffer_size*4));
         for(ByteBuffer buffer:out_buffer) buffer.order(ByteOrder.LITTLE_ENDIAN);
-        ALlib.init(new int[buffer_cnt],SoundEngine::mixTask);
         thread.setDaemon(true);
         thread.start();
     }
@@ -34,7 +33,7 @@ public class SoundEngine implements Reloadable{
         ALlib.enable();
         ALlib.clear();
     }
-    private static void mixTask(){
+    public static void mixTask(){
         if(!is_run) return;
         try{
             ALlib.feed(out_buffer[tail_ptr]);

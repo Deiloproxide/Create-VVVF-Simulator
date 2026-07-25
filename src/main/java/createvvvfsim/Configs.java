@@ -1,8 +1,8 @@
 package createvvvfsim;
 import utils.ConfigSpec;
-import utils.ConfigSpec.Builder;
-import utils.ConfigSpec.DoubleValue;
-import utils.ConfigSpec.IntValue;
+import utils.Builder;
+import utils.DoubleValue;
+import utils.IntValue;
 public class Configs{
     public static final int mixin_priority=1027;
     public static final String mod_id="create_vvvf_simulator";
@@ -28,14 +28,15 @@ public class Configs{
     public static final String reload_ok=mod_id+".command.reload.ok";
     public static final String table="/assets/createvvvfsim/switchangle/";
     public static final String strategy="strategy/";
-    public static final String irsound="trainsound/";
+    public static final String irsound="irsound/";
     public static final String default_yaml="default.yaml";
-    public static final String default_ir="filter.wav";
+    public static final String default_ir="default.ir";
     public static final ConfigSpec server_config;
     public static final ConfigSpec client_config;
     public static final IntValue sync_period;
     public static final IntValue eval_period;
     public static final IntValue sample_rate;
+    public static final IntValue buffer_cnt;
     public static final IntValue buffer_size;
     public static final IntValue conv_size;
     public static final IntValue table_size;
@@ -95,6 +96,7 @@ public class Configs{
         client_builder.pop();
         client_builder.push("audio");
         sample_rate=client_builder.defineInRange("sample_rate",44100,8000,192000);
+        buffer_cnt=client_builder.defineInRange("buffer_cnt",4,2,8);
         buffer_size=client_builder.defineInRange("buffer_size",1<<12,1<<10,1<<16);
         conv_size=client_builder.defineInRange("conv_size",1<<10,1<<8,1<<12);
         table_size=client_builder.defineInRange("table_size",1<<17,1<<12,1<<20);

@@ -8,6 +8,7 @@
       "eval_period",
       "audio",
       "sample_rate",
+      "buffer_cnt",
       "buffer_size",
       "conv_size",
       "table_size",

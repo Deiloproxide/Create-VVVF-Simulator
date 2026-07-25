@@ -6,9 +6,9 @@ Simulates VVVF on Minecraft Create Train.
 </div>
 
 ## Features
-![mod-version](https://img.shields.io/github/v/tag/Deiloproxide/Create-VVVF-Simulator?color=brightgreen&label=latest)
-![license](https://img.shields.io/github/license/Deiloproxide/Create-VVVF-Simulator?color=red&logo=gplv3)
-![game-version](https://img.shields.io/curseforge/game-versions/1580570?color=orange&logo=curseforge)
+![latest](https://img.shields.io/github/v/tag/Deiloproxide/Create-VVVF-Simulator?label=latest)
+![license](https://img.shields.io/github/license/Deiloproxide/Create-VVVF-Simulator?color=red)
+![version](https://img.shields.io/curseforge/game-versions/1580570?color=orange&logo=curseforge)
 - Realtime VVVF wave simulation without premade audio.
 - Config delivery from server ensure remote or cross-dimension speed continuity.
 ## Dependencies
@@ -47,13 +47,12 @@ poweredTrainTurningTopSpeed=28
 poweredTrainAcceleration=1
 ```
 ## Contributions
-Your contributions to our [project](https://github.com/Deiloproxide/Create-VVVF-Simulator) are well-welcome!
+Your contributions to our [project](https://github.com/Deiloproxide/Create-VVVF-Simulator) are well-welcome!<br>
 Please feel free to feed back issues, make comments or submit a pull request.
 ## Thanks
-Some parts of this project's code were ported or adapted from the following projects.
-Thanks to the creators of following projects!
-
-[![vvvfsim](icon/vvvfsim.png)](https://github.com/VvvfGeeks/VVVF-Simulator)
+Some parts of this project's code were ported or adapted from the following projects.<br>
+Thanks to the creators of following projects!<br>
+[![vvvfsim](icon/vvvfsim.png)](https://github.com/intel713/VVVF-Simulator)
 [![spr](icon/spr.png)](https://github.com/henkelmax/sound-physics-remastered)
 [![spp](icon/spp.png)](https://github.com/FalseMSP/SoundPhysicsPerfected)
 ## Contact us

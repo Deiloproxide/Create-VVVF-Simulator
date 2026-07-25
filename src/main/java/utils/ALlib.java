@@ -3,36 +3,21 @@ import createvvvfsim.Configs;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import org.lwjgl.openal.*;
-import org.lwjgl.system.Callback;
-import org.lwjgl.system.CallbackI;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.libffi.FFICIF;
-import static org.lwjgl.system.APIUtil.apiCreateCIF;
 import static org.lwjgl.system.JNI.invokePP;
 import static org.lwjgl.system.JNI.invokePPV;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.system.MemoryUtil.memAddress;
-import static org.lwjgl.system.MemoryUtil.memGetAddress;
-import static org.lwjgl.system.MemoryUtil.memGetInt;
-import static org.lwjgl.system.libffi.LibFFI.FFI_DEFAULT_ABI;
-import static org.lwjgl.system.libffi.LibFFI.ffi_type_pointer;
-import static org.lwjgl.system.libffi.LibFFI.ffi_type_sint32;
-import static org.lwjgl.system.libffi.LibFFI.ffi_type_uint32;
-import static org.lwjgl.system.libffi.LibFFI.ffi_type_void;
 public class ALlib{
     private static final int sample_rate=Configs.sample_rate.get();
+    private static final int buffer_cnt=Configs.buffer_cnt.get();
     private static final int buffer_size=Configs.buffer_size.get();
     private static final int buffer_complete=0x19A4;
+    private static final int[] al_buffers=new int[buffer_cnt];
     private static final ByteBuffer empty=ByteBuffer.allocateDirect(buffer_size*4);
-    private static final EventCallback callback=new EventCallback();
+    private static final ALCallback callback=new ALCallback();
     private static long control_addr=NULL,callback_addr=NULL;
-    private static volatile int source_id=0;
-    private static int[] al_buffers;
-    private static Runnable handler;
-    public static void init(int[] buffers,Runnable task){
-        al_buffers=buffers;
-        handler=task;
-    }
+    public static volatile int source_id=0;
     public static void load(){
         AL10.alDeleteSources(source_id);
         AL10.alDeleteBuffers(al_buffers);
@@ -98,24 +83,6 @@ public class ALlib{
             IntBuffer types=stack.mallocInt(1);
             types.put(0,buffer_complete);
             invokePPV(1L,memAddress(types),enable,control_addr);
-        }
-    }
-    private static class EventCallback extends Callback implements CallbackI{
-        private static final FFICIF cif=apiCreateCIF(FFI_DEFAULT_ABI,
-                ffi_type_void,ffi_type_sint32,ffi_type_uint32,ffi_type_uint32,
-                ffi_type_sint32,ffi_type_pointer,ffi_type_pointer);
-        public EventCallback(){
-            super(cif);
-        }
-        @Override
-        public FFICIF getCallInterface(){
-            return cif;
-        }
-        @Override
-        public void callback(long ret,long args){
-            int eventType=memGetInt(memGetAddress(args));
-            int object=memGetInt(memGetAddress(args+POINTER_SIZE));
-            if(eventType==buffer_complete && object==source_id) handler.run();
         }
     }
 }

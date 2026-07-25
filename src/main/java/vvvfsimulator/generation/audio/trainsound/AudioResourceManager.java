@@ -51,7 +51,7 @@ public class AudioResourceManager{
         return out.toByteArray();
     }
     private static LoadException decodeIr(byte[] bytes){
-        if(bytes.length<=IR_HEADER_SIZE || !fourCC(bytes,0,"IRCF")){
+        if(bytes.length<=IR_HEADER_SIZE || !fourCC(bytes,0,"IR\0\0")){
             failed();
             return LoadException.irerror;
         }
