@@ -50,10 +50,11 @@ poweredTrainAcceleration=1
 Your contributions to our [project](https://github.com/Deiloproxide/Create-VVVF-Simulator) are well-welcome!<br>
 Please feel free to feed back issues, make comments or submit a pull request.
 ## Thanks
-Some parts of this project's code were ported or adapted from the following projects.<br>
+Some parts of code and resource are from the following projects.<br>
 Thanks to the creators of following projects!<br>
 [![vvvfsim](icon/vvvfsim.png)](https://github.com/intel713/VVVF-Simulator)
 [![spr](icon/spr.png)](https://github.com/henkelmax/sound-physics-remastered)
 [![spp](icon/spp.png)](https://github.com/FalseMSP/SoundPhysicsPerfected)
+[![echo](icon/echo.png)](https://www.echothief.com/downloads)
 ## Contact us
 [![contact](icon/contact.svg)](https://github.com/Deiloproxide)

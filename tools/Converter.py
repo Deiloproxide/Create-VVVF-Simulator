@@ -7,9 +7,9 @@ class Converter:
     is_error:bool=True
     @staticmethod
     def convert(path:str)->None:
+        Converter.is_error=True
         if not os.path.exists(path):
             print(f"File not found: {path}")
-            Converter.is_error=True
             return
         ffprobe_args:list[str]=["ffprobe","-v","quiet",
                                 "-print_format","json",
@@ -21,7 +21,6 @@ class Converter:
             Converter.sample_rate=int(stream_data["sample_rate"])
         except Exception as e:
             print(f"Fail to parse: {e}")
-            Converter.is_error=True
             return
         ffmpeg_args:list[str]=["ffmpeg","-v","error","-i",path,
                                "-vn","-ac","1","-ar",
@@ -34,12 +33,11 @@ class Converter:
             if(tube.returncode!=0):
                 msg:str=ffmpeg_out[1].decode("utf-8")
                 print(f"FFmpeg decode failed: {msg}")
-                Converter.is_error=True
                 return
             Converter.ir_pcm=ffmpeg_out[0]
+            Converter.is_error=False
         except Exception as e:
             print(f"Convert error: {e}")
-            Converter.is_error=False
     @staticmethod
     def saveIR(path:str)->None:
         if Converter.is_error: return
@@ -51,23 +49,21 @@ class Converter:
         ir_file.close()
     @staticmethod
     def loadIR(path:str)->None:
+        Converter.is_error=True
         if not path.endswith(".ir"): path+=".ir"
         if not os.path.exists(path):
             print(f"File not found: {path}")
-            Converter.is_error=True
             return
         ir_file:BufferedReader=open(path,"rb")
         header:bytes=ir_file.read(8)
         if len(header)<8:
             print(f"Incomplete file: {path}")
             ir_file.close()
-            Converter.is_error=True
             return
         data:tuple=struct.unpack("<4sI",header)
         if data[0]!=b"IR\0\0" or data[1]<=0:
             print(f"Format error: {path}")
             ir_file.close()
-            Converter.is_error=True
             return
         Converter.sample_rate=data[1]
         Converter.ir_pcm=ir_file.read()
@@ -94,3 +90,6 @@ class Converter:
         wav_file.write(data)
         wav_file.write(Converter.ir_pcm)
         wav_file.close()
+if __name__=="__main__":
+    Converter.convert("alt1.wav")
+    Converter.saveIR("alt1.ir")
