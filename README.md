@@ -2,15 +2,16 @@
 
 ![icon](icon/icon.svg)
 # Create: VVVF-Simulator
-Simulates VVVF on Minecraft Create Train.
+Simulates VVVF on Minecraft Create trains.
 </div>
 
 ## Features
 ![latest](https://img.shields.io/github/v/tag/Deiloproxide/Create-VVVF-Simulator?label=latest)
 ![license](https://img.shields.io/github/license/Deiloproxide/Create-VVVF-Simulator?color=red)
 ![version](https://img.shields.io/curseforge/game-versions/1580570?color=orange&logo=curseforge)
+- Customizable train sounds.
 - Realtime VVVF wave simulation without premade audio.
-- Config delivery from server ensure remote or cross-dimension speed continuity.
+- Server-side config delivery to keep speed continuity in remote and cross-dimension situations.
 ## Dependencies
 [![create](icon/create.svg)](https://github.com/Creators-of-Create/Create)
 ## Run
@@ -24,34 +25,14 @@ Simulates VVVF on Minecraft Create Train.
 ### Build from source
 ![java](icon/java.svg)
 ![gradle](icon/gradle.svg)
-### Environments
-- Client: optional
-- Server: optional
-
-| Behaviour          | Server available    | Server unavailable    |
-|--------------------|---------------------|-----------------------|
-| Client available   | Full part functions | Client side functions |
-| Client unavailable | Compatible          | -                     |
-### Recommendations
-The following Create server train configs are recommended:
-```toml
-[trains]
-manualTrainSpeedModifier=1
-[trains.trainStats]
-trainTopSpeed=32
-trainTurningTopSpeed=28
-trainAcceleration=1
-[trains.poweredTrainStats]
-poweredTrainTopSpeed=32
-poweredTrainTurningTopSpeed=28
-poweredTrainAcceleration=1
-```
+## Documentation
+See [documentation.md](documentation.md) for usage, configs, commands, resource packs, and tools.
 ## Contributions
-Your contributions to our [project](https://github.com/Deiloproxide/Create-VVVF-Simulator) are well-welcome!<br>
-Please feel free to feed back issues, make comments or submit a pull request.
+Contributions to this [project](https://github.com/Deiloproxide/Create-VVVF-Simulator) are welcome.<br>
+Please feel free to report issues, make comments, or submit a pull request.
 ## Thanks
-Some parts of code and resource are from the following projects.<br>
-Thanks to the creators of following projects!<br>
+Some code and resources are from the following projects.<br>
+Thanks to the creators of these projects!<br>
 [![vvvfsim](icon/vvvfsim.png)](https://github.com/intel713/VVVF-Simulator)
 [![spr](icon/spr.png)](https://github.com/henkelmax/sound-physics-remastered)
 [![spp](icon/spp.png)](https://github.com/FalseMSP/SoundPhysicsPerfected)

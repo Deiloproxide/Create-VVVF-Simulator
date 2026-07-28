@@ -1,26 +1,50 @@
-# TODO
-- 构建实时生成的音频管线（已完成）
-- 使用440Hz正弦波测试实时音频管线（已完成）
-- 移植vvvfsim算法层和线电压波形处理（已完成）
-- vvvfsim列车属性映射机械动力列车属性（已完成）
-- 临时硬编码调制策略，保证最小可听实践（已完成）
-- 继续移植列车走行音滤波模块与齿轮/谐波声音（已完成）
-- 解决列车远程与跨界的速度连续性和音频问题（已完成）
-- 列车高速运行的气流风声（已完成）
-- 服务端版和客户端版分离（已完成）
-- 模组兼容性与功能回退（已完成）
-- 将项目迁移至forge 1.20.1（已完成）
-- 构建GUI，在游戏内配置参数（已完成）
-- 移植解析外部yaml配置模块，实现参数可配置的vvvf策略（已完成）
-- 继续移植原vvvfsim更多可配置属性，与vvvfsim配置互通（已完成）
-- 处理模组依赖与兼容问题（已完成）
-- 完善各类列车事件（已完成）
-- 列车轨道接触网摩擦声音
-- (Opt.)音频重载指令（已完成）
-- (Opt.)与sound physics相关模组联动（已完成）
-- (Opt.)在列车站《组装列车》界面为每辆车单独配置策略
-- (Opt.)列车控制改为功率控制
-- (Opt.)修改其他生物的驾驶逻辑（GoA3/4）
+<div align="center">
 
-# 目前已知问题
-- 和电力学一起使用，列车会出现《二重奏》
+![icon](icon/icon.svg)
+# TODO
+Current development status and known issues.
+</div>
+
+## Completed
+- Build the realtime generated audio pipeline.
+- Test the realtime audio pipeline with a 440 Hz sine wave.
+- Port the VVVF-Simulator algorithm layer and line-voltage waveform processing.
+- Map VVVF-Simulator train properties to Create train properties.
+- Temporarily hard-code a modulation strategy for the minimum audible prototype.
+- Port more train running-sound filters, gear sounds, and harmonic sounds.
+- Fix speed continuity and audio issues for remote and cross-dimension trains.
+- Add high-speed airflow wind sounds for trains.
+- Split server-side and client-side versions.
+- Add mod compatibility handling and feature fallbacks.
+- Migrate the project to Forge 1.20.1.
+- Build an in-game GUI for parameter configuration.
+- Port the external YAML config parser and support configurable VVVF strategies.
+- Port more configurable properties from VVVF-Simulator and keep configs interoperable.
+- Handle mod dependency and compatibility issues.
+- Improve train event handling.
+- Add the optional audio reload command.
+- Add optional integration with Sound Physics related mods.
+## Planned
+- Add rail and contact-wire friction sounds for trains.
+## Optional
+- Configure a separate strategy for each carriage in the train station's
+  `Assemble Train` screen.
+- Change train control to power-based control.
+- Modify the driving logic of other entities for GoA3/GoA4 operation.
+## Known Issues
+- Use this mod carefully on low-performance devices or servers with a very large
+  number of trains. It may cause audio stutter or loud audio glitches. See
+  [this post](https://www.bilibili.com/opus/1223450262128033811) for the reason.
+  Although mobile platforms are now supported, using this mod with the FCL
+  launcher on Android is still not recommended.
+- Because of a motor pole-pair bug in the original
+  [VVVF-Simulator](https://github.com/VvvfGeeks/VVVF-Simulator)
+  project, `tn27.yaml` sounds slower during acceleration. An
+  [issue](https://github.com/VvvfGeeks/VVVF-Simulator/issues/32)
+  has already been submitted.
+- When used together with
+  [Create: Electro Energetics](https://github.com/george8188625/Create-Electro-Energetics),
+  trains may have a `duet` effect, where train sounds are duplicated or layered unexpectedly.
+## Feedback
+If you find other issues or have better ideas, feedback is welcome in
+[GitHub issues](https://github.com/Deiloproxide/Create-VVVF-Simulator/issues).
