@@ -30,6 +30,12 @@ versionRange="${create_range}"
 ordering="NONE"
 side="BOTH"
 [[dependencies."${mod_id}"]]
+modId="vvvf_simulator_lib"
+type="required"
+versionRange="${lib_range}"
+ordering="NONE"
+side="BOTH"
+[[dependencies."${mod_id}"]]
 modId="sound_physics_remastered"
 type="optional"
 versionRange="${spr_range}"

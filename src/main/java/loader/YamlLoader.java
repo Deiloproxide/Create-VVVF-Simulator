@@ -11,6 +11,9 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import vvvfsimulator.data.vvvf.Manager;
+import vvvfsimulator.loader.LoadContext;
+import vvvfsimulator.loader.LoadException;
+/**client class*/
 public class YamlLoader{
     private static final ResourceManager manager=Minecraft.getInstance().getResourceManager();
     private static final List<LoadException> parse_errors=Arrays.asList(LoadException.lex,
@@ -64,8 +67,8 @@ public class YamlLoader{
         ResourceLocation location=ResourceLocation.tryBuild(Configs.group_id,Configs.strategy+path);
         if(location==null) return new LoadContext(LoadException.invalid,0,0);
         LoadContext context;
-        try(InputStream input=manager.getResource(location).orElseThrow().open()){
-            context=Manager.load(path,input);
+        try(InputStream stream=manager.getResource(location).orElseThrow().open()){
+            context=Manager.load(path,stream);
         }
         catch(NoSuchElementException ignored){
             context=new LoadContext(LoadException.notfound,0,0);

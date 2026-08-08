@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import utils.ALlib;
 import utils.Reloadable;
+/**client class*/
 public class SoundEngine implements Reloadable{
     private static final int buffer_size=Configs.buffer_size.get();
     private static final int buffer_cnt=Configs.buffer_cnt.get();

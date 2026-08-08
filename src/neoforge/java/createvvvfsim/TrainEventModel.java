@@ -8,15 +8,17 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.joml.Vector3f;
-public record TrainEventModel(UUID train_id,String name,String event,String dimension,
-                              Vector3f pos) implements CustomPacketPayload{
+/**common class*/
+public record TrainEventModel(UUID train_id,String name,String event,String dim_mod,
+                              String dim_name,Vector3f pos) implements CustomPacketPayload{
     public static final Type<TrainEventModel> model_type=new Type<>(
             ResourceLocation.tryBuild(Configs.mod_id,Configs.event_name));
     public static final StreamCodec<RegistryFriendlyByteBuf,TrainEventModel> stream_codec=StreamCodec.composite(
             UUIDUtil.STREAM_CODEC,TrainEventModel::train_id,
             ByteBufCodecs.STRING_UTF8,TrainEventModel::name,
             ByteBufCodecs.STRING_UTF8,TrainEventModel::event,
-            ByteBufCodecs.STRING_UTF8,TrainEventModel::dimension,
+            ByteBufCodecs.STRING_UTF8,TrainEventModel::dim_mod,
+            ByteBufCodecs.STRING_UTF8,TrainEventModel::dim_name,
             ByteBufCodecs.VECTOR3F,TrainEventModel::pos,
             TrainEventModel::new);
     static{
@@ -27,7 +29,7 @@ public record TrainEventModel(UUID train_id,String name,String event,String dime
         return model_type;
     }
     public void handle(IPayloadContext ignored){
-        ClientEvents.onGetTrainEvent(name(),event(),dimension(),pos());
+        ClientEvents.onGetTrainEvent(name(),event(),dim_mod(),dim_name(),pos());
         TrainStatus.getServerEvent(train_id());
     }
 }

@@ -1,5 +1,6 @@
 package utils;
 import net.neoforged.neoforge.common.ModConfigSpec;
+/**common class*/
 public class Builder{
     private final ModConfigSpec.Builder builder=new ModConfigSpec.Builder();
     public void push(String path){

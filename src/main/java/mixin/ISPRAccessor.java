@@ -8,6 +8,7 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.gen.Invoker;
+/**client class*/
 @Pseudo
 @Mixin(targets="com.sonicether.soundphysics.SoundPhysics",remap=false,priority=Configs.mixin_priority)
 public interface ISPRAccessor{

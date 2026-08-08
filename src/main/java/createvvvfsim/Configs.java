@@ -3,13 +3,14 @@ import utils.ConfigSpec;
 import utils.Builder;
 import utils.DoubleValue;
 import utils.IntValue;
+/**common class*/
 public class Configs{
     public static final int mixin_priority=1027;
     public static final String mod_id="create_vvvf_simulator";
     public static final String group_id="createvvvfsim";
     public static final String sync_name="train_sync";
     public static final String event_name="train_event";
-    public static final String version="1.1.0";
+    public static final String version="1.2.1";
     public static final String command_vvvf="vvvf";
     public static final String command_loadyaml="loadyaml";
     public static final String command_loadir="loadir";

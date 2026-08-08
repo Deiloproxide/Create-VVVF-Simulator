@@ -1,13 +1,16 @@
 package mixin;
+import com.simibubi.create.content.trains.entity.Carriage;
+import com.simibubi.create.content.trains.entity.Carriage.DimensionalCarriageEntity;
 import com.simibubi.create.content.trains.entity.Train;
 import com.simibubi.create.content.trains.entity.TrainStatus;
 import createvvvfsim.Configs;
-import createvvvfsim.ServerEvents;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Map.Entry;
+import createvvvfsim.ServerEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,25 +20,26 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import utils.PosHandler;
 import utils.TrainEventType;
+/**server class*/
 @Mixin(value=TrainStatus.class,remap=false,priority=Configs.mixin_priority)
 public class TrainEvents{
     @Shadow
     Train train;
-    private static final Map<ResourceKey<Level>,String> name=new HashMap<>();
-    static{
-        name.put(Level.OVERWORLD,"overworld");
-        name.put(Level.NETHER,"nether");
-        name.put(Level.END,"end");
-    }
     private void sendEvent(TrainEventType type){
         train.speed=0.0;
-        for(ResourceKey<Level> dimension:train.getPresentDimensions()){
-            Level level=ServerEvents.server.getLevel(dimension);
-            Optional<BlockPos> block_pos=train.getPositionInDimension(dimension);
-            if(block_pos.isPresent()){
-                Vec3 train_pos=PosHandler.convert(block_pos.get().getCenter(),level);
-                ServerEvents.onTrainEvent(train,type.name(),name.get(dimension),train_pos.toVector3f());
+        Map<ResourceKey<Level>,BlockPos> dim_pos=new HashMap<>();
+        for(Carriage carriage:train.carriages){
+            Map<ResourceKey<Level>,DimensionalCarriageEntity> entities=((CarriageAccessor) carriage).entities();
+            for(Entry<ResourceKey<Level>,DimensionalCarriageEntity> entry:entities.entrySet()){
+                ResourceKey<Level> dimension=entry.getKey();
+                dim_pos.putIfAbsent(dimension,BlockPos.containing(entry.getValue().positionAnchor));
             }
+        }
+        for(ResourceKey<Level> dimension:dim_pos.keySet()){
+            ResourceLocation location=dimension.location();
+            Level level=ServerEvents.server.getLevel(dimension);
+            Vec3 pos=PosHandler.convert(Vec3.atLowerCornerOf(dim_pos.get(dimension)),level);
+            ServerEvents.onTrainEvent(train,type.name(),location.getNamespace(),location.getPath(),pos.toVector3f());
         }
     }
     @Inject(method="failedMigration",at=@At(value="INVOKE",
@@ -58,8 +62,7 @@ public class TrainEvents{
     private void endOfTrack(CallbackInfo ci){
         sendEvent(TrainEventType.end);
     }
-    @Inject(method="crash",at=@At(value="INVOKE",
-            target="Lcom/simibubi/create/content/trains/entity/TrainStatus;addMessage(Lcom/simibubi/create/content/trains/entity/TrainStatus$StatusMessage;)V"))
+    @Inject(method="crash",at=@At("HEAD"))
     private void crash(CallbackInfo ci){
         sendEvent(TrainEventType.crash);
     }

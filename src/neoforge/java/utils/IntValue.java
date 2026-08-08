@@ -1,5 +1,6 @@
 package utils;
 import net.neoforged.neoforge.common.ModConfigSpec;
+/**common class*/
 public class IntValue{
     private final ModConfigSpec.IntValue int_value;
     public IntValue(ModConfigSpec.IntValue int_value){

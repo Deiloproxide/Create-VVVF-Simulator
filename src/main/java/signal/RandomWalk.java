@@ -1,5 +1,6 @@
 package signal;
 import java.util.concurrent.ThreadLocalRandom;
+/**client class*/
 public class RandomWalk{
     private double value=0.0;
     public double step(double sigma,double range){

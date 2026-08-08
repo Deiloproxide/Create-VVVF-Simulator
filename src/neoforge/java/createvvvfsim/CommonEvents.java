@@ -6,6 +6,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+/**common class*/
 @EventBusSubscriber(modid=Configs.mod_id)
 public class CommonEvents{
     public static final List<Type<?>> types=new ArrayList<>();

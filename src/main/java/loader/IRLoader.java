@@ -10,6 +10,9 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import vvvfsimulator.generation.audio.trainsound.AudioResourceManager;
+import vvvfsimulator.loader.LoadContext;
+import vvvfsimulator.loader.LoadException;
+/**client class*/
 public class IRLoader{
     private static final ResourceManager manager=Minecraft.getInstance().getResourceManager();
     public static String success_name;

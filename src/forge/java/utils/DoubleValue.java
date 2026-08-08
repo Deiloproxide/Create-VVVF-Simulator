@@ -1,5 +1,6 @@
 package utils;
 import net.minecraftforge.common.ForgeConfigSpec;
+/**common class*/
 public class DoubleValue{
     private final ForgeConfigSpec.DoubleValue double_value;
     public DoubleValue(ForgeConfigSpec.DoubleValue double_value){

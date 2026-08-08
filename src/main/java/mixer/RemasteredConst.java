@@ -2,6 +2,7 @@ package mixer;
 import createvvvfsim.Configs;
 import java.lang.reflect.Method;
 import utils.Instance;
+/**client class*/
 public class RemasteredConst{
     private static final int sample_rate=Configs.sample_rate.get();
     public static final int[] send_delays={

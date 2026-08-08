@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import utils.Instance;
 import utils.Reloadable;
+/**client class*/
 public class FSmoother implements Reloadable{
     private static final CTrains train_config=AllConfigs.server().trains;
     private static final int speeds_length=Configs.speeds_length.get();

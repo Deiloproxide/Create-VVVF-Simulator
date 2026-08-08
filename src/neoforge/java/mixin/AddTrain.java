@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+/**client class*/
 @Mixin(value=AddTrainPacket.class,remap=false,priority=Configs.mixin_priority)
 public abstract class AddTrain{
     @Shadow

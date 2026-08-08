@@ -3,6 +3,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+/**common class*/
 public class CommonEvents{
     public static final SimpleChannel channel=NetworkRegistry.newSimpleChannel(
             ResourceLocation.tryBuild(Configs.mod_id,Configs.group_id),

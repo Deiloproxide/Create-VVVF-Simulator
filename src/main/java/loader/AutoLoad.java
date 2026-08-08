@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.world.level.storage.LevelResource;
+/**client class*/
 public class AutoLoad{
     private static final HexFormat hex=HexFormat.of();
     private static final MessageDigest hash;

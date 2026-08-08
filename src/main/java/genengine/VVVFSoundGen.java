@@ -10,6 +10,7 @@ import vvvfsimulator.vvvf.MyMath;
 import vvvfsimulator.vvvf.calculation.Common;
 import vvvfsimulator.vvvf.model.Struct.Domain;
 import vvvfsimulator.vvvf.model.Struct.PhaseState;
+/**client class*/
 public class VVVFSoundGen extends SoundGen{
     private static final int conv_size=Configs.conv_size.get();
     private static volatile int first_gear;

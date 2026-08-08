@@ -8,6 +8,7 @@ import static org.lwjgl.system.JNI.invokePP;
 import static org.lwjgl.system.JNI.invokePPV;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.system.MemoryUtil.memAddress;
+/**client class*/
 public class ALlib{
     private static final int sample_rate=Configs.sample_rate.get();
     private static final int buffer_cnt=Configs.buffer_cnt.get();

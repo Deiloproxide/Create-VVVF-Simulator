@@ -1,6 +1,7 @@
 package utils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+/**common class*/
 public class Instance{
     public final Class<?> clazz;
     public final Object object;

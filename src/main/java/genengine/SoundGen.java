@@ -1,6 +1,7 @@
 package genengine;
 import createvvvfsim.Configs;
 import utils.Reloadable;
+/**client class*/
 public class SoundGen implements Reloadable{
     protected static final int sample_rate=Configs.sample_rate.get();
     protected static final int buffer_size=Configs.buffer_size.get();

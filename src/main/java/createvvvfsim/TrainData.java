@@ -8,6 +8,7 @@ import mixer.Mixer;
 import mixer.PerfectedMixer;
 import mixer.RemasteredMixer;
 import signal.Lowpass;
+/**client class*/
 public class TrainData{
     public static final Mixer mixer;
     public final Train train;

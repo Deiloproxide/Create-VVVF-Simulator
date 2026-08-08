@@ -1,5 +1,6 @@
 package createvvvfsim;
 import java.util.List;
+/**client class*/
 public class EnvData{
     public double gain=1.0,cutoff=1.0;
     public double[] gains={0.0,0.0,0.0,0.0},cutoffs={1.0,1.0,1.0,1.0};

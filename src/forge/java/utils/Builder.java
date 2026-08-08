@@ -1,5 +1,6 @@
 package utils;
 import net.minecraftforge.common.ForgeConfigSpec;
+/**common class*/
 public class Builder{
     private final ForgeConfigSpec.Builder builder=new ForgeConfigSpec.Builder();
     public void push(String path){

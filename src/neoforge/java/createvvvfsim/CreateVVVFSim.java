@@ -3,6 +3,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLEnvironment;
+/**common class*/
 @Mod(Configs.mod_id)
 public class CreateVVVFSim{
     public CreateVVVFSim(ModContainer container){

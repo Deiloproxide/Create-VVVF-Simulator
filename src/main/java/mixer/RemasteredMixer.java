@@ -18,6 +18,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import signal.Lowpass;
 import utils.Instance;
+/**client class*/
 public class RemasteredMixer extends Mixer{
     private static final int buffer_size=Configs.buffer_size.get();
     private static final int tail_size=Configs.tail_size.get();

@@ -2,7 +2,7 @@
 
 ![icon](icon/icon.svg)
 # Documentation
-How to use this mod.
+How to use Create: VVVF-Simulator in Minecraft.
 </div>
 
 ## Environments

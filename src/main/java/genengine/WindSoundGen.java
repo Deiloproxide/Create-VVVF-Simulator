@@ -5,6 +5,7 @@ import org.jtransforms.fft.DoubleFFT_1D;
 import signal.Highpass;
 import signal.Lowpass;
 import signal.RandomWalk;
+/**client class*/
 public class WindSoundGen extends SoundGen{
     private static final int table_size=Configs.table_size.get();
     private static volatile double wind_base_amp;

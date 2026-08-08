@@ -1,4 +1,5 @@
 package signal;
+/**client class*/
 public class Lowpass{
     private double value=0.0;
     public double process(double alpha,double num){

@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+/**client class*/
 @Mixin(value=TrainPacket.class,remap=false,priority=Configs.mixin_priority)
 public abstract class RemoveTrain{
     @Shadow

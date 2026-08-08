@@ -3,6 +3,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent.Context;
+/**common class*/
 public record TrainSyncModel(UUID train_id,double speed){
     public static void encode(TrainSyncModel model,FriendlyByteBuf buf){
         buf.writeUUID(model.train_id);

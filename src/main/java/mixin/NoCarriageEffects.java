@@ -7,6 +7,7 @@ import createvvvfsim.Configs;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+/**client class*/
 @Mixin(value=CarriageContraptionEntity.class,remap=false,priority=Configs.mixin_priority)
 public class NoCarriageEffects{
     @Redirect(method="tickContraption()V",at=@At(value="INVOKE",

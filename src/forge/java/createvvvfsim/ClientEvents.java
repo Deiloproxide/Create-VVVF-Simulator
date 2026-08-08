@@ -17,7 +17,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
@@ -25,12 +24,13 @@ import net.minecraftforge.client.event.sound.SoundEngineLoadEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.joml.Vector3f;
+import utils.DimensionName;
 import utils.Reloadable;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
+/**client class*/
 @Mod.EventBusSubscriber(modid=Configs.mod_id,value=Dist.CLIENT)
 public class ClientEvents implements Reloadable{
     private static final Minecraft mc=Minecraft.getInstance();
@@ -82,9 +82,9 @@ public class ClientEvents implements Reloadable{
     public static void onExit(LoggingOut event){
         TrainStatus.clearDataCache();
     }
-    public static void onGetTrainEvent(String name,String event,String dimension,Vector3f pos){
+    public static void onGetTrainEvent(String name,String event,String dim_mod,String dim_name,Vector3f pos){
         int x=Math.round(pos.x),y=Math.round(pos.y),z=Math.round(pos.z);
-        String dimension_lang=I18n.get(Configs.dimension_path+dimension);
+        String dimension_lang=DimensionName.get(dim_mod,dim_name);
         String msg=I18n.get(Configs.event_path+event,name,dimension_lang,x,y,z);
         Player player=mc.player;
         if(player!=null) player.sendSystemMessage(Component.literal(msg));

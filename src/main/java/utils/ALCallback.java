@@ -8,6 +8,7 @@ import static org.lwjgl.system.MemoryUtil.memGetAddress;
 import static org.lwjgl.system.MemoryUtil.memGetInt;
 import static org.lwjgl.system.libffi.LibFFI.*;
 import static org.lwjgl.system.libffi.LibFFI.ffi_type_pointer;
+/**client class*/
 public class ALCallback extends Callback implements CallbackI{
     private static final int buffer_complete=0x19A4;
     private static final FFICIF cif=apiCreateCIF(FFI_DEFAULT_ABI,

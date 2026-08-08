@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import utils.PosHandler;
 import utils.Reloadable;
+/**client class*/
 public class TrainStatus implements Reloadable{
     private static volatile double near_distance;
     private static volatile double far_distance;

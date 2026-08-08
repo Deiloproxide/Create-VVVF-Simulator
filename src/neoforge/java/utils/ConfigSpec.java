@@ -1,5 +1,6 @@
 package utils;
 import net.neoforged.neoforge.common.ModConfigSpec;
+/**common class*/
 public class ConfigSpec{
     private final ModConfigSpec config_spec;
     public ConfigSpec(ModConfigSpec config_spec){
