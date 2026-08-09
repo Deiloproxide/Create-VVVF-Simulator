@@ -12,7 +12,7 @@ buildscript{
 }
 plugins{
     id("java-library")
-    id("com.gradleup.shadow") version("8.3.6") apply false
+    id("com.gradleup.shadow") version("8.3.6")
     id("maven-publish")
 }
 val versions_file:File=file("versions.json")
@@ -121,6 +121,7 @@ subprojects{
         archiveAppendix=platform
         archiveVersion=mod_version
         archiveClassifier=""
+        minimize()
         relocate("org.jtransforms","${mod_group_id}.shadow.org.jtransforms")
         relocate("org.visnow.jlargearrays","${mod_group_id}.shadow.org.visnow.jlargearrays")
         relocate("org.apache.commons.math3","${mod_group_id}.shadow.org.apache.commons.math3")

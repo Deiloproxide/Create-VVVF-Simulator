@@ -5,10 +5,9 @@
 Simulates VVVF on Minecraft Create trains.
 </div>
 
-
 ![latest](https://img.shields.io/github/v/tag/Deiloproxide/Create-VVVF-Simulator?label=latest)
 ![license](https://img.shields.io/github/license/Deiloproxide/Create-VVVF-Simulator?color=red)
-[![](https://jitpack.io/v/Deiloproxide/Create-VVVF-Simulator.svg)](https://jitpack.io/#Deiloproxide/Create-VVVF-Simulator)
+[![jitpack](https://jitpack.io/v/Deiloproxide/Create-VVVF-Simulator.svg)](https://jitpack.io/#Deiloproxide/Create-VVVF-Simulator)
 
 ![modrinth_version](https://img.shields.io/modrinth/game-versions/create-vvvf-simulator?color=green&logo=modrinth)
 ![curseforge_version](https://img.shields.io/curseforge/game-versions/1580570?color=orange&logo=curseforge)
