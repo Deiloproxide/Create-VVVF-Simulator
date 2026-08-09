@@ -22,17 +22,15 @@ public class YamlLoader{
     public static String loadYaml(String path){
         List<String> err_list=new ArrayList<>();
         String[] paths;
-        LoadStatus[] statuses;
+        String status_path;
         int status_length,status_ptr;
         if(path.endsWith(".yaml") || path.endsWith(".yml")){
-            status_length=2;
-            paths=new String[]{path,Configs.default_yaml};
-            statuses=new LoadStatus[]{LoadStatus.ok,LoadStatus.fallback,LoadStatus.error};
+            status_length=1;
+            paths=new String[]{path};
         }
         else{
-            status_length=3;
-            paths=new String[]{path+".yaml",path+".yml",Configs.default_yaml};
-            statuses=new LoadStatus[]{LoadStatus.ok,LoadStatus.ok,LoadStatus.fallback,LoadStatus.error};
+            status_length=2;
+            paths=new String[]{path+".yaml",path+".yml"};
         }
         for(status_ptr=0;status_ptr<status_length;status_ptr++){
             LoadContext context=load(paths[status_ptr]);
@@ -43,23 +41,17 @@ public class YamlLoader{
             else err_list.add(I18n.get(key,paths[status_ptr]));
             if(exception==LoadException.normal) break;
         }
-        LoadStatus status=statuses[status_ptr];
-        if(status==LoadStatus.error) success_name=null;
-        else success_name=paths[status_ptr];
         StringBuilder msg=new StringBuilder(),err_msg=new StringBuilder();
-        String status_path=Configs.yaml_status_path+status.name();
-        switch(status){
-            case ok:
-                msg.append(I18n.get(status_path,paths[status_ptr]));
-                break;
-            case fallback:
-                for(String err:err_list) err_msg.append("\n").append(err);
-                msg.append(I18n.get(status_path,path,err_msg.toString()));
-                break;
-            case error:
-                for(String err:err_list) err_msg.append("\n").append(err);
-                msg.append(I18n.get(status_path,path,path,err_msg.toString()));
-                break;
+        if(status_ptr==status_length){
+            status_path=Configs.status_path+"error";
+            success_name=null;
+            for(String err:err_list) err_msg.append("\n").append(err);
+            msg.append(I18n.get(status_path,path,err_msg.toString()));
+        }
+        else{
+            status_path=Configs.status_path+"ok";
+            success_name=paths[status_ptr];
+            msg.append(I18n.get(status_path,paths[status_ptr]));
         }
         return msg.toString();
     }

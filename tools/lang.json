@@ -78,9 +78,8 @@
       "end",
       "miss"
     ],
-    ".command.loadyaml.status.":[
+    ".command.status.":[
       "ok",
-      "fallback",
       "error"
     ],
     ".command.loadyaml.exception.":[
@@ -94,11 +93,6 @@
       "compose",
       "dump",
       "init"
-    ],
-    ".command.loadir.status.":[
-      "ok",
-      "fallback",
-      "error"
     ],
     ".command.loadir.exception.":[
       "normal",

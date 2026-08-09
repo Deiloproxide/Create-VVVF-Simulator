@@ -22,9 +22,8 @@ public class Configs{
     public static final String loadir_key="irfile";
     public static final String dimension_path=mod_id+".train.dimension.";
     public static final String event_path=mod_id+".train.event.";
-    public static final String yaml_status_path=mod_id+".command.loadyaml.status.";
+    public static final String status_path=mod_id+".command.status.";
     public static final String yaml_exception_path=mod_id+".command.loadyaml.exception.";
-    public static final String ir_status_path=mod_id+".command.loadir.status.";
     public static final String ir_exception_path=mod_id+".command.loadir.exception.";
     public static final String reload_ok=mod_id+".command.reload.ok";
     public static final String table="/assets/createvvvfsim/switchangle/";

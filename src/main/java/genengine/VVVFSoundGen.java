@@ -72,7 +72,7 @@ public class VVVFSoundGen extends SoundGen{
         }
     }
     public static void reloadData(){
-        vvvf_config=Manager.deepClone(Manager.current);
+        vvvf_config=Manager.deepClone(Manager.loadData);
         train_config.impulseResponse=AudioResourceManager.resampleLinear(sample_rate);
         CppConvolutionFilter.updateSharedResponse(conv_size,train_config.impulseResponse);
     }
