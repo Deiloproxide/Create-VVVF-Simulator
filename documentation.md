@@ -34,6 +34,7 @@ This mod requires Create and VVVF Simulator Library.
 |--------------------|------------------|-----------------------|
 | Client available   | Full functions   | Client-side functions |
 | Client unavailable | Compatible       | -                     |
+
 Install the mod on both sides for full synchronization. Client-only installation
 keeps local sound features available, while server-only installation keeps the
 server compatible with clients that not have the mod.

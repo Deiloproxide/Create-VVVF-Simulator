@@ -81,7 +81,7 @@ class Converter:
         data_size:int=len(Converter.ir_pcm)
         riff_size:int=data_size+36
         wav_file:BufferedWriter=open(path,"wb")
-        riff:bytes=struct.pack("<4sI4s",b"RIFF",riff_size,"WAVE")
+        riff:bytes=struct.pack("<4sI4s",b"RIFF",riff_size,b"WAVE")
         wav_file.write(riff)
         fmt:bytes=struct.pack("<4sIHHIIHH",b"fmt ",16,3,channel_num,
                               Converter.sample_rate,byte_rate,block_align,sample_bits)
