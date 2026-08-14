@@ -1,19 +1,17 @@
 package utils;
 import genengine.SoundEngine;
+import org.lwjgl.system.APIUtil;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.CallbackI;
 import org.lwjgl.system.libffi.FFICIF;
-import static org.lwjgl.system.APIUtil.apiCreateCIF;
-import static org.lwjgl.system.MemoryUtil.memGetAddress;
-import static org.lwjgl.system.MemoryUtil.memGetInt;
-import static org.lwjgl.system.libffi.LibFFI.*;
-import static org.lwjgl.system.libffi.LibFFI.ffi_type_pointer;
+import org.lwjgl.system.libffi.LibFFI;
+import org.lwjgl.system.MemoryUtil;
 /**client class*/
 public class ALCallback extends Callback implements CallbackI{
     private static final int buffer_complete=0x19A4;
-    private static final FFICIF cif=apiCreateCIF(FFI_DEFAULT_ABI,
-            ffi_type_void,ffi_type_sint32,ffi_type_uint32,ffi_type_uint32,
-            ffi_type_sint32,ffi_type_pointer,ffi_type_pointer);
+    private static final FFICIF cif=APIUtil.apiCreateCIF(
+            LibFFI.FFI_DEFAULT_ABI,LibFFI.ffi_type_void,LibFFI.ffi_type_sint32,LibFFI.ffi_type_uint32,
+            LibFFI.ffi_type_uint32,LibFFI.ffi_type_sint32,LibFFI.ffi_type_pointer,LibFFI.ffi_type_pointer);
     private final Runnable handler=SoundEngine::mixTask;
     public ALCallback(){
         super(cif);
@@ -24,8 +22,8 @@ public class ALCallback extends Callback implements CallbackI{
     }
     @Override
     public void callback(long ret,long args){
-        int eventType=memGetInt(memGetAddress(args));
-        int object=memGetInt(memGetAddress(args+POINTER_SIZE));
+        int eventType=MemoryUtil.memGetInt(MemoryUtil.memGetAddress(args));
+        int object=MemoryUtil.memGetInt(MemoryUtil.memGetAddress(args+POINTER_SIZE));
         if(eventType==buffer_complete && object==ALlib.source_id) handler.run();
     }
 }

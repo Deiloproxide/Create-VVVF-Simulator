@@ -5,9 +5,9 @@ import java.util.List;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import utils.Reloadable;
+import utils.IReloadable;
 /**client class*/
-public class Mixer implements Reloadable{
+public class Mixer implements IReloadable{
     public EnvData getEnv(Level level,Player player,Vec3 train_pos){
         return new EnvData();
     }

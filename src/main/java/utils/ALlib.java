@@ -2,7 +2,11 @@ package utils;
 import createvvvfsim.Configs;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import org.lwjgl.openal.*;
+import org.lwjgl.openal.AL;
+import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.ALC;
+import org.lwjgl.openal.SOFTDirectChannels;
+import org.lwjgl.openal.SOFTDirectChannelsRemix;
 import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.JNI.invokePP;
 import static org.lwjgl.system.JNI.invokePPV;
@@ -49,23 +53,16 @@ public class ALlib{
         AL10.alSourcePlay(source_id);
     }
     public static void enable(){
-        try{
-            boolean present=AL10.alIsExtensionPresent("AL_SOFT_events");
-            if(!present) return;
-            control_addr=getAddr("alEventControlSOFT");
-            callback_addr=getAddr("alEventCallbackSOFT");
-            if(control_addr==NULL || callback_addr==NULL) return;
-            invokePPV(callback.address(),NULL,callback_addr);
-            control(true);
-        }
-        catch(RuntimeException ignored){}
+        if(!AL10.alIsExtensionPresent("AL_SOFT_events")) return;
+        control_addr=getAddr("alEventControlSOFT");
+        callback_addr=getAddr("alEventCallbackSOFT");
+        if(control_addr==NULL || callback_addr==NULL) return;
+        invokePPV(callback.address(),NULL,callback_addr);
+        control(true);
     }
     public static void disable(){
-        try{
-            if(control_addr!=NULL) control(false);
-            if(callback_addr!=NULL) invokePPV(NULL,NULL,callback_addr);
-        }
-        catch(RuntimeException ignored){}
+        if(control_addr!=NULL) control(false);
+        if(callback_addr!=NULL) invokePPV(NULL,NULL,callback_addr);
     }
     public static void clear(){
         AL10.alGetError();

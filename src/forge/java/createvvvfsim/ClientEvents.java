@@ -28,14 +28,14 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.joml.Vector3f;
 import utils.DimensionName;
-import utils.Reloadable;
+import utils.IReloadable;
 import vvvfsimulator.vvvf.modulation.CustomPwm;
 /**client class*/
 @Mod.EventBusSubscriber(modid=Configs.mod_id,value=Dist.CLIENT)
-public class ClientEvents implements Reloadable{
+public class ClientEvents implements IReloadable{
     private static final Minecraft mc=Minecraft.getInstance();
     private static boolean is_single=false,is_ready=false;
-    private static Reloadable[] reloadables;
+    private static IReloadable[] reloadables;
     private static boolean is_paused,is_last_paused=true;
     private static volatile int eval_period;
     private static int eval_current;
@@ -60,11 +60,11 @@ public class ClientEvents implements Reloadable{
     }
     @SubscribeEvent
     public static void onInit(FMLClientSetupEvent event){
-        reloadables=new Reloadable[]{
+        reloadables=new IReloadable[]{
                 new BaseSoundGen(),new VVVFSoundGen(),new WindSoundGen(),new SoundEngine(),
                 TrainData.mixer,new ClientEvents(),new FSmoother(),new TrainStatus()};
         YamlLoader.loadYaml(Configs.default_yaml);
-        for(Reloadable reloadable:reloadables) reloadable.reload();
+        for(IReloadable reloadable:reloadables) reloadable.reload();
         is_ready=true;
     }
     @SubscribeEvent
@@ -107,7 +107,7 @@ public class ClientEvents implements Reloadable{
     }
     public static int onReload(CommandContext<CommandSourceStack> context){
         Component msg=Component.translatable(Configs.reload_ok);
-        for(Reloadable reloadable:reloadables) reloadable.reload();
+        for(IReloadable reloadable:reloadables) reloadable.reload();
         FSmoother.reloadCreate();
         TrainStatus.reloadSpeed();
         SoundEngine.load();

@@ -1,11 +1,11 @@
 {
-  "required":true,
-  "minVersion":"0.8",
-  "package":"mixin",
-  "mixins":["CarriageAccessor","TrainEvents"],
-  "client":["NoCarriageEffects","ISyncAccessor",
-    "AddTrain","RemoveTrain","ISPRAccessor"],
-  "injectors":{
-    "defaultRequire":1
-  }
+    "required":true,
+    "minVersion":"0.8",
+    "package":"mixin",
+    "mixins":["ICarriageAccessor","TrainEvents"],
+    "client":["NoCarriageEffects","ISyncAccessor",
+        "AddTrain","RemoveTrain","ISPRAccessor"],
+    "injectors":{
+        "defaultRequire":1
+    }
 }

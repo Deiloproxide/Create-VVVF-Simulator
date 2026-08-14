@@ -4,9 +4,9 @@ import com.simibubi.create.infrastructure.config.CTrains;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import utils.Instance;
-import utils.Reloadable;
+import utils.IReloadable;
 /**client class*/
-public class FSmoother implements Reloadable{
+public class FSmoother implements IReloadable{
     private static final CTrains train_config=AllConfigs.server().trains;
     private static final int speeds_length=Configs.speeds_length.get();
     private static volatile double max_speed;

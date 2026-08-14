@@ -4,17 +4,21 @@ import com.simibubi.create.content.trains.entity.Carriage.DimensionalCarriageEnt
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.content.trains.entity.Train;
 import com.simibubi.create.foundation.utility.ServerSpeedProvider;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import mixin.ISyncAccessor;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import utils.IReloadable;
 import utils.PosHandler;
-import utils.Reloadable;
 /**client class*/
-public class TrainStatus implements Reloadable{
+public class TrainStatus implements IReloadable{
     private static volatile double near_distance;
     private static volatile double far_distance;
     private static volatile double main_amp;

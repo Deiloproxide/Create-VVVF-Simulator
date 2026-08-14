@@ -1,5 +1,5 @@
 package utils;
 /**client class*/
-public interface Reloadable{
+public interface IReloadable{
     default void reload(){}
 }

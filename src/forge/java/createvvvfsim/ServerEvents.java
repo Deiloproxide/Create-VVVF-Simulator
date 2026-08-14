@@ -17,14 +17,14 @@ import net.minecraftforge.fml.event.config.ModConfigEvent.Loading;
 import net.minecraftforge.fml.event.config.ModConfigEvent.Reloading;
 import net.minecraftforge.network.PacketDistributor;
 import org.joml.Vector3f;
-import utils.Reloadable;
+import utils.IReloadable;
 /**server class*/
 @Mod.EventBusSubscriber(modid=Configs.mod_id)
-public class ServerEvents implements Reloadable{
+public class ServerEvents implements IReloadable{
     public static MinecraftServer server;
     private static final List<ServerPlayer> all_players=new ArrayList<>();
     private static final Object player_lock=new Object();
-    private static final Reloadable reloadable=new ServerEvents();
+    private static final IReloadable reloadable=new ServerEvents();
     private static volatile int sync_period;
     private static int sync_current;
     @SubscribeEvent

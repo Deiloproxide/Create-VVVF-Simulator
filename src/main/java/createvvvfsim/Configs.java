@@ -141,7 +141,7 @@ public class Configs{
         second_gear=client_builder.defineInRange("second_gear",120,0,500);
         max_speed_f=client_builder.defineInRange("max_speed_f",115.0,0.0,500.0);
         motor_db=client_builder.defineInRange("motor_db",-2.0,-20.0,20.0);
-        gear_harmonic_db=client_builder.defineInRange("gear_harmonic_db",-2.5,-20.0,20.0);
+        gear_harmonic_db=client_builder.defineInRange("gear_harmonic_db",-1.75,-20.0,20.0);
         dry_wet_ratio=client_builder.defineInRange("dry_wet_ratio",0.0,0.0,1.0);
         line_train_ratio=client_builder.defineInRange("line_train_ratio",0.0,0.0,1.0);
         client_builder.pop();

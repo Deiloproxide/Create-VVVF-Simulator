@@ -29,7 +29,7 @@ public class TrainEvents{
         train.speed=0.0;
         Map<ResourceKey<Level>,BlockPos> dim_pos=new HashMap<>();
         for(Carriage carriage:train.carriages){
-            Map<ResourceKey<Level>,DimensionalCarriageEntity> entities=((CarriageAccessor) carriage).entities();
+            Map<ResourceKey<Level>,DimensionalCarriageEntity> entities=((ICarriageAccessor)carriage).entities();
             for(Entry<ResourceKey<Level>,DimensionalCarriageEntity> entry:entities.entrySet()){
                 ResourceKey<Level> dimension=entry.getKey();
                 dim_pos.putIfAbsent(dimension,BlockPos.containing(entry.getValue().positionAnchor));
