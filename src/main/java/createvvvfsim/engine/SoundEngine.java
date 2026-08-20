@@ -1,31 +1,34 @@
-package genengine;
-import createvvvfsim.Configs;
-import createvvvfsim.TrainData;
-import createvvvfsim.TrainStatus;
+package createvvvfsim.engine;
+import createvvvfsim.config.SpecConfig;
+import createvvvfsim.reverber.PerfectedReverber;
+import createvvvfsim.reverber.RemasteredReverber;
+import createvvvfsim.reverber.Reverber;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
-import java.util.List;
-import utils.ALlib;
-import utils.IReloadable;
 /**client class*/
-public class SoundEngine implements IReloadable{
-    private static final int buffer_size=Configs.buffer_size.get();
-    private static final int buffer_cnt=Configs.buffer_cnt.get();
+public class SoundEngine{
+    private static final int buffer_size=SpecConfig.buffer_size.get();
+    private static final int buffer_cnt=SpecConfig.buffer_cnt.get();
     private static final double[] mix_buffer=new double[buffer_size];
     private static final ByteBuffer[] out_buffer=new ByteBuffer[buffer_cnt];
     private static final Thread thread=new Thread(SoundEngine::mixLoop);
     private static final Object buffer_lock=new Object();
     private static volatile boolean is_run=false,is_paused=false;
-    private static volatile double main_amp;
     private static volatile int buffer_remain=buffer_cnt;
-    private static double current_amp=0.0;
+    private static Reverber reverber;
     private static int buffer_ptr=0;
     static{
         Arrays.setAll(out_buffer,i->ByteBuffer.allocateDirect(buffer_size*4));
         for(ByteBuffer buffer:out_buffer) buffer.order(ByteOrder.LITTLE_ENDIAN);
         thread.setDaemon(true);
         thread.start();
+        Reverber[] reverbers={new RemasteredReverber(),new PerfectedReverber(),new Reverber()};
+        for(Reverber candidate:reverbers)
+            if(candidate.register()){
+                reverber=candidate;
+                break;
+            }
     }
     public static void load(){
         is_run=false;
@@ -54,12 +57,9 @@ public class SoundEngine implements IReloadable{
         while(true){
             Arrays.fill(mix_buffer,0.0);
             out_buffer[buffer_ptr].clear();
-            List<TrainData> train_datas=TrainStatus.getTrainData();
-            TrainData.mixer.handle(mix_buffer,train_datas);
-            double amp_step=(main_amp-current_amp)/buffer_size;
+            reverber.handle(mix_buffer);
             for(int i=0;i<buffer_size;i++){
-                current_amp+=amp_step;
-                double clipped=Math.min(Math.max(mix_buffer[i],-1.0),1.0)*current_amp;
+                double clipped=Math.min(Math.max(mix_buffer[i],-1.0),1.0);
                 short sample=(short)(clipped*Short.MAX_VALUE);
                 out_buffer[buffer_ptr].putShort(sample);
                 out_buffer[buffer_ptr].putShort(sample);
@@ -79,9 +79,5 @@ public class SoundEngine implements IReloadable{
                 buffer_remain++;
             }
         }
-    }
-    @Override
-    public void reload(){
-        main_amp=Configs.main_amp.get();
     }
 }
