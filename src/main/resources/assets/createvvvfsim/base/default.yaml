@@ -1,0 +1,30 @@
+begin_amp: 0.4
+base_amp: 0.04
+brown_amp: 0.025
+bg_amp: 0.3
+bg_wind_amp: 3.3
+main_wind_amp: 0.1
+base_f: 140.0
+cutoff_f: 250.0
+center_f: 700.0
+cauchy_gamma: 35.0
+bg:
+  f: 0.2
+  depth: 0.4
+main:
+  f: 0.2
+  depth: 0.4
+brown:
+  mu: 0.0
+  sigma: 1.05
+  range: 2.0
+pink:
+  mu: 0.0
+  sigma: 1.05
+  range: 0.055
+shear:
+  mu: 800.0
+  sigma: 0.8
+  range: 400.0
+base_amps: [0.189,0.233,0.097,0.065]
+base_phases: [0.538,0.979,1.98,0.08]

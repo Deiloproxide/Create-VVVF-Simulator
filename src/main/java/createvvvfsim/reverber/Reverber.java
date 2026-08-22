@@ -6,7 +6,6 @@ import createvvvfsim.generator.BaseSoundGen;
 import createvvvfsim.generator.SoundGen;
 import createvvvfsim.generator.VVVFSoundGen;
 import createvvvfsim.generator.WindSoundGen;
-import java.util.List;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -19,9 +18,7 @@ public class Reverber{
         return new EnvData();
     }
     public void handle(double[] mix_buffer){
-        List<TrainData> datas=GlobalData.getAllTrains();
-        for(TrainData data:datas)
-            for(SoundGen gen:gens)
-                gen.mixTo(data,mix_buffer);
+        for(TrainData data:GlobalData.trains)
+            for(SoundGen gen:gens) gen.mixTo(data,mix_buffer);
     }
 }

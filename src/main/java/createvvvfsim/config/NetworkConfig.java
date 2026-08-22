@@ -5,5 +5,7 @@ public class NetworkConfig{
     public static final String event_brd="event_brd";
     public static final String file_upload="text_upload";
     public static final String file_brd="text_brd";
+    public static final String apply_upload="apply_upload";
+    public static final String apply_brd="apply_brd";
     public static final int upload_permission=4;
 }

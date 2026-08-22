@@ -100,17 +100,14 @@ public class WindSoundGen extends SoundGen{
         for(int i=0;i<table_size;i++) temp[i]=tlr.nextGaussian();
         DoubleFFT_1D fft=new DoubleFFT_1D(table_size);
         fft.realForward(temp);
-        double log_ratio0=Math.log(1e-6/main_center_f);
-        double gain_0=1.0/(1.0+Math.pow(log_ratio0/main_cauchy_gamma,2));
-        double log_ratio_nyq=Math.log(sample_rate/main_center_f/2.0);
-        double gain_nyq=1.0/(1.0+Math.pow(log_ratio_nyq/main_cauchy_gamma,2));
+        double gain_0=1.0/(1.0+Math.pow(main_center_f/main_cauchy_gamma,2));
+        double gain_nyq=1.0/(1.0+Math.pow((sample_rate/2.0-main_center_f)/main_cauchy_gamma,2));
         temp[0]*=gain_0;
         temp[1]*=gain_nyq;
         int num_bins=table_size/2;
         for(int i=1;i<num_bins;i++){
             double freq=(double)i/(table_size*sample_dt);
-            double log_ratio=Math.log(freq/main_center_f);
-            double gain=1.0/(1.0+Math.pow(log_ratio/main_cauchy_gamma,2));
+            double gain=1.0/(1.0+Math.pow((freq-main_center_f)/main_cauchy_gamma,2));
             temp[2*i]*=gain;
             temp[2*i+1]*=gain;
         }

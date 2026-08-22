@@ -1,0 +1,18 @@
+{
+    "train_start":{
+        "subtitle":"create_vvvf_simulator.sound.subtitle.start",
+        "sounds":[]
+    },
+    "train_base":{
+        "subtitle":"create_vvvf_simulator.sound.subtitle.base",
+        "sounds":[]
+    },
+    "train_vvvf":{
+        "subtitle":"create_vvvf_simulator.sound.subtitle.vvvf",
+        "sounds":[]
+    },
+    "train_wind":{
+        "subtitle":"create_vvvf_simulator.sound.subtitle.wind",
+        "sounds":[]
+    }
+}

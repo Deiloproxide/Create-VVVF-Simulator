@@ -16,10 +16,10 @@ public class BaseSoundGen extends SoundGen{
     public void mixTo(TrainData data,double[] mix_buffer){
         BaseData base=slots[data.config_from].bases[data.slots[base_index]];
         double current_amp=data.dist_amps[gen_index];
-        double amp_step=(data.dist_amp-current_amp)/buffer_size;
+        double amp_step=(data.near_amp-current_amp)/buffer_size;
         double phase=data.phase;
-        if(data.dist_amp<1e-2 && current_amp<1e-2) return;
-        data.brown.set(base.brown_sigma,base.brown_range);
+        if(data.near_amp<1e-2 && current_amp<1e-2) return;
+        data.brown.set(base.brown.mu,base.brown.sigma,base.brown.range);
         for(int i=0;i<buffer_size;i++){
             current_amp+=amp_step;
             double harmonics=0;

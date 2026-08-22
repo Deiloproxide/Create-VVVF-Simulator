@@ -11,7 +11,6 @@ import createvvvfsim.util.Instance;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
@@ -147,8 +146,7 @@ public class RemasteredReverber extends Reverber{
     }
     @Override
     public void handle(double[] mix_buffer){
-        List<TrainData> datas=GlobalData.getAllTrains();
-        for(TrainData data:datas){
+        for(TrainData data:GlobalData.trains){
             Arrays.fill(train_buffer,0.0);
             for(SoundGen gen:gens) gen.mixTo(data,train_buffer);
             EnvCalc.setStep(data.current,data.target,data.step);

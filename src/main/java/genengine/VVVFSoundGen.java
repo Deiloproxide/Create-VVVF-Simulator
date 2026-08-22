@@ -89,6 +89,5 @@ public class VVVFSoundGen extends SoundGen{
         train_config.setCalculatedGearHarmonic(first_gear,second_gear);
         train_config.motorVolumeDb=motor_db-gear_harmonic_db;
         train_config.totalVolumeDb=gear_harmonic_db;
-        reloadData();
     }
 }
