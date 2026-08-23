@@ -1,5 +1,6 @@
 package createvvvfsim.engine;
 import createvvvfsim.config.SpecConfig;
+import createvvvfsim.data.GlobalData;
 import createvvvfsim.reverber.PerfectedReverber;
 import createvvvfsim.reverber.RemasteredReverber;
 import createvvvfsim.reverber.Reverber;
@@ -14,21 +15,15 @@ public class SoundEngine{
     private static final ByteBuffer[] out_buffer=new ByteBuffer[buffer_cnt];
     private static final Thread thread=new Thread(SoundEngine::mixLoop);
     private static final Object buffer_lock=new Object();
+    private static final Reverber reverber=GlobalData.reverber;
     private static volatile boolean is_run=false,is_paused=false;
     private static volatile int buffer_remain=buffer_cnt;
-    private static Reverber reverber;
     private static int buffer_ptr=0;
     static{
         Arrays.setAll(out_buffer,i->ByteBuffer.allocateDirect(buffer_size*4));
         for(ByteBuffer buffer:out_buffer) buffer.order(ByteOrder.LITTLE_ENDIAN);
         thread.setDaemon(true);
         thread.start();
-        Reverber[] reverbers={new RemasteredReverber(),new PerfectedReverber(),new Reverber()};
-        for(Reverber candidate:reverbers)
-            if(candidate.register()){
-                reverber=candidate;
-                break;
-            }
     }
     public static void load(){
         is_run=false;

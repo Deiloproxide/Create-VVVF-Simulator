@@ -4,9 +4,11 @@ import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.content.trains.entity.Train;
 import com.simibubi.create.foundation.utility.ServerSpeedProvider;
 import createvvvfsim.config.SpecConfig;
+import createvvvfsim.data.EnvData;
 import createvvvfsim.data.GlobalData;
 import createvvvfsim.data.TrainData;
 import createvvvfsim.mixin.ISyncAccessor;
+import createvvvfsim.reverber.Reverber;
 import createvvvfsim.util.PosHandler;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,7 +24,8 @@ public class Controller{
     private static final Set<TrainData> trains=GlobalData.trains;
     private static final Map<UUID,Double> cached_speeds=GlobalData.cached_speeds;
     private static final Set<UUID> cached_events=GlobalData.cached_events;
-    private static Set<TrainData> eval_trains=new HashSet<>(trains);
+    private static final Reverber reverber=GlobalData.reverber;
+    private static TrainData[] eval_trains=trains.toArray(TrainData[]::new);
     public static void addTrain(Train train){
         trains.add(new TrainData(train));
     }
@@ -59,17 +62,20 @@ public class Controller{
         return new Tuple<>(avg_distance,sync_f);
     }
     public static double speedResolver(TrainData data,double avg_speed,int carriage_cnt){
-        if(!data.use_server_speed && cached_speeds.containsKey(data.train.id))
-            data.use_server_speed=true;
+        if(!GlobalData.server_available && cached_speeds.containsKey(data.train.id))
+            GlobalData.server_available=true;
         double speed;
         boolean is_valid=carriage_cnt!=0;
-        if(data.use_server_speed){
+        if(GlobalData.server_available){
             UUID id=data.train.id;
-            speed=cached_speeds.get(id);
-            if(!data.server_reloaded){
-                SpeedCalc.reloadSpeed(data,speed);
-                data.server_reloaded=true;
+            if(cached_speeds.containsKey(id)){
+                speed=cached_speeds.get(id);
+                if(!data.server_reloaded){
+                    SpeedCalc.reloadSpeed(data,speed);
+                    data.server_reloaded=true;
+                }
             }
+            else speed=0.0;
             if(cached_events.contains(id)){
                 speed=0.0;
                 SpeedCalc.reloadSpeed(data,speed);
@@ -124,6 +130,22 @@ public class Controller{
             boolean is_valid=carriage_cnt!=0,is_move=speed>1e-2;
             dataResolver(data,speed,near_factor,far_factor,is_valid,is_move);
             SoundEvent.internalPlay(data,level,player_pos,near_factor,is_move);
+        }
+    }
+    public static void eval(Player player,int current,int period){
+        if(player==null) return;
+        Level level=player.level();
+        if(current==0) eval_trains=trains.toArray(TrainData[]::new);
+        for(int i=current;i<eval_trains.length;i+=period){
+            TrainData data=eval_trains[i];
+            Set<EnvData> envs=new HashSet<>();
+            for(Carriage carriage:data.train.carriages){
+                Tuple<Vec3,CarriageContraptionEntity> pos_info=PosHandler.getCarriageInf(carriage,level);
+                if(pos_info==null) continue;
+                Vec3 train_pos=pos_info.getA();
+                envs.add(reverber.getEnv(level,player,train_pos));
+            }
+            EnvCalc.avg(envs,data.target);
         }
     }
 }

@@ -11,20 +11,16 @@ public class SpecConfig{
     public static final IntValue buffer_cnt;
     public static final IntValue buffer_size;
     public static final IntValue conv_size;
-    public static final IntValue table_size;
     public static final IntValue tail_size;
     public static final IntValue speeds_length;
     public static final DoubleValue max_acc_ratio;
     public static final DoubleValue near_distance;
     public static final DoubleValue far_distance;
+    public static final BooleanValue mute_event;
     static{
         Builder server_builder=new Builder();
-        server_builder.push("permission");
         upload_permission=server_builder.defineInRange("upload_permission",4,0,4);
-        server_builder.pop();
-        server_builder.push("network");
         sync_period=server_builder.defineInRange("sync_period",3,1,20);
-        server_builder.pop();
         server_config=server_builder.build();
         Builder client_builder=new Builder();
         client_builder.push("environment");
@@ -35,7 +31,6 @@ public class SpecConfig{
         buffer_cnt=client_builder.defineInRange("buffer_cnt",4,2,8);
         buffer_size=client_builder.defineInRange("buffer_size",1<<12,1<<10,1<<16);
         conv_size=client_builder.defineInRange("conv_size",1<<10,1<<8,1<<12);
-        table_size=client_builder.defineInRange("table_size",1<<17,1<<12,1<<20);
         tail_size=client_builder.defineInRange("tail_size",1<<18,1<<16,1<<20);
         client_builder.pop();
         client_builder.push("speed_smoother");
@@ -46,6 +41,7 @@ public class SpecConfig{
         near_distance=client_builder.defineInRange("near_distance",32.0,0.0,256.0);
         far_distance=client_builder.defineInRange("far_distance",96.0,0.0,256.0);
         client_builder.pop();
+        mute_event=client_builder.define("mute_event",false);
         client_config=client_builder.build();
     }
 }

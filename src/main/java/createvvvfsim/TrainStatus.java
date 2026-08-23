@@ -137,7 +137,7 @@ public class TrainStatus implements IReloadable{
             else{
                 speed=is_valid?avg_speed/carriage_count:0.0;
                 if(!is_valid && train_data.is_last_valid) train_data.f_smoother.reloadF(0.0);
-                if(is_valid && !train_data.is_last_valid)train_data.reload_timer=10;
+                if(is_valid && !train_data.is_last_valid) train_data.reload_timer=10;
                 if(train_data.reload_timer>0){
                     train_data.reload_timer--;
                     if(train_data.reload_timer==0) train_data.f_smoother.reloadF(speed);

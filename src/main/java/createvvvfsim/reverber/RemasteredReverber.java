@@ -36,8 +36,7 @@ public class RemasteredReverber extends Reverber{
     static{
         Arrays.setAll(filters,i->new Lowpass());
     }
-    @Override
-    public boolean register(){
+    public static boolean register(){
         try{
             Instance reflected_audio=new Instance("com.sonicether.soundphysics.ReflectedAudio");
             constructor=reflected_audio.getConstructor(double.class,ResourceLocation.class);

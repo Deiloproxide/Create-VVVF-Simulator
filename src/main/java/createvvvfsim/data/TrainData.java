@@ -31,7 +31,6 @@ public class TrainData{
     public final double[] speed_pers=new double[SoundGenType.values().length];
     public final int[] slots=new int[SlotType.values().length];
     public double speed=0.0,phase=0.0,total_t=0.0;
-    public boolean use_server_speed=false;
     public boolean server_reloaded=false,is_mute=true;
     public boolean is_last_valid=false,is_last_move=false;
     public int speeds_index=0,reload_timer=0;

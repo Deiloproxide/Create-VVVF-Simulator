@@ -29,8 +29,7 @@ public class PerfectedReverber extends Reverber{
         for(int i=0;i<4;i++) filters[i].set(filters_alpha);
         filters[4].set(filter_alpha);
     }
-    @Override
-    public boolean register(){
+    public static boolean register(){
         try{
             Instance raycasting_helper=new Instance("com.redsmods.sound_physics_perfected.RaycastingHelper");
             count_blocks=raycasting_helper.getMethod(

@@ -11,9 +11,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 public class Reverber{
     protected static final SoundGen[] gens={new BaseSoundGen(),new VVVFSoundGen(),new WindSoundGen()};
-    public boolean register(){
-        return true;
-    }
     public EnvData getEnv(Level level,Player player,Vec3 train_pos){
         return new EnvData();
     }

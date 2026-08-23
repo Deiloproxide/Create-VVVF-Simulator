@@ -1,9 +1,9 @@
 {
     "required":true,
     "minVersion":"0.8",
-    "package":"mixin",
-    "mixins":["ICarriageAccessor","TrainEvents"],
-    "client":["NoCarriageEffects","ISyncAccessor",
+    "package":"createvvvfsim.mixin",
+    "mixins":["ICarriageAccessor","TrainEvent"],
+    "client":["NoCarriageEffect","ISyncAccessor",
         "AddTrain","RemoveTrain","ISPRAccessor"],
     "injectors":{
         "defaultRequire":1

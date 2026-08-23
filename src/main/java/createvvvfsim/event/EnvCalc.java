@@ -1,10 +1,10 @@
 package createvvvfsim.event;
 import createvvvfsim.config.SpecConfig;
 import createvvvfsim.data.EnvData;
-import java.util.List;
+import java.util.Set;
 public class EnvCalc{
     private static final double buffer_size=SpecConfig.buffer_size.get();
-    public static void avg(List<EnvData> envs,EnvData avg_env){
+    public static void avg(Set<EnvData> envs,EnvData avg_env){
         int length=envs.size();
         if(length==0) avg_env=new EnvData();
         double avg_gain=0.0,avg_cutoff=0.0,avg_occlusion=0.0,avg_shared_space=0.0;
