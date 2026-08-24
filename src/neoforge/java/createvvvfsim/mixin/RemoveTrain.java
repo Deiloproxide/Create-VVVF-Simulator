@@ -1,7 +1,7 @@
 package createvvvfsim.mixin;
 import com.simibubi.create.content.trains.entity.RemoveTrainPacket;
 import createvvvfsim.config.ModConfig;
-import createvvvfsim.event.Controller;
+import createvvvfsim.calculator.TrainCalc;
 import java.util.UUID;
 import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,6 +16,6 @@ public abstract class RemoveTrain{
     public abstract UUID id();
     @Inject(method="handle",at=@At("RETURN"))
     private void handle(LocalPlayer player,CallbackInfo ci){
-        Controller.removeTrain(id());
+        TrainCalc.removeTrain(id());
     }
 }

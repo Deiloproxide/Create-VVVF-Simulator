@@ -2,7 +2,7 @@ package createvvvfsim.mixin;
 import com.simibubi.create.content.trains.entity.AddTrainPacket;
 import com.simibubi.create.content.trains.entity.Train;
 import createvvvfsim.config.ModConfig;
-import createvvvfsim.event.Controller;
+import createvvvfsim.calculator.TrainCalc;
 import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -16,6 +16,6 @@ public abstract class AddTrain{
     public abstract Train train();
     @Inject(method="handle",at=@At("RETURN"))
     private void handle(LocalPlayer player,CallbackInfo ci){
-        Controller.addTrain(train());
+        TrainCalc.addTrain(train());
     }
 }

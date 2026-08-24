@@ -7,17 +7,17 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 /**server to client class*/
-public record FileBrd(int slot_num,String file_type,String file_name,byte[] content) implements IModel{
-    public static final Type<FileBrd> model_type=new Type<>(
+public record FileLoad(int slot_num,String file_type,String file_name,byte[] content) implements IModel{
+    public static final Type<FileLoad> model_type=new Type<>(
             ResourceLocation.tryBuild(ModConfig.mod_id,NetworkConfig.file_brd));
-    public static final StreamCodec<RegistryFriendlyByteBuf,FileBrd> codec=StreamCodec.composite(
-            ByteBufCodecs.INT,FileBrd::slot_num,
-            ByteBufCodecs.STRING_UTF8,FileBrd::file_type,
-            ByteBufCodecs.STRING_UTF8,FileBrd::file_name,
-            ByteBufCodecs.BYTE_ARRAY,FileBrd::content,
-            FileBrd::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf,FileLoad> codec=StreamCodec.composite(
+            ByteBufCodecs.INT,FileLoad::slot_num,
+            ByteBufCodecs.STRING_UTF8,FileLoad::file_type,
+            ByteBufCodecs.STRING_UTF8,FileLoad::file_name,
+            ByteBufCodecs.BYTE_ARRAY,FileLoad::content,
+            FileLoad::new);
     @Override
-    public Type<FileBrd> type(){
+    public Type<FileLoad> type(){
         return model_type;
     }
     @Override

@@ -1,4 +1,8 @@
 package createvvvfsim.event;
+import createvvvfsim.autoloader.ClientLoader;
+import createvvvfsim.autoloader.MapLoader;
+import createvvvfsim.calculator.SpeedCalc;
+import createvvvfsim.calculator.TrainCalc;
 import createvvvfsim.config.ModConfig;
 import createvvvfsim.config.SpecConfig;
 import createvvvfsim.engine.SoundEngine;
@@ -42,11 +46,14 @@ public class ClientEvent{
         SoundEngine.load();
         is_single=mc.isSingleplayer();
         SpeedCalc.loadCreate();
-        //load config
+        ClientLoader.load();
+        MapLoader.load();
     }
     @SubscribeEvent
     public static void onExit(LoggingOut event){
-        Controller.clearCache();
+        MapLoader.save();
+        ClientLoader.save();
+        TrainCalc.clearCache();
     }
     @SubscribeEvent
     public static void onPauseChange(ClientPauseChangeEvent.Post event){
@@ -54,9 +61,9 @@ public class ClientEvent{
     }
     @SubscribeEvent
     public static void tick(ClientTickEvent.Post event){
-        Controller.tick(mc.player);
+        TrainCalc.tick(mc.player);
         if(eval_current>=eval_period) eval_current=0;
-        Controller.eval(mc.player,eval_current,eval_period);
+        TrainCalc.eval(mc.player,eval_current,eval_period);
         eval_current++;
     }
 }

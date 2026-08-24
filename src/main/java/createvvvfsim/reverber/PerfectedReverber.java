@@ -3,7 +3,7 @@ import createvvvfsim.config.SpecConfig;
 import createvvvfsim.data.EnvData;
 import createvvvfsim.data.GlobalData;
 import createvvvfsim.data.TrainData;
-import createvvvfsim.event.EnvCalc;
+import createvvvfsim.calculator.EnvCalc;
 import createvvvfsim.generator.SoundGen;
 import createvvvfsim.signal.Lowpass;
 import createvvvfsim.util.Instance;

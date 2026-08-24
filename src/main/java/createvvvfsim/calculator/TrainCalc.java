@@ -1,4 +1,4 @@
-package createvvvfsim.event;
+package createvvvfsim.calculator;
 import com.simibubi.create.content.trains.entity.Carriage;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.content.trains.entity.Train;
@@ -7,6 +7,7 @@ import createvvvfsim.config.SpecConfig;
 import createvvvfsim.data.EnvData;
 import createvvvfsim.data.GlobalData;
 import createvvvfsim.data.TrainData;
+import createvvvfsim.event.SoundsPlayer;
 import createvvvfsim.mixin.ISyncAccessor;
 import createvvvfsim.reverber.Reverber;
 import createvvvfsim.util.PosHandler;
@@ -18,7 +19,7 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-public class Controller{
+public class TrainCalc{
     private static final double near_distance=SpecConfig.near_distance.get();
     private static final double far_distance=SpecConfig.far_distance.get();
     private static final Set<TrainData> trains=GlobalData.trains;
@@ -129,7 +130,7 @@ public class Controller{
             double speed=speedResolver(data,avg_speed,carriage_cnt);
             boolean is_valid=carriage_cnt!=0,is_move=speed>1e-2;
             dataResolver(data,speed,near_factor,far_factor,is_valid,is_move);
-            SoundEvent.internalPlay(data,level,player_pos,near_factor,is_move);
+            SoundsPlayer.play(data,level,player_pos,near_factor,is_move);
         }
     }
     public static void eval(Player player,int current,int period){

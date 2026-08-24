@@ -1,3 +1,3 @@
 package createvvvfsim.autoloader;
-public class ClientLoader{
+public class ClientLoader extends AutoLoader{
 }

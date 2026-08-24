@@ -1,3 +1,3 @@
 package createvvvfsim.autoloader;
-public class MapLoader{
+public class MapLoader extends AutoLoader{
 }

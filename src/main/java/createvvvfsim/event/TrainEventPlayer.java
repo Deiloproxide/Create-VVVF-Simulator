@@ -8,7 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.StringUtils;
 import org.joml.Vector3f;
 /**client class*/
-public class EventPlayer{
+public class TrainEventPlayer{
     private static final Minecraft mc=Minecraft.getInstance();
     public static String getDimName(String dim_mod,String dim_name){
         if("minecraft".equals(dim_mod))
